@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="presenter"
+            type="com.vkas.onlinegameproxy.ui.main.MainActivity.OgClick" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:onClick="@{() ->presenter.clickMain()}">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraintLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:onClick="@{() ->presenter.clickMainMenu()}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@drawable/ic_start_logo"
+                app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+                app:layout_constraintStart_toStartOf="@+id/linearLayout"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.8" />
+
+            <LinearLayout
+                android:id="@+id/linearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:gravity="center_vertical|start"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.4">
+
+                <TextView
+                    android:id="@+id/tv_contact_us_pt"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawablePadding="12dp"
+                    android:gravity="start|center_vertical"
+                    android:onClick="@{() ->presenter.toContactUs()}"
+                    app:drawableStartCompat="@drawable/ic_contact_us"
+                    android:paddingTop="20dp"
+                    android:paddingBottom="20dp"
+                    android:text="@string/contact_us"
+                    android:textColor="#FFFFFFFF"
+                    android:textSize="17sp" />
+
+                <TextView
+                    android:id="@+id/tv_privacy_policy_pt"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:drawablePadding="12dp"
+                    android:gravity="start|center_vertical"
+                    android:onClick="@{() ->presenter.toPrivacyPolicy()}"
+                    app:drawableStartCompat="@drawable/ic_privacy_policy"
+                    android:paddingTop="20dp"
+                    android:paddingBottom="20dp"
+                    android:text="@string/privacy_policy"
+                    android:textColor="#FFFFFFFF"
+                    android:textSize="17sp" />
+
+                <TextView
+                    android:id="@+id/tv_share_pt"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawablePadding="12dp"
+                    android:gravity="start|center_vertical"
+                    android:onClick="@{() ->presenter.toShare()}"
+                    app:drawableStartCompat="@drawable/ic_share"
+                    android:paddingTop="20dp"
+                    android:paddingBottom="20dp"
+                    android:text="@string/share"
+                    android:textColor="#FFFFFFFF"
+                    android:textSize="17sp" />
+
+                <TextView
+                    android:id="@+id/tv_upgrade"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawablePadding="12dp"
+                    android:onClick="@{() ->presenter.toUpgrade()}"
+                    app:drawableStartCompat="@drawable/ic_upgrade"
+                    android:paddingTop="20dp"
+                    android:paddingBottom="20dp"
+                    android:text="@string/upgrade"
+                    android:textColor="#FFFFFFFF"
+                    android:textSize="17sp" />
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
+

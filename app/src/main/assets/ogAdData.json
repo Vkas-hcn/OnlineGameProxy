@@ -1,0 +1,125 @@
+{
+  "og_show_num": 40,
+  "og_click_num": 5,
+  "og_open": [
+    {
+      "og_type": "open",
+      "og_platform": "admob",
+      "og_id": "ca-app-pub-3940256099942544/3419835294XXX",
+      "og_weight": 3
+    },
+    {
+      "og_type": "screen",
+      "og_platform": "admob",
+      "og_id": "ca-app-pub-3940256099942544/1033173712",
+      "og_weight": 1
+    },
+    {
+      "og_type": "open",
+      "og_platform": "admob",
+      "og_id": "ca-app-pub-3940256099942544/3419835294",
+      "og_weight": 2
+    }
+  ],
+
+  "og_vpn": [
+    {
+      "og_type": "primitive",
+      "og_platform": "admob",
+      "og_id": "ca-app-pub-3940256099942544/1044960115",
+      "og_weight": 1
+    },
+    {
+      "og_type": "primitive",
+      "og_platform": "admob",
+      "og_id": "ca-app-pub-3940256099942544/2247696110XX",
+      "og_weight": 3
+    },
+    {
+      "og_type": "primitive",
+      "og_platform": "admob",
+      "og_id": "ca-app-pub-3940256099942544/2247696110",
+      "og_weight": 2
+    }
+  ],
+  "og_result": [
+    {
+      "og_type": "primitive",
+      "og_platform": "admob",
+      "og_id": "ca-app-pub-3940256099942544/1044960115",
+      "og_weight": 2
+    },
+    {
+      "og_type": "primitive",
+      "og_platform": "admob",
+      "og_id": "ca-app-pub-3940256099942544/2247696110XX",
+      "og_weight": 3
+    },
+    {
+      "og_type": "primitive",
+      "og_platform": "admob",
+      "og_id": "ca-app-pub-3940256099942544/2247696110",
+      "og_weight": 1
+    }
+  ],
+  "og_connect": [
+    {
+      "og_type": "screen",
+      "og_platform": "admob",
+      "og_id": "ca-app-pub-3940256099942544/8691691433",
+      "og_weight": 2
+    },
+    {
+      "og_type": "screen",
+      "og_platform": "admob",
+      "og_id": "ca-app-pub-3940256099942544/1033173712XX",
+      "og_weight": 3
+    },
+    {
+      "og_type": "screen",
+      "og_platform": "admob",
+      "og_id": "ca-app-pub-3940256099942544/1033173712",
+      "og_weight": 1
+    }
+  ],
+  "og_back": [
+    {
+      "og_type": "screen",
+      "og_platform": "admob",
+      "og_id": "ca-app-pub-3940256099942544/8691691433",
+      "og_weight": 1
+    },
+    {
+      "og_type": "screen",
+      "og_platform": "admob",
+      "og_id": "ca-app-pub-3940256099942544/1033173712XX",
+      "og_weight": 3
+    },
+    {
+      "og_type": "screen",
+      "og_platform": "admob",
+      "og_id": "ca-app-pub-3940256099942544/1033173712",
+      "og_weight": 2
+    }
+  ],
+  "og_list": [
+    {
+      "og_type": "primitive",
+      "og_platform": "admob",
+      "og_id": "ca-app-pub-3940256099942544/1044960115",
+      "og_weight": 2
+    },
+    {
+      "og_type": "primitive",
+      "og_platform": "admob",
+      "og_id": "ca-app-pub-3940256099942544/2247696110XX",
+      "og_weight": 3
+    },
+    {
+      "og_type": "primitive",
+      "og_platform": "admob",
+      "og_id": "ca-app-pub-3940256099942544/2247696110",
+      "og_weight": 1
+    }
+  ]
+}

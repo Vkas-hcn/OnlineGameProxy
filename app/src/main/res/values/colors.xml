@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="colorPrimary">#1B0B21</color>
+    <color name="colorAccent">#9D734D</color>
+    <color name="colorPrimaryDark">#FF000000</color>
+    <color name="hor_pro_bar">#FF6D00</color>
+    <color name="hor_pro_bg">#EDC360</color>
+    <color name="bg_translation">#F5F5FF</color>
+    <color name="transparent">#00000000</color>
+    <color name="divider">#E5E2FD</color>
+    <color name="tv_check">#FFFFFFFF</color>
+    <color name="tv_dis_check">#66FFFFFF</color>
+    <color name="tv_ff_333333">#FF333333</color>
+    <color name="guide_mask">#87000000</color>
+    <color name="vpn_color">#FFA85A</color>
+    <color name="vpn_success">#52D23C</color>
+    <color name="result_dis">#FFF4B185</color>
+    <color name="tv_result_time_connect">#34BA3D</color>
+    <color name="tv_time_dis">#8E8E8E</color>
+
+    <color name="outer_side_of_ring">#402253</color>
+</resources>
