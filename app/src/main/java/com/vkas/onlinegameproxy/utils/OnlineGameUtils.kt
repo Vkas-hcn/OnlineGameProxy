@@ -21,7 +21,7 @@ object OnlineGameUtils {
         val intersectionList = findFastAndOrdinaryIntersection(ufVpnBean).takeIf { it.isNotEmpty() } ?: ufVpnBean
         return intersectionList.shuffled().first().apply {
             og_best = true
-            og_country = getString(R.string.fast_service)
+            ongpro_country = getString(R.string.fast_service)
         }
     }
     /**
@@ -59,7 +59,7 @@ object OnlineGameUtils {
     private fun findFastAndOrdinaryIntersection(ufVpnBeans: MutableList<OgVpnBean>): MutableList<OgVpnBean> {
         val intersectionList: MutableList<OgVpnBean> = mutableListOf()
         val fastServerData = getLocalFastServerData()
-        intersectionList.addAll(ufVpnBeans.filter { fastServerData.contains(it.og_city) })
+        intersectionList.addAll(ufVpnBeans.filter { fastServerData.contains(it.ongpro_city) })
         return intersectionList
     }
 
@@ -68,15 +68,15 @@ object OnlineGameUtils {
      */
     private fun adSortingOg(elAdBean: OgAdBean): OgAdBean {
         val adBean = OgAdBean()
-        adBean.og_open = sortByWeightDescending(elAdBean.og_open) { it.og_weight }.toMutableList()
-        adBean.og_vpn = sortByWeightDescending(elAdBean.og_vpn) { it.og_weight }.toMutableList()
-        adBean.og_result = sortByWeightDescending(elAdBean.og_result) { it.og_weight }.toMutableList()
-        adBean.og_connect = sortByWeightDescending(elAdBean.og_connect) { it.og_weight }.toMutableList()
-        adBean.og_back = sortByWeightDescending(elAdBean.og_back) { it.og_weight }.toMutableList()
-        adBean.og_list = sortByWeightDescending(elAdBean.og_list) { it.og_weight }.toMutableList()
+        adBean.ongpro_o_open = sortByWeightDescending(elAdBean.ongpro_o_open) { it.ongpro_y }.toMutableList()
+        adBean.ongpro_n_home = sortByWeightDescending(elAdBean.ongpro_n_home) { it.ongpro_y }.toMutableList()
+        adBean.ongpro_n_result = sortByWeightDescending(elAdBean.ongpro_n_result) { it.ongpro_y }.toMutableList()
+        adBean.ongpro_i_2R = sortByWeightDescending(elAdBean.ongpro_i_2R) { it.ongpro_y }.toMutableList()
+        adBean.ongpro_i_2H = sortByWeightDescending(elAdBean.ongpro_i_2H) { it.ongpro_y }.toMutableList()
+        adBean.ongpro_n_ser = sortByWeightDescending(elAdBean.ongpro_n_ser) { it.ongpro_y }.toMutableList()
 
-        adBean.og_show_num = elAdBean.og_show_num
-        adBean.og_click_num = elAdBean.og_click_num
+        adBean.ongpro_sm = elAdBean.ongpro_sm
+        adBean.ongpro_cm = elAdBean.ongpro_cm
         return adBean
     }
     /**
@@ -90,7 +90,7 @@ object OnlineGameUtils {
      * 取出排序后的广告ID
      */
     fun takeSortedAdIDOg(index: Int, elAdDetails: MutableList<OgDetailBean>): String {
-        return elAdDetails.getOrNull(index)?.og_id ?: ""
+        return elAdDetails.getOrNull(index)?.ongpro_id ?: ""
     }
 
     /**
@@ -116,7 +116,7 @@ object OnlineGameUtils {
     fun isThresholdReached(): Boolean {
         val clicksCount = mmkvOg.decodeInt(Constant.CLICKS_OG_COUNT, 0)
         val showCount = mmkvOg.decodeInt(Constant.SHOW_OG_COUNT, 0)
-        if (clicksCount >= getAdServerDataOg().og_click_num || showCount >= getAdServerDataOg().og_show_num) {
+        if (clicksCount >= getAdServerDataOg().ongpro_cm || showCount >= getAdServerDataOg().ongpro_sm) {
             return true
         }
         return false

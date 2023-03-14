@@ -32,8 +32,8 @@ object OgLoadBackAd {
      */
     fun loadBackAdvertisementOg(context: Context, adData: OgAdBean) {
         val adRequest = AdRequest.Builder().build()
-        val id = takeSortedAdIDOg(adBase.adIndexOg, adData.og_back)
-        KLog.d(logTagOg, "back--插屏广告id=$id;权重=${adData.og_back.getOrNull(adBase.adIndexOg)?.og_weight}")
+        val id = takeSortedAdIDOg(adBase.adIndexOg, adData.ongpro_i_2H)
+        KLog.d(logTagOg, "back--插屏广告id=$id;权重=${adData.ongpro_i_2H.getOrNull(adBase.adIndexOg)?.ongpro_y}")
 
         InterstitialAd.load(
             context,
@@ -45,7 +45,7 @@ object OgLoadBackAd {
                         KLog.d(logTagOg, "back---连接插屏加载失败=$it") }
                     adBase.isLoadingOg = false
                     adBase.appAdDataOg = null
-                    if (adBase.adIndexOg < adData.og_back.size - 1) {
+                    if (adBase.adIndexOg < adData.ongpro_i_2H.size - 1) {
                         adBase.adIndexOg++
                         loadBackAdvertisementOg(context,adData)
                     }else{

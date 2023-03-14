@@ -29,7 +29,7 @@ object OgLoadOpenAd {
      * 加载启动页广告
      */
     private fun loadStartupPageAdvertisementOg(context: Context, adData: OgAdBean) {
-        if (adData.og_open.getOrNull(adBase.adIndexOg)?.og_type == "screen") {
+        if (adData.ongpro_o_open.getOrNull(adBase.adIndexOg)?.ongpro_type == "screen") {
             loadStartInsertAdOg(context, adData)
         } else {
             loadOpenAdvertisementOg(context, adData)
@@ -40,15 +40,15 @@ object OgLoadOpenAd {
      * 加载开屏广告
      */
     fun loadOpenAdvertisementOg(context: Context, adData: OgAdBean) {
-        KLog.e("loadOpenAdvertisementOg", "adData().og_open=${JsonUtil.toJson(adData.og_open)}")
+        KLog.e("loadOpenAdvertisementOg", "adData().ongpro_o_open=${JsonUtil.toJson(adData.ongpro_o_open)}")
         KLog.e(
             "loadOpenAdvertisementOg",
-            "id=${JsonUtil.toJson(takeSortedAdIDOg(adBase.adIndexOg, adData.og_open))}"
+            "id=${JsonUtil.toJson(takeSortedAdIDOg(adBase.adIndexOg, adData.ongpro_o_open))}"
         )
 
-        val id = takeSortedAdIDOg(adBase.adIndexOg, adData.og_open)
+        val id = takeSortedAdIDOg(adBase.adIndexOg, adData.ongpro_o_open)
 
-        KLog.d(logTagOg, "open--开屏广告id=$id;权重=${adData.og_open.getOrNull(adBase.adIndexOg)?.og_weight}")
+        KLog.d(logTagOg, "open--开屏广告id=$id;权重=${adData.ongpro_o_open.getOrNull(adBase.adIndexOg)?.ongpro_y}")
         val request = AdRequest.Builder().build()
         AppOpenAd.load(
             context,
@@ -67,7 +67,7 @@ object OgLoadOpenAd {
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     adBase.isLoadingOg = false
                     adBase.appAdDataOg = null
-                    if (adBase.adIndexOg < adData.og_open.size - 1) {
+                    if (adBase.adIndexOg < adData.ongpro_o_open.size - 1) {
                         adBase.adIndexOg++
                         loadStartupPageAdvertisementOg(context, adData)
                     } else {
@@ -156,10 +156,10 @@ object OgLoadOpenAd {
      */
     fun loadStartInsertAdOg(context: Context, adData: OgAdBean) {
         val adRequest = AdRequest.Builder().build()
-        val id = takeSortedAdIDOg(adBase.adIndexOg, adData.og_open)
+        val id = takeSortedAdIDOg(adBase.adIndexOg, adData.ongpro_o_open)
         KLog.d(
             logTagOg,
-            "open--插屏广告id=$id;权重=${adData.og_open.getOrNull(adBase.adIndexOg)?.og_weight}"
+            "open--插屏广告id=$id;权重=${adData.ongpro_o_open.getOrNull(adBase.adIndexOg)?.ongpro_y}"
         )
 
         InterstitialAd.load(
@@ -171,7 +171,7 @@ object OgLoadOpenAd {
                     adError.toString().let { KLog.d(logTagOg, "open---连接插屏加载失败=$it") }
                     adBase.isLoadingOg = false
                     adBase.appAdDataOg = null
-                    if (adBase.adIndexOg < adData.og_open.size - 1) {
+                    if (adBase.adIndexOg < adData.ongpro_o_open.size - 1) {
                         adBase.adIndexOg++
                         loadStartupPageAdvertisementOg(context, adData)
                     } else {

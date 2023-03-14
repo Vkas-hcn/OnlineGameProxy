@@ -36,10 +36,10 @@ object OgLoadConnectAd {
      */
     fun loadConnectAdvertisementOg(context: Context, adData: OgAdBean) {
         val adRequest = AdRequest.Builder().build()
-        idOg = takeSortedAdIDOg(adBase.adIndexOg, adData.og_connect)
+        idOg = takeSortedAdIDOg(adBase.adIndexOg, adData.ongpro_i_2R)
         KLog.d(
             logTagOg,
-            "connect--插屏广告id=$idOg;权重=${adData.og_connect.getOrNull(adBase.adIndexOg)?.og_weight}"
+            "connect--插屏广告id=$idOg;权重=${adData.ongpro_i_2R.getOrNull(adBase.adIndexOg)?.ongpro_y}"
         )
 
         InterstitialAd.load(
@@ -51,7 +51,7 @@ object OgLoadConnectAd {
                     adError.toString().let { KLog.d(logTagOg, "connect---连接插屏加载失败=$it") }
                     adBase.isLoadingOg = false
                     adBase.appAdDataOg = null
-                    if (adBase.adIndexOg < adData.og_connect.size - 1) {
+                    if (adBase.adIndexOg < adData.ongpro_i_2R.size - 1) {
                         adBase.adIndexOg++
                         loadConnectAdvertisementOg(context, adData)
                     } else {

@@ -21,10 +21,10 @@ class ListAdapter (data: MutableList<OgVpnBean>?) :
                 getFlagThroughCountryEc(Constant.FASTER_OG_SERVER)
             )
         } else {
-            holder.setText(R.id.txt_country, item.og_country + "-" + item.og_city)
+            holder.setText(R.id.txt_country, item.ongpro_country + "-" + item.ongpro_city)
             holder.setImageResource(
                 R.id.img_flag,
-                getFlagThroughCountryEc(item.og_country.toString())
+                getFlagThroughCountryEc(item.ongpro_country.toString())
             )
         }
         if(holder.adapterPosition%2==0){

@@ -30,8 +30,8 @@ object OgLoadListAd {
      * 加载list原生广告
      */
     fun loadListAdvertisementOg(context: Context, adData: OgAdBean) {
-        val id = takeSortedAdIDOg(adBase.adIndexOg, adData.og_list)
-        KLog.d(logTagOg, "list--原生广告id=$id;权重=${adData.og_list.getOrNull(adBase.adIndexOg)?.og_weight}")
+        val id = takeSortedAdIDOg(adBase.adIndexOg, adData.ongpro_n_ser)
+        KLog.d(logTagOg, "list--原生广告id=$id;权重=${adData.ongpro_n_ser.getOrNull(adBase.adIndexOg)?.ongpro_y}")
 
         val vpnNativeAds = AdLoader.Builder(
             context.applicationContext,
@@ -62,7 +62,7 @@ object OgLoadListAd {
                 adBase.appAdDataOg = null
                 KLog.d(logTagOg, "list--加载vpn原生加载失败: $error")
 
-                if (adBase.adIndexOg < adData.og_list.size - 1) {
+                if (adBase.adIndexOg < adData.ongpro_n_ser.size - 1) {
                     adBase.adIndexOg++
                     loadListAdvertisementOg(context,adData)
                 }else{

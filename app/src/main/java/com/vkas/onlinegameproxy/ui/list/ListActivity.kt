@@ -128,7 +128,7 @@ class ListActivity : BaseActivity<ActivityServiceListOgBinding, ListViewModel>()
      * 选中服务器
      */
     private fun selectServer(position: Int) {
-        if (ecServiceBeanList[position].og_ip == checkSkServiceBeanClick.og_ip && ecServiceBeanList[position].og_best == checkSkServiceBeanClick.og_best) {
+        if (ecServiceBeanList[position].ongpro_ip == checkSkServiceBeanClick.ongpro_ip && ecServiceBeanList[position].og_best == checkSkServiceBeanClick.og_best) {
             if (!whetherToConnect) {
                 finish()
                 LiveEventBus.get<OgVpnBean>(Constant.NOT_CONNECTED_OG_RETURN)
@@ -156,7 +156,7 @@ class ListActivity : BaseActivity<ActivityServiceListOgBinding, ListViewModel>()
                 ecServiceBeanList[0].og_check = true
             } else {
                 ecServiceBeanList[index].og_check =
-                    ecServiceBeanList[index].og_ip == checkSkServiceBeanClick.og_ip
+                    ecServiceBeanList[index].ongpro_ip == checkSkServiceBeanClick.ongpro_ip
                 ecServiceBeanList[0].og_check = false
             }
         }
@@ -196,7 +196,7 @@ class ListActivity : BaseActivity<ActivityServiceListOgBinding, ListViewModel>()
                 dialog.dismiss()
                 ecServiceBeanList.forEachIndexed { index, _ ->
                     ecServiceBeanList[index].og_check =
-                        (ecServiceBeanList[index].og_ip == checkSkServiceBeanClick.og_ip && ecServiceBeanList[index].og_best == checkSkServiceBeanClick.og_best)
+                        (ecServiceBeanList[index].ongpro_ip == checkSkServiceBeanClick.ongpro_ip && ecServiceBeanList[index].og_best == checkSkServiceBeanClick.og_best)
                 }
                 selectAdapter.notifyDataSetChanged()
             }

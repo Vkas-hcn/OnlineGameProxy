@@ -30,8 +30,8 @@ object OgLoadHomeAd {
      * 加载vpn原生广告
      */
     fun loadHomeAdvertisementOg(context: Context, adData: OgAdBean) {
-        val id = takeSortedAdIDOg(adBase.adIndexOg, adData.og_vpn)
-        KLog.d(logTagOg, "home---原生广告id=$id;权重=${adData.og_vpn.getOrNull(adBase.adIndexOg)?.og_weight}")
+        val id = takeSortedAdIDOg(adBase.adIndexOg, adData.ongpro_n_home)
+        KLog.d(logTagOg, "home---原生广告id=$id;权重=${adData.ongpro_n_home.getOrNull(adBase.adIndexOg)?.ongpro_y}")
 
         val vpnNativeAds = AdLoader.Builder(
             context.applicationContext,
@@ -62,7 +62,7 @@ object OgLoadHomeAd {
                 adBase.appAdDataOg = null
                 KLog.d(logTagOg, "home---加载vpn原生加载失败: $error")
 
-                if (adBase.adIndexOg < adData.og_vpn.size - 1) {
+                if (adBase.adIndexOg < adData.ongpro_n_home.size - 1) {
                     adBase.adIndexOg++
                     loadHomeAdvertisementOg(context,adData)
                 }else{

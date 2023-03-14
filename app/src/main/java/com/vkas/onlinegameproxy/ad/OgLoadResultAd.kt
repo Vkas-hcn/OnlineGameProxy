@@ -30,10 +30,10 @@ object OgLoadResultAd {
      * 加载result原生广告
      */
     fun loadResultAdvertisementOg(context: Context, adData: OgAdBean) {
-        val id = takeSortedAdIDOg(adBase.adIndexOg, adData.og_result)
+        val id = takeSortedAdIDOg(adBase.adIndexOg, adData.ongpro_n_result)
         KLog.d(
             logTagOg,
-            "result---原生广告id=$id;权重=${adData.og_result.getOrNull(adBase.adIndexOg)?.og_weight}"
+            "result---原生广告id=$id;权重=${adData.ongpro_n_result.getOrNull(adBase.adIndexOg)?.ongpro_y}"
         )
 
         val homeNativeAds = AdLoader.Builder(
@@ -65,7 +65,7 @@ object OgLoadResultAd {
                 adBase.appAdDataOg = null
                 KLog.d(logTagOg, "result---加载result原生加载失败: $error")
 
-                if (adBase.adIndexOg < adData.og_result.size - 1) {
+                if (adBase.adIndexOg < adData.ongpro_n_result.size - 1) {
                     adBase.adIndexOg++
                     loadResultAdvertisementOg(context, adData)
                 } else {

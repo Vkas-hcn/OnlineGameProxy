@@ -1,125 +1,125 @@
 {
-  "og_show_num": 40,
-  "og_click_num": 5,
-  "og_open": [
+  "ongpro_sm": 40,
+  "ongpro_cm": 5,
+  "ongpro_o_open": [
     {
-      "og_type": "open",
-      "og_platform": "admob",
-      "og_id": "ca-app-pub-3940256099942544/3419835294XXX",
-      "og_weight": 3
+      "ongpro_type": "open",
+      "ongpro_from": "admob",
+      "ongpro_id": "ca-app-pub-3940256099942544/3419835294XXX",
+      "ongpro_y": 3
     },
     {
-      "og_type": "screen",
-      "og_platform": "admob",
-      "og_id": "ca-app-pub-3940256099942544/1033173712",
-      "og_weight": 1
+      "ongpro_type": "screen",
+      "ongpro_from": "admob",
+      "ongpro_id": "ca-app-pub-3940256099942544/1033173712",
+      "ongpro_y": 1
     },
     {
-      "og_type": "open",
-      "og_platform": "admob",
-      "og_id": "ca-app-pub-3940256099942544/3419835294",
-      "og_weight": 2
+      "ongpro_type": "open",
+      "ongpro_from": "admob",
+      "ongpro_id": "ca-app-pub-3940256099942544/3419835294",
+      "ongpro_y": 2
     }
   ],
 
-  "og_vpn": [
+  "ongpro_n_home": [
     {
-      "og_type": "primitive",
-      "og_platform": "admob",
-      "og_id": "ca-app-pub-3940256099942544/1044960115",
-      "og_weight": 1
+      "ongpro_type": "primitive",
+      "ongpro_from": "admob",
+      "ongpro_id": "ca-app-pub-3940256099942544/1044960115",
+      "ongpro_y": 1
     },
     {
-      "og_type": "primitive",
-      "og_platform": "admob",
-      "og_id": "ca-app-pub-3940256099942544/2247696110XX",
-      "og_weight": 3
+      "ongpro_type": "primitive",
+      "ongpro_from": "admob",
+      "ongpro_id": "ca-app-pub-3940256099942544/2247696110XX",
+      "ongpro_y": 3
     },
     {
-      "og_type": "primitive",
-      "og_platform": "admob",
-      "og_id": "ca-app-pub-3940256099942544/2247696110",
-      "og_weight": 2
+      "ongpro_type": "primitive",
+      "ongpro_from": "admob",
+      "ongpro_id": "ca-app-pub-3940256099942544/2247696110",
+      "ongpro_y": 2
     }
   ],
-  "og_result": [
+  "ongpro_n_result": [
     {
-      "og_type": "primitive",
-      "og_platform": "admob",
-      "og_id": "ca-app-pub-3940256099942544/1044960115",
-      "og_weight": 2
+      "ongpro_type": "primitive",
+      "ongpro_from": "admob",
+      "ongpro_id": "ca-app-pub-3940256099942544/1044960115",
+      "ongpro_y": 2
     },
     {
-      "og_type": "primitive",
-      "og_platform": "admob",
-      "og_id": "ca-app-pub-3940256099942544/2247696110XX",
-      "og_weight": 3
+      "ongpro_type": "primitive",
+      "ongpro_from": "admob",
+      "ongpro_id": "ca-app-pub-3940256099942544/2247696110XX",
+      "ongpro_y": 3
     },
     {
-      "og_type": "primitive",
-      "og_platform": "admob",
-      "og_id": "ca-app-pub-3940256099942544/2247696110",
-      "og_weight": 1
+      "ongpro_type": "primitive",
+      "ongpro_from": "admob",
+      "ongpro_id": "ca-app-pub-3940256099942544/2247696110",
+      "ongpro_y": 1
     }
   ],
-  "og_connect": [
+  "ongpro_i_2R": [
     {
-      "og_type": "screen",
-      "og_platform": "admob",
-      "og_id": "ca-app-pub-3940256099942544/8691691433",
-      "og_weight": 2
+      "ongpro_type": "screen",
+      "ongpro_from": "admob",
+      "ongpro_id": "ca-app-pub-3940256099942544/8691691433",
+      "ongpro_y": 2
     },
     {
-      "og_type": "screen",
-      "og_platform": "admob",
-      "og_id": "ca-app-pub-3940256099942544/1033173712XX",
-      "og_weight": 3
+      "ongpro_type": "screen",
+      "ongpro_from": "admob",
+      "ongpro_id": "ca-app-pub-3940256099942544/1033173712XX",
+      "ongpro_y": 3
     },
     {
-      "og_type": "screen",
-      "og_platform": "admob",
-      "og_id": "ca-app-pub-3940256099942544/1033173712",
-      "og_weight": 1
+      "ongpro_type": "screen",
+      "ongpro_from": "admob",
+      "ongpro_id": "ca-app-pub-3940256099942544/1033173712",
+      "ongpro_y": 1
     }
   ],
-  "og_back": [
+  "ongpro_i_2H": [
     {
-      "og_type": "screen",
-      "og_platform": "admob",
-      "og_id": "ca-app-pub-3940256099942544/8691691433",
-      "og_weight": 1
+      "ongpro_type": "screen",
+      "ongpro_from": "admob",
+      "ongpro_id": "ca-app-pub-3940256099942544/8691691433",
+      "ongpro_y": 1
     },
     {
-      "og_type": "screen",
-      "og_platform": "admob",
-      "og_id": "ca-app-pub-3940256099942544/1033173712XX",
-      "og_weight": 3
+      "ongpro_type": "screen",
+      "ongpro_from": "admob",
+      "ongpro_id": "ca-app-pub-3940256099942544/1033173712XX",
+      "ongpro_y": 3
     },
     {
-      "og_type": "screen",
-      "og_platform": "admob",
-      "og_id": "ca-app-pub-3940256099942544/1033173712",
-      "og_weight": 2
+      "ongpro_type": "screen",
+      "ongpro_from": "admob",
+      "ongpro_id": "ca-app-pub-3940256099942544/1033173712",
+      "ongpro_y": 2
     }
   ],
-  "og_list": [
+  "ongpro_n_ser": [
     {
-      "og_type": "primitive",
-      "og_platform": "admob",
-      "og_id": "ca-app-pub-3940256099942544/1044960115",
-      "og_weight": 2
+      "ongpro_type": "primitive",
+      "ongpro_from": "admob",
+      "ongpro_id": "ca-app-pub-3940256099942544/1044960115",
+      "ongpro_y": 2
     },
     {
-      "og_type": "primitive",
-      "og_platform": "admob",
-      "og_id": "ca-app-pub-3940256099942544/2247696110XX",
-      "og_weight": 3
+      "ongpro_type": "primitive",
+      "ongpro_from": "admob",
+      "ongpro_id": "ca-app-pub-3940256099942544/2247696110XX",
+      "ongpro_y": 3
     },
     {
-      "og_type": "primitive",
-      "og_platform": "admob",
-      "og_id": "ca-app-pub-3940256099942544/2247696110",
-      "og_weight": 1
+      "ongpro_type": "primitive",
+      "ongpro_from": "admob",
+      "ongpro_id": "ca-app-pub-3940256099942544/2247696110",
+      "ongpro_y": 1
     }
   ]
 }

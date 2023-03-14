@@ -92,7 +92,7 @@ class AdBase {
 
     private val adLoaders = mapOf<Int, (Context, OgAdBean) -> Unit>(
         1 to { context, adData ->
-            val adType = adData.og_open.getOrNull(adIndexOg)?.og_type
+            val adType = adData.ongpro_o_open.getOrNull(adIndexOg)?.ongpro_type
             if (adType == "screen") {
                 OgLoadOpenAd.loadStartInsertAdOg(context, adData)
             } else {

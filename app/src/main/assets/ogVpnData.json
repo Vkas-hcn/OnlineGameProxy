@@ -1,10 +1,10 @@
 [
   {
-    "og_pwd": "M=cmJT7VQe6x1ObN",
-    "og_method": "chacha20-ietf-poly1305",
-    "og_port": 6391,
-    "og_country": "SouthKorea",
-    "og_city": "Seoul",
-    "og_ip": "38.54.40.145"
+    "ongpro_password": "M=cmJT7VQe6x1ObN",
+    "ongpro_cc": "chacha20-ietf-poly1305",
+    "ongpro_port": 6391,
+    "ongpro_country": "SouthKorea",
+    "ongpro_city": "Seoul",
+    "ongpro_ip": "38.54.40.145"
   }
 ]

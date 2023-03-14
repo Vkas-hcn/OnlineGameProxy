@@ -98,11 +98,11 @@ class MainViewModel (application: Application) : BaseViewModel(application) {
      * 设置服务器数据
      */
     private fun setSkServerData(profile: Profile, bestData: OgVpnBean): Profile {
-        profile.name = bestData.og_country + "-" + bestData.og_city
-        profile.host = bestData.og_ip.toString()
-        profile.password = bestData.og_pwd!!
-        profile.method = bestData.og_method!!
-        profile.remotePort = bestData.og_port!!
+        profile.name = bestData.ongpro_country + "-" + bestData.ongpro_city
+        profile.host = bestData.ongpro_ip.toString()
+        profile.password = bestData.ongpro_password!!
+        profile.method = bestData.ongpro_cc!!
+        profile.remotePort = bestData.ongpro_port!!
         return profile
     }
 

@@ -352,8 +352,8 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
             binding.imgCountry.setImageResource(getFlagThroughCountryEc(Constant.FASTER_OG_SERVER))
 
         } else {
-            binding.txtCountry.text = elVpnBean.og_country.toString()
-            binding.imgCountry.setImageResource(getFlagThroughCountryEc(elVpnBean.og_country.toString()))
+            binding.txtCountry.text = elVpnBean.ongpro_country.toString()
+            binding.imgCountry.setImageResource(getFlagThroughCountryEc(elVpnBean.ongpro_country.toString()))
 
         }
     }

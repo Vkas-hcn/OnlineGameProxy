@@ -67,7 +67,7 @@ class ResultActivity : BaseActivity<ActivityResultOgBinding, BaseViewModel>() {
         }
         binding.imgCountry.setImageResource(
             OnlineGameUtils.getFlagThroughCountryEc(
-                currentServerBeanOg.og_country.toString()
+                currentServerBeanOg.ongpro_country.toString()
             )
         )
         AdBase.getResultInstance().whetherToShowOg = false
