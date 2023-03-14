@@ -107,10 +107,10 @@ class StartActivity : BaseActivity<ActivityStartBinding, BaseViewModel>(),
             preloadedAdvertisement()
             val auth = Firebase.remoteConfig
             auth.fetchAndActivate().addOnSuccessListener {
-                MmkvUtils.set(Constant.PROFILE_OG_DATA, auth.getString("sigvn_ser"))
-                MmkvUtils.set(Constant.PROFILE_OG_DATA_FAST, auth.getString("sigvn_smar"))
-                MmkvUtils.set(Constant.AROUND_OG_FLOW_DATA, auth.getString("sigvnAroundFlow_Data"))
-                MmkvUtils.set(Constant.ADVERTISING_OG_DATA, auth.getString("sigvn_ad"))
+                MmkvUtils.set(Constant.PROFILE_OG_DATA, auth.getString("ongpro_server"))
+                MmkvUtils.set(Constant.PROFILE_OG_DATA_FAST, auth.getString("ongpro_smart"))
+                MmkvUtils.set(Constant.AROUND_OG_FLOW_DATA, auth.getString("ongproAroundFlow_Data"))
+                MmkvUtils.set(Constant.ADVERTISING_OG_DATA, auth.getString("ongpro_ad"))
 
             }
         }
