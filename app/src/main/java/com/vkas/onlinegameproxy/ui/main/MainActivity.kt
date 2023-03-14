@@ -26,8 +26,11 @@ import com.google.gson.reflect.TypeToken
 import com.jeremyliao.liveeventbus.LiveEventBus
 import com.vkas.onlinegameproxy.BR
 import com.vkas.onlinegameproxy.R
+import com.vkas.onlinegameproxy.ad.OgLoadConnectAd
+import com.vkas.onlinegameproxy.ad.OgLoadHomeAd
 import com.vkas.onlinegameproxy.app.App
 import com.vkas.onlinegameproxy.app.App.Companion.mmkvOg
+import com.vkas.onlinegameproxy.base.AdBase
 import com.vkas.onlinegameproxy.base.BaseActivity
 import com.vkas.onlinegameproxy.bean.OgVpnBean
 import com.vkas.onlinegameproxy.databinding.ActivityMainBinding
@@ -130,22 +133,22 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
                 viewModel.updateSkServer(it, true)
             }
         //插屏关闭后跳转
-//        LiveEventBus
-//            .get(Constant.PLUG_OG_ADVERTISEMENT_SHOW, Boolean::class.java)
-//            .observeForever {
-//                KLog.e("state", "插屏关闭接收=${it}")
-//                //重复点击
-//                jobRepeatClick = lifecycleScope.launch {
-//                    if (!repeatClick) {
-//                        KLog.e("state", "插屏关闭后跳转=${it}")
-//                        AdBase.getConnectInstance().advertisementLoadingOg(this@MainActivity)
-//                        connectOrDisconnectOg(it)
-//                        repeatClick = true
-//                    }
-//                    delay(1000)
-//                    repeatClick = false
-//                }
-//            }
+        LiveEventBus
+            .get(Constant.PLUG_OG_ADVERTISEMENT_SHOW, Boolean::class.java)
+            .observeForever {
+                KLog.e("state", "插屏关闭接收=${it}")
+                //重复点击
+                jobRepeatClick = lifecycleScope.launch {
+                    if (!repeatClick) {
+                        KLog.e("state", "插屏关闭后跳转=${it}")
+                        AdBase.getConnectInstance().advertisementLoadingOg(this@MainActivity)
+                        connectOrDisconnectOg(it)
+                        repeatClick = true
+                    }
+                    delay(1000)
+                    repeatClick = false
+                }
+            }
     }
 
     override fun initData() {
@@ -174,7 +177,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
             setFastInformation(currentServerData)
         }
 
-//        AdBase.getHomeInstance().whetherToShowOg = false
+        AdBase.getHomeInstance().whetherToShowOg = false
 
         // 初始化主页广告
         initHomeAd()
@@ -184,16 +187,17 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
     }
 
     private fun initHomeAd() {
-//        jobNativeAdsOg = lifecycleScope.launch {
-//            while (isActive) {
-//                OgLoadHomeAd.setDisplayHomeNativeAdOg(this@MainActivity, binding)
-//                if (AdBase.getHomeInstance().whetherToShowOg) {
-//                    jobNativeAdsOg?.cancel()
-//                    jobNativeAdsOg = null
-//                }
-//                delay(1000L)
-//            }
-//        }
+        binding.vpnAdOg = false
+        jobNativeAdsOg = lifecycleScope.launch {
+            while (isActive) {
+                OgLoadHomeAd.setDisplayHomeNativeAdOg(this@MainActivity, binding)
+                if (AdBase.getHomeInstance().whetherToShowOg) {
+                    jobNativeAdsOg?.cancel()
+                    jobNativeAdsOg = null
+                }
+                delay(1000L)
+            }
+        }
     }
 
     override fun initViewObservable() {
@@ -332,7 +336,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
             } else {
                 bundle.putBoolean(Constant.WHETHER_OG_CONNECTED, false)
             }
-//            AdBase.getBackInstance().advertisementLoadingOg(this@MainActivity)
+            AdBase.getBackInstance().advertisementLoadingOg(this@MainActivity)
             val serviceData = mmkvOg.decodeString("currentServerData", "").toString()
             bundle.putString(Constant.CURRENT_OG_SERVICE, serviceData)
             startActivity(ListActivity::class.java, bundle)
@@ -356,7 +360,6 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
 
     private val connect = registerForActivityResult(StartService()) {
         binding.homeGuideOg = false
-//        binding.viewGuideMask.visibility = View.GONE
         lifecycleScope.launch(Dispatchers.IO) {
             OnlineGameUtils.getIpInformation()
         }
@@ -381,35 +384,37 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
         changeOfVpnStatus()
         jobStartOg = lifecycleScope.launch {
             App.isAppOpenSameDayOg()
-
-//            AdBase.getConnectInstance().advertisementLoadingOg(this@MainActivity)
-//            AdBase.getResultInstance().advertisementLoadingOg(this@MainActivity)
-
+            if (isThresholdReached() || Utils.isNullOrEmpty(OgLoadConnectAd.idOg)) {
+                delay(2000L)
+                KLog.d(logTagOg, "广告达到上线,或者无广告位")
+                val showState =
+                    OgLoadConnectAd
+                        .displayConnectAdvertisementOg(this@MainActivity)
+                if (!showState) {
+                    connectOrDisconnectOg(false)
+                }
+                return@launch
+            }
+            AdBase.getConnectInstance().advertisementLoadingOg(this@MainActivity)
+            AdBase.getResultInstance().advertisementLoadingOg(this@MainActivity)
             try {
                 withTimeout(10000L) {
                     delay(2000L)
-//                    if (isThresholdReached() || Utils.isNullOrEmpty(OgLoadConnectAd.idOg)) {
-//                        KLog.d(logTagOg, "广告达到上线,或者无广告位")
-                        connectOrDisconnectOg(false)
-//                        jobStartOg?.cancel()
-//                        jobStartOg = null
-//                        return@withTimeout
-//                    }
-//                    KLog.e(logTagOg, "jobStartOg?.isActive=${jobStartOg?.isActive}")
-//                    while (jobStartOg?.isActive == true) {
-//                        val showState =
-//                            OgLoadConnectAd
-//                                .displayConnectAdvertisementOg(this@MainActivity)
-//                        if (showState) {
-//                            jobStartOg?.cancel()
-//                            jobStartOg = null
-//                        }
-//                        delay(1000L)
-//                    }
+                    KLog.e(logTagOg, "jobStartOg?.isActive=${jobStartOg?.isActive}")
+                    while (jobStartOg?.isActive == true) {
+                        val showState =
+                            OgLoadConnectAd
+                                .displayConnectAdvertisementOg(this@MainActivity)
+                        if (showState) {
+                            jobStartOg?.cancel()
+                            jobStartOg = null
+                        }
+                        delay(1000L)
+                    }
                 }
             } catch (e: TimeoutCancellationException) {
-//                KLog.d(logTagOg, "connect---插屏超时")
-//                connectOrDisconnectOg(false)
+                KLog.d(logTagOg, "connect---插屏超时")
+                connectOrDisconnectOg(false)
             }
         }
     }
@@ -585,19 +590,18 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
                 return@launch
             }
 
-//            if (App.nativeAdRefreshOg) {
-//                changeOfVpnStatus()
-//                AdBase.getHomeInstance().whetherToShowOg = false
-//                if (AdBase.getHomeInstance().appAdDataOg != null) {
-//                    KLog.d(logTagOg, "onResume------>1")
-//                    OgLoadHomeAd.setDisplayHomeNativeAdOg(this@MainActivity, binding)
-//                } else {
-//                    binding.vpnAdOg = false
-//                    KLog.d(logTagOg, "onResume------>2")
-//                    AdBase.getHomeInstance().advertisementLoadingOg(this@MainActivity)
-//                    initHomeAd()
-//                }
-//            }
+            if (App.nativeAdRefreshOg) {
+                changeOfVpnStatus()
+                AdBase.getHomeInstance().whetherToShowOg = false
+                if (AdBase.getHomeInstance().appAdDataOg != null) {
+                    KLog.d(logTagOg, "onResume------>1")
+                    OgLoadHomeAd.setDisplayHomeNativeAdOg(this@MainActivity, binding)
+                } else {
+                    KLog.d(logTagOg, "onResume------>2")
+                    AdBase.getHomeInstance().advertisementLoadingOg(this@MainActivity)
+                    initHomeAd()
+                }
+            }
         }
     }
 

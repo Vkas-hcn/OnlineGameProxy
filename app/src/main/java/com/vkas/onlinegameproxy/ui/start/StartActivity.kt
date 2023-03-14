@@ -15,7 +15,9 @@ import com.jeremyliao.liveeventbus.LiveEventBus
 import com.vkas.onlinegameproxy.BR
 import com.vkas.onlinegameproxy.BuildConfig
 import com.vkas.onlinegameproxy.R
+import com.vkas.onlinegameproxy.ad.OgLoadOpenAd
 import com.vkas.onlinegameproxy.app.App
+import com.vkas.onlinegameproxy.base.AdBase
 import com.vkas.onlinegameproxy.base.BaseActivity
 import com.vkas.onlinegameproxy.base.BaseViewModel
 import com.vkas.onlinegameproxy.databinding.ActivityStartBinding
@@ -25,6 +27,7 @@ import com.vkas.onlinegameproxy.ui.main.MainActivity
 import com.vkas.onlinegameproxy.utils.KLog
 import com.vkas.onlinegameproxy.utils.MmkvUtils
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils
+import com.vkas.onlinegameproxy.utils.OnlineGameUtils.isThresholdReached
 import com.xuexiang.xui.widget.progress.HorizontalProgressView
 import kotlinx.coroutines.*
 import java.util.*
@@ -64,7 +67,7 @@ class StartActivity : BaseActivity<ActivityStartBinding, BaseViewModel>(),
 //        MobileAds.setRequestConfiguration(configuration)
 
         binding.pbStartOg.setProgressViewUpdateListener(this)
-        binding.pbStartOg.setProgressDuration(2000)
+        binding.pbStartOg.setProgressDuration(10000)
         binding.pbStartOg.setProgressTextVisibility(true)
         binding.pbStartOg.startProgressAnimation()
         liveEventBusOg()
@@ -149,65 +152,65 @@ class StartActivity : BaseActivity<ActivityStartBinding, BaseViewModel>(),
      */
     private fun loadAdvertisement() {
         // 开屏
-//        AdBase.getOpenInstance().adIndexOg = 0
-//        AdBase.getOpenInstance().advertisementLoadingOg(this)
-//        rotationDisplayOpeningAdOg()
-//        // 首页原生
-//        AdBase.getHomeInstance().adIndexOg = 0
-//        AdBase.getHomeInstance().advertisementLoadingOg(this)
-//        // 结果页原生
-//        AdBase.getResultInstance().adIndexOg = 0
-//        AdBase.getResultInstance().advertisementLoadingOg(this)
-//        // 连接插屏
-//        AdBase.getConnectInstance().adIndexOg = 0
-//        AdBase.getConnectInstance().advertisementLoadingOg(this)
-//        // 服务器页插屏
-//        AdBase.getBackInstance().adIndexOg = 0
-//        AdBase.getBackInstance().advertisementLoadingOg(this)
-//        // 服务器页原生
-//        AdBase.getListInstance().adIndexOg = 0
-//        AdBase.getListInstance().advertisementLoadingOg(this)
+        AdBase.getOpenInstance().adIndexOg = 0
+        AdBase.getOpenInstance().advertisementLoadingOg(this)
+        rotationDisplayOpeningAdOg()
+        // 首页原生
+        AdBase.getHomeInstance().adIndexOg = 0
+        AdBase.getHomeInstance().advertisementLoadingOg(this)
+        // 结果页原生
+        AdBase.getResultInstance().adIndexOg = 0
+        AdBase.getResultInstance().advertisementLoadingOg(this)
+        // 连接插屏
+        AdBase.getConnectInstance().adIndexOg = 0
+        AdBase.getConnectInstance().advertisementLoadingOg(this)
+        // 服务器页插屏
+        AdBase.getBackInstance().adIndexOg = 0
+        AdBase.getBackInstance().advertisementLoadingOg(this)
+        // 服务器页原生
+        AdBase.getListInstance().adIndexOg = 0
+        AdBase.getListInstance().advertisementLoadingOg(this)
     }
 
     /**
      * 轮训展示开屏广告
      */
     private fun rotationDisplayOpeningAdOg() {
-//        jobOpenAdsOg = lifecycleScope.launch {
-//            try {
-//                withTimeout(10000L) {
-//                    delay(1000L)
-//                    while (isActive) {
-//                        val showState = OgLoadOpenAd
-//                            .displayOpenAdvertisementOg(this@StartActivity)
-//                        if (showState) {
-//                            jobOpenAdsOg?.cancel()
-//                            jobOpenAdsOg = null
-//                        }
-//                        delay(1000L)
-//                    }
-//                }
-//            } catch (e: TimeoutCancellationException) {
-//                KLog.e("TimeoutCancellationException I'm sleeping $e")
-//                jumpPage()
-//            }
-//        }
+        jobOpenAdsOg = lifecycleScope.launch {
+            try {
+                withTimeout(10000L) {
+                    delay(1000L)
+                    while (isActive) {
+                        val showState = OgLoadOpenAd
+                            .displayOpenAdvertisementOg(this@StartActivity)
+                        if (showState) {
+                            jobOpenAdsOg?.cancel()
+                            jobOpenAdsOg = null
+                        }
+                        delay(1000L)
+                    }
+                }
+            } catch (e: TimeoutCancellationException) {
+                KLog.e("TimeoutCancellationException I'm sleeping $e")
+                jumpPage()
+            }
+        }
     }
 
     /**
      * 预加载广告
      */
     private fun preloadedAdvertisement() {
-//        App.isAppOpenSameDayOg()
-//        if (isThresholdReached()) {
-//            KLog.d(logTagOg, "广告达到上线")
+        App.isAppOpenSameDayOg()
+        if (isThresholdReached()) {
+            KLog.d(logTagOg, "广告达到上线")
             lifecycleScope.launch {
                 delay(2000L)
                 liveJumpHomePage.postValue(true)
             }
-//        } else {
-//            loadAdvertisement()
-//        }
+        } else {
+            loadAdvertisement()
+        }
     }
 
     override fun onHorizontalProgressStart(view: View?) {

@@ -4,17 +4,24 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/drawable/bg_home_ad_button.xml" value="0.23958333333333334" />
+        <entry key="app/src/main/res/drawable/bg_list_ad.xml" value="0.1597222222222222" />
+        <entry key="app/src/main/res/drawable/bg_list_ad_button.xml" value="0.1597222222222222" />
         <entry key="app/src/main/res/drawable/bg_list_item.xml" value="0.1597222222222222" />
+        <entry key="app/src/main/res/drawable/bg_main_ad.xml" value="0.1597222222222222" />
         <entry key="app/src/main/res/drawable/bg_nav_item.xml" value="0.23958333333333334" />
+        <entry key="app/src/main/res/drawable/bg_result_ad.xml" value="0.1597222222222222" />
         <entry key="app/src/main/res/drawable/bg_result_ad_button.xml" value="0.12552083333333333" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.23958333333333334" />
-        <entry key="app/src/main/res/layout/activity_main.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.1544041450777202" />
         <entry key="app/src/main/res/layout/activity_result_og.xml" value="0.165" />
-        <entry key="app/src/main/res/layout/activity_service_list_og.xml" value="0.14895833333333333" />
+        <entry key="app/src/main/res/layout/activity_service_list_og.xml" value="0.165" />
         <entry key="app/src/main/res/layout/activity_start.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_web_og.xml" value="0.14895833333333333" />
         <entry key="app/src/main/res/layout/item_service.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/layout_list_native_og.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/layout_main_native_og.xml" value="0.14895833333333333" />
         <entry key="app/src/main/res/layout/layout_main_navigation_og.xml" value="0.125" />
+        <entry key="app/src/main/res/layout/layout_result_native_og.xml" value="0.335" />
         <entry key="app/src/main/res/layout/layout_toolbar_og.xml" value="0.25" />
       </map>
     </option>

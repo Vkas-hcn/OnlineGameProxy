@@ -97,7 +97,7 @@ object OnlineGameUtils {
      * 获取广告服务器数据
      */
     fun getAdServerDataOg(): OgAdBean {
-        return runCatching {
+        val serviceData: OgAdBean = runCatching {
             JsonUtil.fromJson(
                 mmkvOg.decodeString(Constant.ADVERTISING_OG_DATA),
                 OgAdBean::class.java
@@ -106,6 +106,7 @@ object OnlineGameUtils {
             ResourceUtils.readStringFromAssert(Constant.AD_LOCAL_FILE_NAME_SKY),
             object : TypeToken<OgAdBean>() {}.type
         )
+        return adSortingOg(serviceData)
     }
 
 

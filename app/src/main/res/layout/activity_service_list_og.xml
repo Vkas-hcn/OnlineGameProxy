@@ -8,11 +8,11 @@
         <import type="android.view.View" />
 
         <variable
-            name="backAdUf"
+            name="backAdOg"
             type="Boolean"
             android:value="false" />
         <variable
-            name="listAdSky"
+            name="listAdOg"
             type="Boolean"
             android:value="false" />
     </data>
@@ -26,7 +26,31 @@
         <include
             android:id="@+id/select_title_og"
             layout="@layout/layout_toolbar_og" />
+        <FrameLayout
+            android:id="@+id/frameLayout_ad"
+            android:layout_width="match_parent"
+            android:layout_height="68dp"
+            android:layout_margin="12dp"
+            android:background="@drawable/bg_list_ad"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
 
+            <FrameLayout
+                android:id="@+id/og_ad_frame"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="@{listAdOg ? View.VISIBLE : View.GONE}" />
+
+            <ImageView
+                android:id="@+id/img_og_ad_frame"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:scaleType="fitXY"
+                android:src="@drawable/ic_list_oc"
+                android:visibility="@{listAdOg ? View.GONE : View.VISIBLE}" />
+        </FrameLayout>
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_select"
             android:layout_width="match_parent"
@@ -37,33 +61,7 @@
             android:paddingStart="24dp"
             android:paddingEnd="24dp"
             android:paddingTop="42dp"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
-<!--        <FrameLayout-->
-<!--            android:id="@+id/frameLayout_ad"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="152dp"-->
-<!--            android:layout_margin="12dp"-->
-<!--            android:background="@drawable/bg_connect"-->
-<!--            app:layout_constraintBottom_toBottomOf="parent"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintStart_toStartOf="parent">-->
-
-<!--            <FrameLayout-->
-<!--                android:id="@+id/st_ad_frame"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="match_parent"-->
-<!--                android:visibility="@{listAdSky ? View.VISIBLE : View.GONE}" />-->
-
-<!--            <ImageView-->
-<!--                android:id="@+id/img_st_ad_frame"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="match_parent"-->
-<!--                android:layout_gravity="center"-->
-<!--                android:scaleType="fitXY"-->
-<!--                android:src="@drawable/ic_ad_list_occupy"-->
-<!--                android:visibility="@{listAdSky ? View.GONE : View.VISIBLE}" />-->
-<!--        </FrameLayout>-->
     </LinearLayout>
 </layout>

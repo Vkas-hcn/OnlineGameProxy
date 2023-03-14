@@ -8,7 +8,7 @@
         <import type="android.view.View" />
 
         <variable
-            name="resultAdSky"
+            name="resultAdOg"
             type="Boolean"
             android:value="false" />
         <variable
@@ -126,16 +126,16 @@
             android:layout_width="match_parent"
             android:layout_height="328dp"
             android:layout_margin="20dp"
-            android:visibility="gone"
+            android:layout_marginTop="46dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/con_time">
+            app:layout_constraintTop_toBottomOf="@+id/view_top">
 
             <FrameLayout
                 android:id="@+id/og_ad_frame"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="@{resultAdSky ? View.VISIBLE : View.GONE}" />
+                android:visibility="@{resultAdOg ? View.VISIBLE : View.GONE}" />
 
             <ImageView
                 android:id="@+id/img_og_ad_frame"
@@ -144,7 +144,7 @@
                 android:layout_gravity="center"
                 android:scaleType="fitXY"
                 android:src="@drawable/ic_ad_occupy"
-                android:visibility="@{resultAdSky ? View.GONE : View.VISIBLE}" />
+                android:visibility="@{resultAdOg ? View.GONE : View.VISIBLE}" />
         </FrameLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
