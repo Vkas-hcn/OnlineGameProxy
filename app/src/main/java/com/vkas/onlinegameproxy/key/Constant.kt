@@ -54,6 +54,7 @@ object Constant {
     const val FASTER_OG_SERVER= "Faster server"
     //ip信息
     const val IP_INFORMATION= "ipInformation"
+    const val IP_INFORMATION2= "ipInformation2"
     // 已连接返回
     const val CONNECTED_OG_RETURN="connectedOgReturn"
     // 未连接返回
@@ -64,4 +65,11 @@ object Constant {
     const val VPN_LOCAL_FILE_NAME_SKY = "ogVpnData.json"
     // Fast本地文件名
     const val FAST_LOCAL_FILE_NAME_SKY = "ogVpnFastData.json"
+
+    // vpn配置本地文件名
+    const val VPN_BOOT_LOCAL_FILE_NAME_UF = "online_config.json"
+    //online_config
+    const val ONLINE_CONFIG = "online_config"
+    //installReferrer
+    const val INSTALL_REFERRER = "installReferrer"
 }

@@ -1,5 +1,6 @@
 package com.vkas.onlinegameproxy.ui.main
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.Application
 import android.content.Context
@@ -17,7 +18,9 @@ import com.github.shadowsocks.preference.DataStore
 import com.google.gson.reflect.TypeToken
 import com.vkas.onlinegameproxy.R
 import com.vkas.onlinegameproxy.app.App.Companion.mmkvOg
+import com.vkas.onlinegameproxy.base.AdBase
 import com.vkas.onlinegameproxy.base.BaseViewModel
+import com.vkas.onlinegameproxy.bean.OgIp2Bean
 import com.vkas.onlinegameproxy.bean.OgIpBean
 import com.vkas.onlinegameproxy.bean.OgVpnBean
 import com.vkas.onlinegameproxy.key.Constant
@@ -122,21 +125,36 @@ class MainViewModel (application: Application) : BaseViewModel(application) {
      */
     fun whetherParsingIsIllegalIp(): Boolean {
         val data = mmkvOg.decodeString(Constant.IP_INFORMATION)
-        val locale = Locale.getDefault()
-        val language = locale.language
-        KLog.e("state", "language=${language}")
-
-        KLog.e("state", "data=${data}===isNullOrEmpty=${Utils.isNullOrEmpty(data)}")
         return if (Utils.isNullOrEmpty(data)) {
-            language != "zh" || language == "fa"
+            whetherParsingIsIllegalIp2()
         } else {
             val ptIpBean: OgIpBean = JsonUtil.fromJson(
-                mmkvOg.decodeString(Constant.IP_INFORMATION),
+                data,
                 object : TypeToken<OgIpBean?>() {}.type
             )
             KLog.e("code", "ptIpBean.country_code==${ptIpBean.country_code}")
-            return ptIpBean.country_code == "IR" || ptIpBean.country_code != "CN" ||
+            return ptIpBean.country_code == "IR" || ptIpBean.country_code == "CN" ||
                     ptIpBean.country_code == "HK" || ptIpBean.country_code == "MO"
+        }
+    }
+
+    private fun whetherParsingIsIllegalIp2(): Boolean {
+        val data = mmkvOg.decodeString(Constant.IP_INFORMATION2)
+        val locale = Locale.getDefault()
+        val language = locale.language
+        KLog.e("state", "language2=${language}")
+
+        KLog.e("state", "data2=${data}===isNullOrEmpty=${Utils.isNullOrEmpty(data)}")
+        return if (Utils.isNullOrEmpty(data)) {
+            language == "zh" || language == "fa"
+        } else {
+            val ptIpBean: OgIp2Bean = JsonUtil.fromJson(
+                data,
+                object : TypeToken<OgIp2Bean?>() {}.type
+            )
+            KLog.e("state", "OgIp2Bean.cc==${ptIpBean.cc}")
+            return ptIpBean.cc == "IR" || ptIpBean.cc == "CN" ||
+                    ptIpBean.cc == "HK" || ptIpBean.cc == "MO"
         }
     }
 
@@ -167,5 +185,49 @@ class MainViewModel (application: Application) : BaseViewModel(application) {
             Toast.makeText(context, "Unable to open link", Toast.LENGTH_SHORT).show()
         }
     }
+    /**
+     *  清空所有广告重新加载
+     */
+    fun clearAllAdsReload(activity: Activity) {
+        // 开屏
+        AdBase.getOpenInstance().appAdDataOg = null
+        AdBase.getOpenInstance().adIndexOg = 0
+        AdBase.getOpenInstance().advertisementLoadingOg(activity)
+        // 首页原生
+        AdBase.getHomeInstance().appAdDataOg = null
+        AdBase.getHomeInstance().adIndexOg = 0
+        AdBase.getHomeInstance().advertisementLoadingOg(activity)
+        // 结果页原生
+        AdBase.getResultInstance().appAdDataOg = null
+        AdBase.getResultInstance().adIndexOg = 0
+        AdBase.getResultInstance().advertisementLoadingOg(activity)
+        // 连接插屏
+        AdBase.getConnectInstance().appAdDataOg = null
+        AdBase.getConnectInstance().adIndexOg = 0
+        AdBase.getConnectInstance().advertisementLoadingOg(activity)
+        // 服务器页插屏
+        AdBase.getBackInstance().appAdDataOg = null
+        AdBase.getBackInstance().adIndexOg = 0
+        AdBase.getBackInstance().advertisementLoadingOg(activity)
+    }
 
+    /**
+     * 检测广告位加载
+     */
+    fun detectingAdSpaceLoading(activity: Activity) {
+        // 首页原生
+        AdBase.getHomeInstance().advertisementLoadingOg(activity)
+        // 结果页原生
+        AdBase.getResultInstance().advertisementLoadingOg(activity)
+        // 连接插屏
+        AdBase.getConnectInstance().advertisementLoadingOg(activity)
+        // 服务器页插屏
+        AdBase.getBackInstance().advertisementLoadingOg(activity)
+    }
+    /**
+     * 是否是买量用户
+     */
+    fun isItABuyingUser(): Boolean {
+        return OnlineGameUtils.isValuableUser()
+    }
 }

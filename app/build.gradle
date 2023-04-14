@@ -70,6 +70,6 @@ dependencies {
     implementation rootProject.ext.dependencies.rxpermissions
     implementation rootProject.ext.dependencies.glide
     implementation rootProject.ext.dependencies.transformations
-
+    implementation "com.android.installreferrer:installreferrer:2.2"
     implementation 'com.google.firebase:firebase-analytics-ktx'
 }

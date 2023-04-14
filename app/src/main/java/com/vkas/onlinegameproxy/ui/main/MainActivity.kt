@@ -33,6 +33,7 @@ import com.vkas.onlinegameproxy.app.App.Companion.mmkvOg
 import com.vkas.onlinegameproxy.base.AdBase
 import com.vkas.onlinegameproxy.base.BaseActivity
 import com.vkas.onlinegameproxy.bean.OgVpnBean
+import com.vkas.onlinegameproxy.bean.OpRemoteBean
 import com.vkas.onlinegameproxy.databinding.ActivityMainBinding
 import com.vkas.onlinegameproxy.key.Constant
 import com.vkas.onlinegameproxy.key.Constant.logTagOg
@@ -81,6 +82,13 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
 
     //是否点击连接
     private var clickToConnect: Boolean = false
+
+    //是否执行A方案
+    private var whetherToImplementPlanA = false
+
+    //是否执行B方案
+    private var whetherToImplementPlanB = false
+    val onlineConfig: OpRemoteBean = OnlineGameUtils.getLocalVpnBootData()
 
     companion object {
         var stateListener: ((BaseService.State) -> Unit)? = null
@@ -184,6 +192,9 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
 
         // 显示VPN指南
         showVpnGuide()
+        if (onlineConfig.online_start == "1") {
+            judgeVpnScheme()
+        }
     }
 
     private fun initHomeAd() {
@@ -387,12 +398,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
             if (isThresholdReached() || Utils.isNullOrEmpty(OgLoadConnectAd.idOg)) {
                 delay(2000L)
                 KLog.d(logTagOg, "广告达到上线,或者无广告位")
-                val showState =
-                    OgLoadConnectAd
-                        .displayConnectAdvertisementOg(this@MainActivity)
-                if (!showState) {
-                    connectOrDisconnectOg(false)
-                }
+                connectOrDisconnectOg(false)
                 return@launch
             }
             AdBase.getConnectInstance().advertisementLoadingOg(this@MainActivity)
@@ -401,15 +407,21 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
                 withTimeout(10000L) {
                     delay(2000L)
                     KLog.e(logTagOg, "jobStartOg?.isActive=${jobStartOg?.isActive}")
-                    while (jobStartOg?.isActive == true) {
-                        val showState =
-                            OgLoadConnectAd
-                                .displayConnectAdvertisementOg(this@MainActivity)
-                        if (showState) {
-                            jobStartOg?.cancel()
-                            jobStartOg = null
+                    if(OnlineGameUtils.whetherToBlockScreenAds(onlineConfig.online_ref)) {
+                        while (jobStartOg?.isActive == true) {
+                            val showState =
+                                OgLoadConnectAd
+                                    .displayConnectAdvertisementOg(this@MainActivity)
+                            if (showState) {
+                                jobStartOg?.cancel()
+                                jobStartOg = null
+                            }
+                            delay(1000L)
                         }
-                        delay(1000L)
+                    }else{
+                        jobStartOg?.cancel()
+                        jobStartOg = null
+                        connectOrDisconnectOg(false)
                     }
                 }
             } catch (e: TimeoutCancellationException) {
@@ -441,14 +453,16 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
             }
             false
         } else {
-            if (!isBackgroundClosed) {
-                viewModel.jumpConnectionResultsPage(true)
-            }
-//            EasyConnectUtils.getBuriedPointOg("unlimF_sv")
             if ((lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED))) {
                 Core.startService()
+                if (!whetherToImplementPlanA && !whetherToImplementPlanB) {
+                    viewModel.clearAllAdsReload(this@MainActivity)
+                }
             } else {
                 binding.vpnState = 0
+            }
+            if (!isBackgroundClosed) {
+                viewModel.jumpConnectionResultsPage(true)
             }
             true
         }
@@ -491,6 +505,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
     private fun connectionServerSuccessful() {
         binding.vpnState = 2
         changeOfVpnStatus()
+        whetherToImplementPlanB =true
 //        EasyConnectUtils.getBuriedPointOg("unlimF_vT")
     }
 
@@ -544,16 +559,69 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
             delay(300)
             if (state.name != "Connected") {
                 binding.homeGuideOg = true
-//                binding.viewGuideMask.visibility = View.VISIBLE
                 binding.lavViewGu.playAnimation()
             } else {
                 binding.homeGuideOg = false
-//                binding.viewGuideMask.visibility = View.GONE
                 binding.lavViewGu.pauseAnimation()
             }
         }
     }
+    /**
+     * 判断Vpn方案
+     */
+    private fun judgeVpnScheme() {
+        if (!viewModel.isItABuyingUser()) {
+            //非买量用户直接走A方案
+            whetherToImplementPlanA = true
+            return
+        }
+        val data = onlineConfig.online_ratio
+        if (Utils.isNullOrEmpty(data)) {
+            KLog.d(logTagOg, "判断Vpn方案---默认")
+            vpnCScheme("50")
+        } else {
+            //C
+            whetherToImplementPlanA = false
+            vpnCScheme(data)
+        }
+    }
 
+    /**
+     * vpn B 方案
+     */
+    private fun vpnBScheme() {
+        lifecycleScope.launch {
+            delay(300)
+            if (!state.canStop) {
+                connect.launch(null)
+            }
+        }
+    }
+
+    /**
+     * vpn C 方案
+     * 概率
+     */
+    private fun vpnCScheme(mProbability: String) {
+        val mProbabilityInt = mProbability.toIntOrNull()
+        if (mProbabilityInt == null) {
+            whetherToImplementPlanA = true
+        } else {
+            val random = (0..100).shuffled().last()
+            when {
+                random <= mProbabilityInt -> {
+                    //B
+                    KLog.d(logTagOg, "随机落在B方案")
+                    vpnBScheme() //20，代表20%为B用户；80%为A用户
+                }
+                else -> {
+                    //A
+                    KLog.d(logTagOg, "随机落在A方案")
+                    whetherToImplementPlanA = true
+                }
+            }
+        }
+    }
     override fun stateChanged(state: BaseService.State, profileName: String?, msg: String?) {
         changeState(state)
     }
@@ -591,6 +659,10 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
             }
 
             if (App.nativeAdRefreshOg) {
+                //A方案热启动
+                if (onlineConfig.online_start == "2") {
+                    judgeVpnScheme()
+                }
                 changeOfVpnStatus()
                 AdBase.getHomeInstance().whetherToShowOg = false
                 if (AdBase.getHomeInstance().appAdDataOg != null) {

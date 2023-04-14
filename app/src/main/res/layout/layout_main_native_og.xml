@@ -59,6 +59,7 @@
                     android:layout_height="wrap_content"
                     android:drawablePadding="3dp"
                     android:textColor="#FFFFFFFF"
+                    app:drawableEndCompat="@drawable/ic_ad_type"
                     android:textSize="14sp"
                     android:maxLines="1"
                     android:ellipsize="end"

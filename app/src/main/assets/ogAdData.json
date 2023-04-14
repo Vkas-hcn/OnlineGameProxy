@@ -5,16 +5,15 @@
     {
       "ongpro_type": "open",
       "ongpro_from": "admob",
-      "ongpro_id": "ca-app-pub-1576819475324396/5660368634",
+      "ongpro_id": "ca-app-pub-3940256099942544/1033173712",
       "ongpro_y": 1
     }
   ],
-
   "ongpro_n_home": [
     {
       "ongpro_type": "primitive",
       "ongpro_from": "admob",
-      "ongpro_id": "ca-app-pub-1576819475324396/8186745035",
+      "ongpro_id": "ca-app-pub-3940256099942544/2247696110",
       "ongpro_y": 1
     }
   ],
@@ -22,7 +21,7 @@
     {
       "ongpro_type": "primitive",
       "ongpro_from": "admob",
-      "ongpro_id": "ca-app-pub-1576819475324396/8553576540",
+      "ongpro_id": "ca-app-pub-3940256099942544/2247696110",
       "ongpro_y": 1
     }
   ],
@@ -30,7 +29,7 @@
     {
       "ongpro_type": "screen",
       "ongpro_from": "admob",
-      "ongpro_id": "ca-app-pub-1576819475324396/1729147890",
+      "ongpro_id": "ca-app-pub-3940256099942544/8691691433",
       "ongpro_y": 1
     }
   ],
@@ -38,7 +37,7 @@
     {
       "ongpro_type": "screen",
       "ongpro_from": "admob",
-      "ongpro_id": "ca-app-pub-1576819475324396/3010154566",
+      "ongpro_id": "ca-app-pub-3940256099942544/8691691433",
       "ongpro_y": 1
     }
   ],
@@ -46,7 +45,7 @@
     {
       "ongpro_type": "primitive",
       "ongpro_from": "admob",
-      "ongpro_id": "ca-app-pub-1576819475324396/3042229560",
+      "ongpro_id": "ca-app-pub-3940256099942544/2247696110",
       "ongpro_y": 1
     }
   ]

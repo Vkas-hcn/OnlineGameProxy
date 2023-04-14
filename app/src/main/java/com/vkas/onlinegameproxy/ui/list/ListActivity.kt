@@ -18,6 +18,7 @@ import com.vkas.onlinegameproxy.app.App
 import com.vkas.onlinegameproxy.base.AdBase
 import com.vkas.onlinegameproxy.base.BaseActivity
 import com.vkas.onlinegameproxy.bean.OgVpnBean
+import com.vkas.onlinegameproxy.bean.OpRemoteBean
 import com.vkas.onlinegameproxy.databinding.ActivityServiceListOgBinding
 import com.vkas.onlinegameproxy.key.Constant
 import com.vkas.onlinegameproxy.key.Constant.logTagOg
@@ -34,15 +35,19 @@ class ListActivity : BaseActivity<ActivityServiceListOgBinding, ListViewModel>()
     private var ecServiceBeanList: MutableList<OgVpnBean> = ArrayList()
     private lateinit var adBean: OgVpnBean
     private var jobBackOg: Job? = null
+
     //选中服务器
     private lateinit var checkSkServiceBean: OgVpnBean
     private lateinit var checkSkServiceBeanClick: OgVpnBean
+    val onlineConfig: OpRemoteBean = OnlineGameUtils.getLocalVpnBootData()
+
     // 是否连接
     private var whetherToConnect = false
 
     override fun initContentView(savedInstanceState: Bundle?): Int {
         return R.layout.activity_service_list_og
     }
+
     override fun initVariableId(): Int {
         return BR._all
     }
@@ -73,7 +78,7 @@ class ListActivity : BaseActivity<ActivityServiceListOgBinding, ListViewModel>()
         initSelectRecyclerView()
         viewModel.getServerListData()
         AdBase.getBackInstance().whetherToShowOg = false
-        AdBase.getListInstance().whetherToShowOg =false
+        AdBase.getListInstance().whetherToShowOg = false
         initListAds()
     }
 
@@ -81,6 +86,7 @@ class ListActivity : BaseActivity<ActivityServiceListOgBinding, ListViewModel>()
         super.initViewObservable()
         getServerListData()
     }
+
     private fun liveEventBusReceive() {
         //插屏关闭后跳转
         LiveEventBus
@@ -89,11 +95,12 @@ class ListActivity : BaseActivity<ActivityServiceListOgBinding, ListViewModel>()
                 finish()
             }
     }
+
     private fun initListAds() {
-        binding.listAdOg =false
-        jobBackOg= lifecycleScope.launch {
+        binding.listAdOg = false
+        jobBackOg = lifecycleScope.launch {
             while (isActive) {
-                OgLoadListAd.setDisplayListNativeAdOg(this@ListActivity,binding)
+                OgLoadListAd.setDisplayListNativeAdOg(this@ListActivity, binding)
                 if (AdBase.getListInstance().whetherToShowOg) {
                     jobBackOg?.cancel()
                     jobBackOg = null
@@ -174,9 +181,14 @@ class ListActivity : BaseActivity<ActivityServiceListOgBinding, ListViewModel>()
             finish()
             return
         }
-        if(!OgLoadBackAd.displayBackAdvertisementOg(this)){
+        if (OnlineGameUtils.whetherToBlockScreenAds(onlineConfig.online_ref)) {
+            if (!OgLoadBackAd.displayBackAdvertisementOg(this)) {
+                finish()
+            }
+        } else {
             finish()
         }
+
     }
 
     /**
@@ -215,22 +227,26 @@ class ListActivity : BaseActivity<ActivityServiceListOgBinding, ListViewModel>()
         dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.BLACK)
         dialog.getButton(DialogInterface.BUTTON_NEGATIVE)?.setTextColor(Color.BLACK)
     }
+
     override fun onResume() {
         super.onResume()
         lifecycleScope.launch {
             delay(300)
-            if(lifecycle.currentState != Lifecycle.State.RESUMED){return@launch}
-            if(App.nativeAdRefreshOg){
-                AdBase.getListInstance().whetherToShowOg =false
-                if(AdBase.getListInstance().appAdDataOg !=null){
-                    OgLoadListAd.setDisplayListNativeAdOg(this@ListActivity,binding)
-                }else{
+            if (lifecycle.currentState != Lifecycle.State.RESUMED) {
+                return@launch
+            }
+            if (App.nativeAdRefreshOg) {
+                AdBase.getListInstance().whetherToShowOg = false
+                if (AdBase.getListInstance().appAdDataOg != null) {
+                    OgLoadListAd.setDisplayListNativeAdOg(this@ListActivity, binding)
+                } else {
                     AdBase.getResultInstance().advertisementLoadingOg(this@ListActivity)
                     initListAds()
                 }
             }
         }
     }
+
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             returnToHomePage()

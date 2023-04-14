@@ -72,6 +72,7 @@ class StartActivity : BaseActivity<ActivityStartBinding, BaseViewModel>(),
         binding.pbStartOg.startProgressAnimation()
         liveEventBusOg()
         lifecycleScope.launch(Dispatchers.IO) {
+            OnlineGameUtils.referrer(this@StartActivity)
             OnlineGameUtils.getIpInformation()
         }
         getFirebaseDataOg()
@@ -111,6 +112,7 @@ class StartActivity : BaseActivity<ActivityStartBinding, BaseViewModel>(),
                 MmkvUtils.set(Constant.PROFILE_OG_DATA_FAST, auth.getString("ongpro_smart"))
                 MmkvUtils.set(Constant.AROUND_OG_FLOW_DATA, auth.getString("ongproAroundFlow_Data"))
                 MmkvUtils.set(Constant.ADVERTISING_OG_DATA, auth.getString("ongpro_ad"))
+                MmkvUtils.set(Constant.ONLINE_CONFIG, auth.getString(Constant.ONLINE_CONFIG))
 
             }
         }
