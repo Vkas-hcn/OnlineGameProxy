@@ -47,7 +47,7 @@ object Constant {
     // 当前服务器
     const val CURRENT_OG_SERVICE="currentOgService"
     // back插屏广告展示
-    const val PLUG_OG_BACK_AD_SHOW="plugOgBackAdShow"
+    const val PLUG_OG_OGCK_AD_SHOW="plugOgOgckAdShow"
     // connect插屏广告展示
     const val PLUG_OG_ADVERTISEMENT_SHOW="plugOgAdvertisementShow"
     // Faster server
@@ -72,4 +72,49 @@ object Constant {
     const val ONLINE_CONFIG = "online_config"
     //installReferrer
     const val INSTALL_REFERRER = "installReferrer"
+
+
+    // vpn配置本地文件名
+    const val VPN_BOOT_LOCAL_FILE_NAME_OG = "bubble_remote.json"
+    //online_config
+    const val BUBBLE_CONFIG = "bubble_config"
+    // back插屏广告展示
+    const val PLUG_OG_BACK_AD_SHOW="plugBaBackAdShow"
+    //当前IP
+    const val CURRENT_IP_OG = "currentIpOg"
+    //google广告id
+    const val GOOGLE_ADVERTISING_ID_OG = "googleAdvertisingIdOg"
+    //UUID值
+    const val UUID_VALUE_OG = "uuidValueOg"
+    // Session Json
+    const val SESSION_JSON_OG = "sessionJsonOg"
+    // Session Json
+    const val INSTALL_TYPE_OG  = "installTypeOg"
+    //tba上报地址(测试)
+    const val TBA_ADDRESS_TEST_OG  = "https://test-u.speedunlimited.link/podium/bond/tenacity/pueblo"
+
+    //tba上报地址(正式)
+    const val TBA_ADDRESS_OG  = "https://u.speedunlimited.link/prude/forswore"
+
+    //服务器下发地址（测试）
+    const val SERVER_DISTRIBUTION_ADDRESS_TEST_OG  = "https://test.onlinegameproxy.com/wom/slkf/"
+
+    //服务器下发地址（正式）
+    const val SERVER_DISTRIBUTION_ADDRESS_OG  = "https://prod.onlinegameproxy.com/wom/slkf/"
+
+    //cloak 测试/正式地址
+    const val cloak_url_OG  = "https://sorensen.speedunlimited.link/muong/dampen/taboo/sit"
+
+    //VPN链接后的IP
+    const val IP_AFTER_VPN_LINK_OG  = "iPAfterVpnLinkOg"
+
+    //VPN链接后的城市
+    const val IP_AFTER_VPN_CITY_OG  = "iPAfterVpnCityOg"
+
+    //1:打开黑名单用户屏蔽； //2:关闭黑名单用户屏蔽； //默认1
+    const val BUBBLE_CLOAK = "bubble_cloak"
+    //是否是黑名单用户
+    const val BLACKLIST_USER_OG  ="blacklistUserOg"
+    //下发服务器数据
+    const val SEND_SERVER_DATA ="sendServerData"
 }

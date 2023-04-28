@@ -6,5 +6,6 @@ import androidx.annotation.Keep
 data class OpRemoteBean(
     val online_start: String,
     val online_ratio: String,
-    val online_ref:String
+    val online_ref:String,
+    val online_cloak:String
 )

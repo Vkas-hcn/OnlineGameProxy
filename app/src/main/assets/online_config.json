@@ -1,5 +1,6 @@
 {
   "online_start":"1",
   "online_ratio":"50",
-  "online_ref":"1"
+  "online_ref":"2",
+  "online_cloak":"1"
 }

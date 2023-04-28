@@ -12,14 +12,19 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.jeremyliao.liveeventbus.LiveEventBus
 import com.vkas.onlinegameproxy.app.App
+import com.vkas.onlinegameproxy.app.App.Companion.mmkvOg
 import com.vkas.onlinegameproxy.base.AdBase
 import com.vkas.onlinegameproxy.bean.OgAdBean
+import com.vkas.onlinegameproxy.bean.OgDetailBean
 import com.vkas.onlinegameproxy.key.Constant
 import com.vkas.onlinegameproxy.key.Constant.logTagOg
 import com.vkas.onlinegameproxy.utils.KLog
+import com.vkas.onlinegameproxy.utils.OnlineGameUtils
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.recordNumberOfAdClickOg
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.recordNumberOfAdDisplaysOg
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.takeSortedAdIDOg
+import com.vkas.onlinegameproxy.utils.OnlineGameUtils.whetherToBlockScreenAds
+import com.vkas.onlinegameproxy.utils.OnlineOkHttpUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
@@ -29,13 +34,14 @@ object OgLoadConnectAd {
 
     // 广告ID
     var idOg = ""
-
+    var ogDetailBean: OgDetailBean? = null
 
     /**
      * 加载首页插屏广告
      */
     fun loadConnectAdvertisementOg(context: Context, adData: OgAdBean) {
         val adRequest = AdRequest.Builder().build()
+        ogDetailBean = OnlineGameUtils.beforeLoadLinkSettingsOg(adData.ongpro_i_2R.getOrNull(adBase.adIndexOg))
         idOg = takeSortedAdIDOg(adBase.adIndexOg, adData.ongpro_i_2R)
         KLog.d(
             logTagOg,
@@ -65,6 +71,15 @@ object OgLoadConnectAd {
                     adBase.appAdDataOg = interstitialAd
                     adBase.adIndexOg = 0
                     KLog.d(logTagOg, "connect---连接插屏加载成功")
+                    interstitialAd.setOnPaidEventListener { adValue ->
+                        KLog.e("TBA", "back-----setOnPaidEventListener")
+
+                        OnlineOkHttpUtils.postAdEvent(
+                            adValue,
+                            interstitialAd.responseInfo,
+                           ogDetailBean, "interstitial", "ongpro_i_2R"
+                        )
+                    }
                 }
             })
     }
@@ -109,6 +124,7 @@ object OgLoadConnectAd {
                     // Called when ad is shown.
                     adBase.whetherToShowOg = true
                     KLog.d(logTagOg, "connect----show")
+                    ogDetailBean = OnlineGameUtils.afterLoadLinkSettingsOg(ogDetailBean)
                 }
             }
     }
@@ -116,15 +132,28 @@ object OgLoadConnectAd {
     /**
      * 展示Connect广告
      */
-    fun displayConnectAdvertisementOg(activity: AppCompatActivity): Boolean {
+    fun displayConnectAdvertisementOg(activity: AppCompatActivity): Int {
+        val localVpnBootData = OnlineGameUtils.getLocalVpnBootData()
+        val blacklistUser = mmkvOg.decodeBool(Constant.BLACKLIST_USER_OG, true)
+        KLog.d(logTagOg, "bubble_cloak---${localVpnBootData.online_cloak}。。。")
+        KLog.d(logTagOg, "blacklist_user---${blacklistUser}。。。")
+
+        if (blacklistUser && localVpnBootData.online_cloak == "1") {
+            KLog.d(logTagOg, "根据黑名单屏蔽插屏广告。。。")
+            return 0
+        }
+        if(!whetherToBlockScreenAds(localVpnBootData.online_ref)){
+            KLog.d(logTagOg, "根据买量屏蔽插屏广告。。。")
+            return 0
+        }
         if (adBase.appAdDataOg == null) {
             KLog.d(logTagOg, "connect--插屏广告加载中或超限。。。")
-            return false
+            return 1
         }
 
         if (adBase.whetherToShowOg || activity.lifecycle.currentState != Lifecycle.State.RESUMED) {
             KLog.d(logTagOg, "connect--前一个插屏广告展示中或者生命周期不对")
-            return false
+            return 1
         }
         connectScreenAdCallback()
         activity.lifecycleScope.launch(Dispatchers.Main) {
@@ -132,6 +161,6 @@ object OgLoadConnectAd {
                 (adBase.appAdDataOg as InterstitialAd).show(activity)
             }
         }
-        return true
+        return 2
     }
 }

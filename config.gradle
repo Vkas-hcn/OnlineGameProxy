@@ -1,4 +1,5 @@
 def versionLifecycle = "2.2.0"
+def versionMoshi = "1.13.0"
 ext {
     android = [
             compileSdkVersion:30,
@@ -37,6 +38,8 @@ ext {
             firebaseConfigKtx: "com.google.firebase:firebase-config-ktx",
             androidUtilCode  : "com.blankj:utilcodex:1.31.0",
             lottie           : "com.airbnb.android:lottie:5.0.3",
+            moshi                  : "com.squareup.moshi:moshi:${versionMoshi}",
+            moshiCodegen           : "com.squareup.moshi:moshi-kotlin-codegen:${versionMoshi}",
             //admob广告
             gmsAds           : "com.google.android.gms:play-services-ads:20.6.0"
 

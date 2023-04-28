@@ -221,6 +221,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@color/guide_mask"
+                    android:onClick="@{(v) ->presenter.toHomeGuideOg()}"
                     android:visibility="@{homeGuideOg ? View.VISIBLE : View.GONE}" />
 
                 <com.airbnb.lottie.LottieAnimationView
@@ -236,6 +237,18 @@
                     app:lottie_fileName="data_guide.json"
                     app:lottie_imageAssetsFolder="images_guide"
                     app:lottie_loop="true" />
+                <ProgressBar
+                    android:id="@+id/pro_list"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:visibility="gone"
+                    android:layout_gravity="center"
+                    android:progressBackgroundTint="@color/white"
+                    android:progressTint="@color/white"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
 

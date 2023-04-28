@@ -182,13 +182,12 @@ class ListActivity : BaseActivity<ActivityServiceListOgBinding, ListViewModel>()
             return
         }
         if (OnlineGameUtils.whetherToBlockScreenAds(onlineConfig.online_ref)) {
-            if (!OgLoadBackAd.displayBackAdvertisementOg(this)) {
+            if (OgLoadBackAd.displayBackAdvertisementOg(this) != 2) {
                 finish()
             }
         } else {
             finish()
         }
-
     }
 
     /**

@@ -40,10 +40,7 @@ import com.vkas.onlinegameproxy.key.Constant.logTagOg
 import com.vkas.onlinegameproxy.ui.list.ListActivity
 import com.vkas.onlinegameproxy.ui.result.ResultActivity
 import com.vkas.onlinegameproxy.ui.web.WebActivity
-import com.vkas.onlinegameproxy.utils.KLog
-import com.vkas.onlinegameproxy.utils.MmkvUtils
-import com.vkas.onlinegameproxy.utils.OgTimerThread
-import com.vkas.onlinegameproxy.utils.OnlineGameUtils
+import com.vkas.onlinegameproxy.utils.*
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.getFlagThroughCountryEc
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.isThresholdReached
 import com.xuexiang.xui.utils.Utils
@@ -57,6 +54,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
     ShadowsocksConnection.Callback,
     OnPreferenceDataStoreChangeListener, LifecycleObserver {
     var state = BaseService.State.Idle
+    private var jobHeart: Job? = null
 
     //重复点击
     var repeatClick = false
@@ -161,10 +159,10 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
 
     override fun initData() {
         super.initData()
-        if (viewModel.whetherParsingIsIllegalIp()) {
-            viewModel.whetherTheBulletBoxCannotBeUsed(this@MainActivity)
-            return
-        }
+//        if (viewModel.whetherParsingIsIllegalIp()) {
+//            viewModel.whetherTheBulletBoxCannotBeUsed(this@MainActivity)
+//            return
+//        }
 
         // 设置状态
         changeState(BaseService.State.Idle, animate = false)
@@ -249,9 +247,20 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
 
     inner class OgClick {
         fun linkService() {
-            if (binding.vpnState != 1 && !binding.viewGuideMask.isVisible) {
-                connect.launch(null)
+            lifecycleScope.launch {
+                if (binding.vpnState != 1 && !binding.viewGuideMask.isVisible) {
+                    if (OnlineGameUtils.deliverServerTransitions()) {
+                        binding.proList.visibility = View.GONE
+                        connect.launch(null)
+
+                    } else {
+                        binding.proList.visibility = View.VISIBLE
+                        delay(2000)
+                        binding.proList.visibility = View.GONE
+                    }
+                }
             }
+
 //            if (binding.vpnState == 0) {
 //                UnLimitedUtils.getBuriedPointOg("unlimF_clickv")
 //            }
@@ -268,8 +277,17 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
         }
 
         fun clickService() {
-            if (binding.vpnState != 1 && !binding.viewGuideMask.isVisible) {
-                jumpToServerList()
+            lifecycleScope.launch {
+                if (binding.vpnState != 1 && !binding.viewGuideMask.isVisible) {
+                    if (OnlineGameUtils.deliverServerTransitions()) {
+                        binding.proList.visibility = View.GONE
+                        jumpToServerList()
+                    } else {
+                        binding.proList.visibility = View.VISIBLE
+                        delay(2000)
+                        binding.proList.visibility = View.GONE
+                    }
+                }
             }
         }
 
@@ -331,6 +349,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
                 binding.sidebarShowsOg = true
             }
         }
+        fun toHomeGuideOg(){}
     }
 
     /**
@@ -358,6 +377,8 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
      * 设置fast信息
      */
     private fun setFastInformation(elVpnBean: OgVpnBean) {
+        MmkvUtils.set(Constant.IP_AFTER_VPN_LINK_OG, elVpnBean.ongpro_ip)
+        MmkvUtils.set(Constant.IP_AFTER_VPN_CITY_OG, elVpnBean.ongpro_city)
         if (elVpnBean.og_best == true) {
             binding.txtCountry.text = Constant.FASTER_OG_SERVER
             binding.imgCountry.setImageResource(getFlagThroughCountryEc(Constant.FASTER_OG_SERVER))
@@ -398,31 +419,36 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
             if (isThresholdReached() || Utils.isNullOrEmpty(OgLoadConnectAd.idOg)) {
                 delay(2000L)
                 KLog.d(logTagOg, "广告达到上线,或者无广告位")
-                connectOrDisconnectOg(false)
+                val showState =
+                    OgLoadConnectAd
+                        .displayConnectAdvertisementOg(this@MainActivity)
+                if (showState!=2) {
+                    connectOrDisconnectOg(false)
+                }
                 return@launch
             }
             AdBase.getConnectInstance().advertisementLoadingOg(this@MainActivity)
-            AdBase.getResultInstance().advertisementLoadingOg(this@MainActivity)
+//            AdBase.getResultInstance().advertisementLoadingOg(this@MainActivity)
             try {
                 withTimeout(10000L) {
                     delay(2000L)
                     KLog.e(logTagOg, "jobStartOg?.isActive=${jobStartOg?.isActive}")
-                    if(OnlineGameUtils.whetherToBlockScreenAds(onlineConfig.online_ref)) {
                         while (jobStartOg?.isActive == true) {
                             val showState =
                                 OgLoadConnectAd
                                     .displayConnectAdvertisementOg(this@MainActivity)
-                            if (showState) {
+                            if (showState == 2) {
                                 jobStartOg?.cancel()
                                 jobStartOg = null
                             }
+                            if (showState == 0) {
+                                jobStartOg?.cancel()
+                                jobStartOg = null
+                                connectOrDisconnectOg(false)
+                            }
                             delay(1000L)
                         }
-                    }else{
-                        jobStartOg?.cancel()
-                        jobStartOg = null
-                        connectOrDisconnectOg(false)
-                    }
+
                 }
             } catch (e: TimeoutCancellationException) {
                 KLog.d(logTagOg, "connect---插屏超时")
@@ -438,10 +464,10 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
      */
     private fun connectOrDisconnectOg(isBackgroundClosed: Boolean) {
         KLog.e("state", "连接或断开")
-        if (viewModel.whetherParsingIsIllegalIp()) {
-            viewModel.whetherTheBulletBoxCannotBeUsed(this@MainActivity)
-            return
-        }
+//        if (viewModel.whetherParsingIsIllegalIp()) {
+//            viewModel.whetherTheBulletBoxCannotBeUsed(this@MainActivity)
+//            return
+//        }
         performConnectionOperations = if (state.canStop) {
             if (!isBackgroundClosed) {
                 viewModel.jumpConnectionResultsPage(false)
@@ -506,7 +532,8 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
         binding.vpnState = 2
         changeOfVpnStatus()
         whetherToImplementPlanB =true
-//        EasyConnectUtils.getBuriedPointOg("unlimF_vT")
+        App.isVpnGlobalLink = true
+        getHeartbeatReportedConnect(App.isVpnGlobalLink)
     }
 
     /**
@@ -516,12 +543,8 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
         KLog.e("TAG", "断开服务器")
         binding.vpnState = 0
         changeOfVpnStatus()
-//        if (clickToConnect) {
-//            EasyConnectUtils.getBuriedPointConnectionTimeOg(
-//                "unlimF_cn",
-//                mmkvOg.decodeInt(Constant.LAST_TIME_SECOND)
-//            )
-//        }
+        App.isVpnGlobalLink = false
+        getHeartbeatReportedDisConnect()
     }
 
     /**
@@ -719,5 +742,38 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(),
             }
         }
         return true
+    }
+    /**
+     * 心跳上报(链接)
+     */
+    private fun getHeartbeatReportedConnect(isConnected:Boolean) {
+        jobHeart?.cancel()
+        jobHeart = null
+        jobHeart =lifecycleScope.launch(Dispatchers.IO) {
+            while (isActive) {
+                var data: String
+                var ip: String
+                if (isConnected) {
+                    data = "as"
+                    ip = mmkvOg.decodeString(Constant.IP_AFTER_VPN_LINK_OG,"")?:""
+                } else {
+                    data = "is"
+                    ip = mmkvOg.decodeString(Constant.CURRENT_IP_OG,"")?:""
+                }
+                if (isConnected) {
+                    OnlineOkHttpUtils.getHeartbeatReporting(data, ip)
+                }
+                delay(60000)
+            }
+        }
+    }
+
+    /**
+     * 心跳上报(断开)
+     */
+    private fun getHeartbeatReportedDisConnect() {
+        jobHeart?.cancel()
+        jobHeart = null
+        OnlineOkHttpUtils.getHeartbeatReporting("is", mmkvOg.decodeString(Constant.CURRENT_IP_OG,"")?:"")
     }
 }

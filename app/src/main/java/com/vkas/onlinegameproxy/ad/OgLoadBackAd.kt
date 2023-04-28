@@ -14,30 +14,37 @@ import com.jeremyliao.liveeventbus.LiveEventBus
 import com.vkas.onlinegameproxy.app.App
 import com.vkas.onlinegameproxy.base.AdBase
 import com.vkas.onlinegameproxy.bean.OgAdBean
+import com.vkas.onlinegameproxy.bean.OgDetailBean
 import com.vkas.onlinegameproxy.key.Constant
 import com.vkas.onlinegameproxy.key.Constant.logTagOg
 import com.vkas.onlinegameproxy.utils.KLog
+import com.vkas.onlinegameproxy.utils.OnlineGameUtils
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.recordNumberOfAdClickOg
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.recordNumberOfAdDisplaysOg
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.takeSortedAdIDOg
+import com.vkas.onlinegameproxy.utils.OnlineOkHttpUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
 
 object OgLoadBackAd {
     private val adBase = AdBase.getBackInstance()
-
+    // 广告ID
+    var idOg = ""
+    var ogDetailBean: OgDetailBean? = null
     /**
      * 加载首页插屏广告
      */
     fun loadBackAdvertisementOg(context: Context, adData: OgAdBean) {
         val adRequest = AdRequest.Builder().build()
-        val id = takeSortedAdIDOg(adBase.adIndexOg, adData.ongpro_i_2H)
-        KLog.d(logTagOg, "back--插屏广告id=$id;权重=${adData.ongpro_i_2H.getOrNull(adBase.adIndexOg)?.ongpro_y}")
+        ogDetailBean= OnlineGameUtils.beforeLoadLinkSettingsOg(adData.ongpro_i_2H.getOrNull(adBase.adIndexOg))
+
+        idOg = takeSortedAdIDOg(adBase.adIndexOg, adData.ongpro_i_2H)
+        KLog.d(logTagOg, "back--插屏广告id=$idOg;权重=${adData.ongpro_i_2H.getOrNull(adBase.adIndexOg)?.ongpro_y}")
 
         InterstitialAd.load(
             context,
-            id,
+            idOg,
             adRequest,
             object : InterstitialAdLoadCallback() {
                 override fun onAdFailedToLoad(adError: LoadAdError) {
@@ -59,6 +66,14 @@ object OgLoadBackAd {
                     adBase.appAdDataOg = interstitialAd
                     adBase.adIndexOg = 0
                     KLog.d(logTagOg, "back---返回插屏加载成功")
+                    interstitialAd.setOnPaidEventListener { adValue ->
+                        KLog.e("TBA", "back-----setOnPaidEventListener")
+
+                        OnlineOkHttpUtils.postAdEvent(
+                            adValue,
+                            interstitialAd.responseInfo, ogDetailBean, "interstitial", "ongpro_i_2H"
+                        )
+                    }
                 }
             })
     }
@@ -102,6 +117,7 @@ object OgLoadBackAd {
                     // Called when ad is shown.
                     adBase.whetherToShowOg = true
                     KLog.d(logTagOg, "back----show")
+                    ogDetailBean = OnlineGameUtils.afterLoadLinkSettingsOg(ogDetailBean)
                 }
             }
     }
@@ -109,19 +125,32 @@ object OgLoadBackAd {
     /**
      * 展示Connect广告
      */
-    fun displayBackAdvertisementOg(activity: AppCompatActivity): Boolean {
+    fun displayBackAdvertisementOg(activity: AppCompatActivity): Int {
+        val localVpnBootData = OnlineGameUtils.getLocalVpnBootData()
+        val blacklistUser = App.mmkvOg.decodeBool(Constant.BLACKLIST_USER_OG, true)
+        KLog.d(logTagOg, "bubble_cloak---${localVpnBootData.online_cloak}。。。")
+        KLog.d(logTagOg, "blacklist_user---${blacklistUser}。。。")
+
+        if (blacklistUser && localVpnBootData.online_cloak == "1") {
+            KLog.d(logTagOg, "根据黑名单屏蔽插屏广告。。。")
+            return 0
+        }
+        if(!OnlineGameUtils.whetherToBlockScreenAds(localVpnBootData.online_ref)){
+            KLog.d(logTagOg, "根据买量屏蔽插屏广告。。。")
+            return 0
+        }
         if (adBase.appAdDataOg == null) {
             KLog.d(logTagOg, "back--插屏广告加载中。。。")
-            return false
+            return 1
         }
         if (adBase.whetherToShowOg || activity.lifecycle.currentState != Lifecycle.State.RESUMED) {
             KLog.d(logTagOg, "back--前一个插屏广告展示中或者生命周期不对")
-            return false
+            return 1
         }
         backScreenAdCallback()
         activity.lifecycleScope.launch(Dispatchers.Main) {
             (adBase.appAdDataOg as InterstitialAd).show(activity)
         }
-        return true
+        return 2
     }
 }

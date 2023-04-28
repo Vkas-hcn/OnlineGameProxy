@@ -24,11 +24,10 @@ import com.vkas.onlinegameproxy.databinding.ActivityStartBinding
 import com.vkas.onlinegameproxy.key.Constant
 import com.vkas.onlinegameproxy.key.Constant.logTagOg
 import com.vkas.onlinegameproxy.ui.main.MainActivity
-import com.vkas.onlinegameproxy.utils.KLog
-import com.vkas.onlinegameproxy.utils.MmkvUtils
-import com.vkas.onlinegameproxy.utils.OnlineGameUtils
+import com.vkas.onlinegameproxy.utils.*
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.isThresholdReached
 import com.xuexiang.xui.widget.progress.HorizontalProgressView
+import com.xuexiang.xutil.net.NetworkUtils
 import kotlinx.coroutines.*
 import java.util.*
 
@@ -62,6 +61,10 @@ class StartActivity : BaseActivity<ActivityStartBinding, BaseViewModel>(),
 
     override fun initData() {
         super.initData()
+                            val fastData = OnlineGameUtils.sendResultDecoding("123456")
+
+//        val data = OnlineTbaUtils.install(this)
+//        KLog.e("TAG","data=======$data")
 //        val testDeviceIds = listOf("9CDD654B92424BD2715643A8BFC44CD0")
 //        val configuration = RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
 //        MobileAds.setRequestConfiguration(configuration)
@@ -72,9 +75,20 @@ class StartActivity : BaseActivity<ActivityStartBinding, BaseViewModel>(),
         binding.pbStartOg.startProgressAnimation()
         liveEventBusOg()
         lifecycleScope.launch(Dispatchers.IO) {
+            if(!NetworkUtils.isNetworkAvailable()){
+                return@launch
+            }
+            runBlocking {
+                OnlineOkHttpUtils.getDeliverData()
+                OnlineTbaUtils.obtainGoogleAdvertisingId(this@StartActivity)
+                OnlineTbaUtils.obtainIpAddress()
+            }
             OnlineGameUtils.referrer(this@StartActivity)
-            OnlineGameUtils.getIpInformation()
+            OnlineOkHttpUtils.postSessionEvent()
+            OnlineOkHttpUtils.getBlacklistData()
         }
+
+
         getFirebaseDataOg()
         jumpHomePageData()
     }

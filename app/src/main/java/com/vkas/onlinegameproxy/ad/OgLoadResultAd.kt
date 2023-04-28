@@ -14,31 +14,39 @@ import com.vkas.onlinegameproxy.R
 import com.vkas.onlinegameproxy.app.App
 import com.vkas.onlinegameproxy.base.AdBase
 import com.vkas.onlinegameproxy.bean.OgAdBean
+import com.vkas.onlinegameproxy.bean.OgDetailBean
 import com.vkas.onlinegameproxy.databinding.ActivityResultOgBinding
 import com.vkas.onlinegameproxy.key.Constant.logTagOg
 import com.vkas.onlinegameproxy.utils.KLog
+import com.vkas.onlinegameproxy.utils.OnlineGameUtils
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.recordNumberOfAdClickOg
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.recordNumberOfAdDisplaysOg
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.takeSortedAdIDOg
+import com.vkas.onlinegameproxy.utils.OnlineOkHttpUtils
 import com.vkas.onlinegameproxy.utils.RoundCornerOutlineProvider
 import java.util.*
 
 object OgLoadResultAd {
     private val adBase = AdBase.getResultInstance()
-
+    // 广告ID
+    var idOg = ""
+    var ogDetailBean: OgDetailBean? = null
     /**
      * 加载result原生广告
      */
     fun loadResultAdvertisementOg(context: Context, adData: OgAdBean) {
-        val id = takeSortedAdIDOg(adBase.adIndexOg, adData.ongpro_n_result)
+        ogDetailBean = OnlineGameUtils.beforeLoadLinkSettingsOg(adData.ongpro_n_result.getOrNull(
+            adBase.adIndexOg))
+
+        idOg = takeSortedAdIDOg(adBase.adIndexOg, adData.ongpro_n_result)
         KLog.d(
             logTagOg,
-            "result---原生广告id=$id;权重=${adData.ongpro_n_result.getOrNull(adBase.adIndexOg)?.ongpro_y}"
+            "result---原生广告id=$idOg;权重=${adData.ongpro_n_result.getOrNull(adBase.adIndexOg)?.ongpro_y}"
         )
 
         val homeNativeAds = AdLoader.Builder(
             context.applicationContext,
-            id
+            idOg
         )
         val videoOptions = VideoOptions.Builder()
             .setStartMuted(true)
@@ -52,6 +60,15 @@ object OgLoadResultAd {
 
         homeNativeAds.withNativeAdOptions(adOelions)
         homeNativeAds.forNativeAd {
+            it.setOnPaidEventListener { adValue ->
+                KLog.e("TBA","home-----setOnPaidEventListener")
+                it.responseInfo?.let { it1 ->
+                    OnlineOkHttpUtils.postAdEvent(adValue,
+                        it1, ogDetailBean,"native", "ongpro_n_result")
+                }
+                //重新缓存
+                AdBase.getResultInstance().advertisementLoadingOg(context)
+            }
             adBase.appAdDataOg = it
         }
         homeNativeAds.withAdListener(object : AdListener() {
@@ -114,8 +131,7 @@ object OgLoadResultAd {
                     App.nativeAdRefreshOg = false
                     adBase.appAdDataOg = null
                     KLog.d(logTagOg, "result--原生广告--展示")
-                    //重新缓存
-                    AdBase.getResultInstance().advertisementLoadingOg(activity)
+                    ogDetailBean = OnlineGameUtils.afterLoadLinkSettingsOg(ogDetailBean)
                 }
             }
         }

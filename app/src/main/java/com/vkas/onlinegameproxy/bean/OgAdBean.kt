@@ -19,5 +19,9 @@ data class OgDetailBean(
     val ongpro_id: String,
     val ongpro_from: String,
     val ongpro_type: String,
-    val ongpro_y: Int
+    val ongpro_y: Int,
+    var ongpro_load_ip:String="",
+    var ongpro_load_city:String="",
+    var ongpro_show_ip:String="",
+    var ongpro_show_city:String=""
 )

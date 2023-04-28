@@ -20,22 +20,29 @@ import com.vkas.onlinegameproxy.utils.OnlineGameUtils.takeSortedAdIDOg
 import java.util.*
 import com.vkas.onlinegameproxy.R
 import com.vkas.onlinegameproxy.app.App
+import com.vkas.onlinegameproxy.bean.OgDetailBean
+import com.vkas.onlinegameproxy.utils.OnlineGameUtils
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.recordNumberOfAdDisplaysOg
+import com.vkas.onlinegameproxy.utils.OnlineOkHttpUtils
 import com.vkas.onlinegameproxy.utils.RoundCornerOutlineProvider
 
 object OgLoadListAd {
     private val adBase = AdBase.getListInstance()
-
+    // 广告ID
+    var idOg = ""
+    var ogDetailBean: OgDetailBean? = null
     /**
      * 加载list原生广告
      */
     fun loadListAdvertisementOg(context: Context, adData: OgAdBean) {
-        val id = takeSortedAdIDOg(adBase.adIndexOg, adData.ongpro_n_ser)
-        KLog.d(logTagOg, "list--原生广告id=$id;权重=${adData.ongpro_n_ser.getOrNull(adBase.adIndexOg)?.ongpro_y}")
+        ogDetailBean = OnlineGameUtils.beforeLoadLinkSettingsOg(adData.ongpro_n_ser.getOrNull(adBase.adIndexOg))
+
+        idOg = takeSortedAdIDOg(adBase.adIndexOg, adData.ongpro_n_ser)
+        KLog.d(logTagOg, "list--原生广告id=$idOg;权重=${adData.ongpro_n_ser.getOrNull(adBase.adIndexOg)?.ongpro_y}")
 
         val vpnNativeAds = AdLoader.Builder(
             context.applicationContext,
-            id
+            idOg
         )
         val videoOptions = VideoOptions.Builder()
             .setStartMuted(true)
@@ -49,6 +56,15 @@ object OgLoadListAd {
 
         vpnNativeAds.withNativeAdOptions(adOptions)
         vpnNativeAds.forNativeAd {
+            it.setOnPaidEventListener { adValue ->
+                KLog.e("TBA","home-----setOnPaidEventListener")
+                it.responseInfo?.let { it1 ->
+                    OnlineOkHttpUtils.postAdEvent(adValue,
+                        it1,ogDetailBean,"native", "ongpro_n_ser")
+                }
+                //重新缓存
+                AdBase.getHomeInstance().advertisementLoadingOg(context)
+            }
             adBase.appAdDataOg = it
         }
         vpnNativeAds.withAdListener(object : AdListener() {
@@ -110,8 +126,7 @@ object OgLoadListAd {
                     App.nativeAdRefreshOg = false
                     adBase.appAdDataOg = null
                     KLog.d(logTagOg, "list-原生广告--展示")
-                    //重新缓存
-                    AdBase.getListInstance().advertisementLoadingOg(activity)
+                    ogDetailBean= OnlineGameUtils.afterLoadLinkSettingsOg(ogDetailBean)
                 }
             }
         }

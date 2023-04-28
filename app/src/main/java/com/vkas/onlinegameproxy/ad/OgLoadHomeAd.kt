@@ -20,22 +20,28 @@ import com.vkas.onlinegameproxy.utils.OnlineGameUtils.takeSortedAdIDOg
 import java.util.*
 import com.vkas.onlinegameproxy.R
 import com.vkas.onlinegameproxy.app.App
+import com.vkas.onlinegameproxy.bean.OgDetailBean
+import com.vkas.onlinegameproxy.utils.OnlineGameUtils
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.recordNumberOfAdDisplaysOg
+import com.vkas.onlinegameproxy.utils.OnlineOkHttpUtils
 import com.vkas.onlinegameproxy.utils.RoundCornerOutlineProvider
 
 object OgLoadHomeAd {
     private val adBase = AdBase.getHomeInstance()
-
+    // 广告ID
+    var idOg = ""
+    var ogDetailBean: OgDetailBean? = null
     /**
      * 加载vpn原生广告
      */
     fun loadHomeAdvertisementOg(context: Context, adData: OgAdBean) {
-        val id = takeSortedAdIDOg(adBase.adIndexOg, adData.ongpro_n_home)
-        KLog.d(logTagOg, "home---原生广告id=$id;权重=${adData.ongpro_n_home.getOrNull(adBase.adIndexOg)?.ongpro_y}")
+        ogDetailBean = OnlineGameUtils.beforeLoadLinkSettingsOg(adData.ongpro_n_home.getOrNull(adBase.adIndexOg))
+        idOg = takeSortedAdIDOg(adBase.adIndexOg, adData.ongpro_n_home)
+        KLog.d(logTagOg, "home---原生广告id=$idOg;权重=${adData.ongpro_n_home.getOrNull(adBase.adIndexOg)?.ongpro_y}")
 
         val vpnNativeAds = AdLoader.Builder(
             context.applicationContext,
-            id
+            idOg
         )
         val videoOptions = VideoOptions.Builder()
             .setStartMuted(true)
@@ -50,6 +56,15 @@ object OgLoadHomeAd {
         vpnNativeAds.withNativeAdOptions(adOptions)
         vpnNativeAds.forNativeAd {
             adBase.appAdDataOg = it
+            it.setOnPaidEventListener { adValue ->
+                KLog.e("TBA","home-----setOnPaidEventListener")
+                it.responseInfo?.let { it1 ->
+                    OnlineOkHttpUtils.postAdEvent(adValue,
+                        it1,ogDetailBean,"native", "ongpro_n_home")
+                }
+                //重新缓存
+                AdBase.getHomeInstance().advertisementLoadingOg(context)
+            }
         }
         vpnNativeAds.withAdListener(object : AdListener() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
@@ -110,8 +125,8 @@ object OgLoadHomeAd {
                     App.nativeAdRefreshOg = false
                     adBase.appAdDataOg = null
                     KLog.d(logTagOg, "home--原生广告--展示")
-                    //重新缓存
-                    AdBase.getHomeInstance().advertisementLoadingOg(activity)
+                   ogDetailBean= OnlineGameUtils.afterLoadLinkSettingsOg(ogDetailBean)
+
                 }
             }
         }

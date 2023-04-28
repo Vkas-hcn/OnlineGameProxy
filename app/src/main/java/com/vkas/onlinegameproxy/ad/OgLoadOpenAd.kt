@@ -14,17 +14,23 @@ import com.jeremyliao.liveeventbus.LiveEventBus
 import com.vkas.onlinegameproxy.app.App
 import com.vkas.onlinegameproxy.base.AdBase
 import com.vkas.onlinegameproxy.bean.OgAdBean
+import com.vkas.onlinegameproxy.bean.OgDetailBean
 import com.vkas.onlinegameproxy.key.Constant
 import com.vkas.onlinegameproxy.key.Constant.logTagOg
 import com.vkas.onlinegameproxy.utils.KLog
+import com.vkas.onlinegameproxy.utils.OnlineGameUtils
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.recordNumberOfAdClickOg
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.recordNumberOfAdDisplaysOg
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.takeSortedAdIDOg
+import com.vkas.onlinegameproxy.utils.OnlineOkHttpUtils
 import com.xuexiang.xutil.net.JsonUtil
 import java.util.*
 
 object OgLoadOpenAd {
     private val adBase = AdBase.getOpenInstance()
+    // 广告ID
+    var idOg = ""
+    var ogDetailBean: OgDetailBean? = null
     /**
      * 加载启动页广告
      */
@@ -45,22 +51,32 @@ object OgLoadOpenAd {
             "loadOpenAdvertisementOg",
             "id=${JsonUtil.toJson(takeSortedAdIDOg(adBase.adIndexOg, adData.ongpro_o_open))}"
         )
+        ogDetailBean = OnlineGameUtils.beforeLoadLinkSettingsOg(
+            adData.ongpro_o_open.getOrNull(
+                adBase.adIndexOg
+            )
+        )
+        idOg = takeSortedAdIDOg(adBase.adIndexOg, adData.ongpro_o_open)
 
-        val id = takeSortedAdIDOg(adBase.adIndexOg, adData.ongpro_o_open)
-
-        KLog.d(logTagOg, "open--开屏广告id=$id;权重=${adData.ongpro_o_open.getOrNull(adBase.adIndexOg)?.ongpro_y}")
+        KLog.d(logTagOg, "open--开屏广告id=$idOg;权重=${adData.ongpro_o_open.getOrNull(adBase.adIndexOg)?.ongpro_y}")
         val request = AdRequest.Builder().build()
         AppOpenAd.load(
             context,
-            id,
+            idOg,
             request,
             AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT,
             object : AppOpenAd.AppOpenAdLoadCallback() {
                 override fun onAdLoaded(ad: AppOpenAd) {
+                    ad.setOnPaidEventListener { adValue ->
+                        KLog.e("TBA", "开屏页--开屏广告开始上报")
+                        OnlineOkHttpUtils.postAdEvent(
+                            adValue,
+                            ad.responseInfo, ogDetailBean, "open", "ongpro_o_open"
+                        )
+                    }
                     adBase.loadTimeOg = Date().time
                     adBase.isLoadingOg = false
                     adBase.appAdDataOg = ad
-
                     KLog.d(logTagOg, "open--开屏广告加载成功")
                 }
 
@@ -118,6 +134,7 @@ object OgLoadOpenAd {
                     recordNumberOfAdDisplaysOg()
                     adBase.adIndexOg = 0
                     KLog.d(logTagOg, "open---开屏广告展示")
+                    ogDetailBean = OnlineGameUtils.afterLoadLinkSettingsOg(ogDetailBean)
                 }
 
                 override fun onAdClicked() {

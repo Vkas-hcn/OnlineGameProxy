@@ -34,6 +34,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.*
 
 class App : Application(), LifecycleObserver {
     private var flag = 0
@@ -43,7 +44,8 @@ class App : Application(), LifecycleObserver {
     companion object {
         // app当前是否在后台
         var isBackDataOg = false
-
+        // VPN是否链接
+        var isVpnGlobalLink = false
         // 是否进入后台（三秒后）
         var whetherBackgroundOg = false
         // 原生广告刷新
@@ -73,7 +75,6 @@ class App : Application(), LifecycleObserver {
     override fun onCreate() {
         super.onCreate()
         MMKV.initialize(this)
-//        initCrash()
         setActivityLifecycleOg(this)
         MobileAds.initialize(this) {}
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
@@ -92,6 +93,10 @@ class App : Application(), LifecycleObserver {
         Core.init(this, MainActivity::class)
         sendTimerInformation()
         isAppOpenSameDayOg()
+        val data = mmkvOg.decodeString(Constant.UUID_VALUE_OG,null)
+        if(data.isNullOrEmpty()){
+            MmkvUtils.set(Constant.UUID_VALUE_OG, UUID.randomUUID().toString())
+        }
     }
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     fun onMoveToForeground() {

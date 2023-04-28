@@ -70,6 +70,11 @@ dependencies {
     implementation rootProject.ext.dependencies.rxpermissions
     implementation rootProject.ext.dependencies.glide
     implementation rootProject.ext.dependencies.transformations
+    implementation rootProject.ext.dependencies.moshi
+    kapt rootProject.ext.dependencies.moshiCodegen
     implementation "com.android.installreferrer:installreferrer:2.2"
     implementation 'com.google.firebase:firebase-analytics-ktx'
+
+    implementation("com.squareup.okhttp3:okhttp:4.8.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.8.0")
 }

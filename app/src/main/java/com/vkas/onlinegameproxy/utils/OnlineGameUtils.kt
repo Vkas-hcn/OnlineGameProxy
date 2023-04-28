@@ -1,16 +1,21 @@
 package com.vkas.onlinegameproxy.utils
 
 import android.content.Context
+import android.util.Base64
+import androidx.core.os.bundleOf
 import com.android.installreferrer.api.InstallReferrerClient
 import com.android.installreferrer.api.InstallReferrerStateListener
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.ktx.Firebase
 import com.google.gson.reflect.TypeToken
+import com.squareup.moshi.Moshi
+import com.vkas.onlinegameproxy.BuildConfig
 import com.vkas.onlinegameproxy.R
+import com.vkas.onlinegameproxy.app.App
 import com.vkas.onlinegameproxy.app.App.Companion.mmkvOg
-import com.vkas.onlinegameproxy.bean.OgAdBean
-import com.vkas.onlinegameproxy.bean.OgDetailBean
-import com.vkas.onlinegameproxy.bean.OgVpnBean
-import com.vkas.onlinegameproxy.bean.OpRemoteBean
+import com.vkas.onlinegameproxy.bean.*
 import com.vkas.onlinegameproxy.key.Constant
+import com.vkas.onlinegameproxy.key.Constant.logTagOg
 import com.xuexiang.xui.utils.ResUtils.getString
 import com.xuexiang.xutil.net.JsonUtil
 import com.xuexiang.xutil.resource.ResourceUtils
@@ -20,55 +25,89 @@ import java.net.URL
 import java.nio.charset.Charset
 
 object OnlineGameUtils {
+    private val local = listOf(
+        OgVpnBean(
+            ongpro_city = "",
+            ongpro_country = "",
+            ongpro_ip = "",
+            ongpro_cc = "",
+            ongpro_port = 0,
+            ongpro_password = "",
+            og_check = false,
+            og_best = false
+        )
+    ).toMutableList()
     private var installReferrer: String = ""
     fun getFastIpOg(): OgVpnBean {
-        val ufVpnBean: MutableList<OgVpnBean> = getLocalServerData()
-        val intersectionList =
-            findFastAndOrdinaryIntersection(ufVpnBean).takeIf { it.isNotEmpty() } ?: ufVpnBean
-        return intersectionList.shuffled().first().apply {
+        val ufVpnBean: MutableList<OgVpnBean> = getDataFastServerData() ?:local
+        return ufVpnBean.shuffled().first().apply {
             og_best = true
             ongpro_country = getString(R.string.fast_service)
         }
     }
 
     /**
-     * 获取本地服务器数据
+     * 下发服务器转换
      */
-    fun getLocalServerData(): MutableList<OgVpnBean> {
-        val listType = object : TypeToken<MutableList<OgVpnBean>>() {}.type
-
-        return runCatching {
-            JsonUtil.fromJson<MutableList<OgVpnBean>>(
-                mmkvOg.decodeString(Constant.PROFILE_OG_DATA),
-                listType
-            )
-        }.getOrNull() ?: JsonUtil.fromJson(
-            ResourceUtils.readStringFromAssert(Constant.VPN_LOCAL_FILE_NAME_SKY),
-            object : TypeToken<MutableList<OgVpnBean>?>() {}.type
-        )
+    fun deliverServerTransitions(): Boolean {
+        val data = getDataFromTheServer()
+        return if (data == null) {
+            OnlineOkHttpUtils.getDeliverData()
+            false
+        } else {
+            true
+        }
     }
 
     /**
-     * 获取本地Fast服务器数据
+     * 获取下发服务器数据
      */
-    private fun getLocalFastServerData(): MutableList<String> {
-        val listType = object : TypeToken<MutableList<String>>() {}.type
+    fun getDataFromTheServer(): MutableList<OgVpnBean>? {
+        val data = mmkvOg.decodeString(Constant.SEND_SERVER_DATA, "")
         return runCatching {
-            JsonUtil.fromJson<MutableList<String>>(
-                mmkvOg.decodeString(Constant.PROFILE_OG_DATA_FAST),
-                listType
-            )
-        }.getOrNull() ?: JsonUtil.fromJson(
-            ResourceUtils.readStringFromAssert(Constant.FAST_LOCAL_FILE_NAME_SKY),
-            object : TypeToken<MutableList<String>>() {}.type
-        )
+            val spinVpnBean = data?.toModelOrNull(OnlineVpnBean::class.java)
+            if (spinVpnBean?.data?.serverList?.isNotEmpty() == true) {
+                spinVpnBean.data.serverList!!.map {
+                    OgVpnBean().apply {
+                        ongpro_ip = it.ip.toString()
+                        og_best = false
+                        ongpro_port = it.port ?: 0
+                        ongpro_cc = it.method.toString()
+                        ongpro_password = it.password.toString()
+                        ongpro_city = it.city.toString()
+                        ongpro_country = it.country.toString()
+                    }
+                }.toMutableList()
+            } else {
+                null
+            }
+        }.getOrElse {
+            null
+        }
     }
 
-    private fun findFastAndOrdinaryIntersection(ufVpnBeans: MutableList<OgVpnBean>): MutableList<OgVpnBean> {
-        val intersectionList: MutableList<OgVpnBean> = mutableListOf()
-        val fastServerData = getLocalFastServerData()
-        intersectionList.addAll(ufVpnBeans.filter { fastServerData.contains(it.ongpro_city) })
-        return intersectionList
+    fun getDataFastServerData(): MutableList<OgVpnBean>? {
+        val data = mmkvOg.decodeString(Constant.SEND_SERVER_DATA, "")
+        return runCatching {
+            val spinVpnBean = data?.toModelOrNull(OnlineVpnBean::class.java)
+            if (spinVpnBean?.data?.smartList?.isNotEmpty() == true) {
+                spinVpnBean.data.smartList!!.map {
+                    OgVpnBean().apply {
+                        ongpro_ip = it.ip.toString()
+                        og_best = true
+                        ongpro_port = it.port ?: 0
+                        ongpro_cc = it.method.toString()
+                        ongpro_password = it.password.toString()
+                        ongpro_city = it.city.toString()
+                        ongpro_country = it.country.toString()
+                    }
+                }.toMutableList()
+            } else {
+                null
+            }
+        }.getOrElse {
+            null
+        }
     }
 
     /**
@@ -312,18 +351,26 @@ object OnlineGameUtils {
     fun referrer(
         context: Context,
     ) {
-//        installReferrer = "gclid"
+        installReferrer = "gclid"
 //        installReferrer = "fb4a"
-//        MmkvUtils.set(Constant.INSTALL_REFERRER, installReferrer)
+        MmkvUtils.set(Constant.INSTALL_REFERRER, installReferrer)
         try {
             val referrerClient = InstallReferrerClient.newBuilder(context).build()
             referrerClient.startConnection(object : InstallReferrerStateListener {
                 override fun onInstallReferrerSetupFinished(p0: Int) {
                     when (p0) {
                         InstallReferrerClient.InstallReferrerResponse.OK -> {
+                            val data = mmkvOg.decodeBool(Constant.INSTALL_TYPE_OG)
+                            if (!data) {
+                                runCatching {
+                                    referrerClient?.installReferrer?.run {
+                                        OnlineOkHttpUtils.postInstallEvent(context, this)
+                                    }
+                                }.exceptionOrNull()
+                            }
                             installReferrer =
                                 referrerClient.installReferrer.installReferrer ?: ""
-                            MmkvUtils.set(Constant.INSTALL_REFERRER, installReferrer)
+//                            MmkvUtils.set(Constant.INSTALL_REFERRER, installReferrer)
                             KLog.e("TAG", "installReferrer====${installReferrer}")
                             referrerClient.endConnection()
                             return
@@ -394,5 +441,83 @@ object OnlineGameUtils {
                 return true
             }
         }
+    }
+
+    /**
+     * 获取Ip Bean
+     */
+    fun getIpBean(): OgIpBean {
+        val data = mmkvOg.decodeString(Constant.IP_INFORMATION)
+        runCatching {
+            return JsonUtil.fromJson(
+                data,
+                OgIpBean::class.java
+            )
+        }.getOrElse {
+            val ip = mmkvOg.decodeString(Constant.CURRENT_IP_OG).toString()
+            val baIpBean = OgIpBean()
+            baIpBean.ip = ip
+            return baIpBean
+        }
+    }
+
+    /**
+     * 加载前链接信息设置
+     */
+    fun beforeLoadLinkSettingsOg(ufDetailBean: OgDetailBean?): OgDetailBean? {
+        val ipAfterVpnLink = mmkvOg.decodeString(Constant.IP_AFTER_VPN_LINK_OG, "")
+        val ipAfterVpnCity = mmkvOg.decodeString(Constant.IP_AFTER_VPN_CITY_OG, "")
+        if (App.isVpnGlobalLink) {
+            ufDetailBean?.ongpro_load_ip = ipAfterVpnLink ?: ""
+            ufDetailBean?.ongpro_load_city = ipAfterVpnCity ?: ""
+        } else {
+            ufDetailBean?.ongpro_load_ip = getIpBean().ip.toString()
+            ufDetailBean?.ongpro_load_city = "null"
+        }
+        return ufDetailBean
+    }
+
+    /**
+     * 加载后链接信息设置
+     */
+    fun afterLoadLinkSettingsOg(ufDetailBean: OgDetailBean?): OgDetailBean? {
+        val ipAfterVpnLink = mmkvOg.decodeString(Constant.IP_AFTER_VPN_LINK_OG, "")
+        val ipAfterVpnCity = mmkvOg.decodeString(Constant.IP_AFTER_VPN_CITY_OG, "")
+        if (App.isVpnGlobalLink) {
+            ufDetailBean?.ongpro_show_ip = ipAfterVpnLink ?: ""
+            ufDetailBean?.ongpro_show_city = ipAfterVpnCity ?: ""
+        } else {
+            KLog.e("TAG", "getIpBean().ip${getIpBean().ip}")
+            ufDetailBean?.ongpro_show_ip = getIpBean().ip.toString()
+            ufDetailBean?.ongpro_show_city = "null"
+        }
+        return ufDetailBean
+    }
+
+    /**
+     * 下发结果解码
+     */
+    fun sendResultDecoding(str: String): String {
+        val halfLength = str.length / 2
+        val firstHalf = str.substring(0, halfLength)
+        val secondHalf = str.substring(halfLength)
+        val reversedSecondHalf = secondHalf.reversed()
+        val concatenated = firstHalf + reversedSecondHalf
+        val decodedBytes =
+            Base64.decode(concatenated.toByteArray(Charsets.UTF_8), Base64.DEFAULT)
+        return String(decodedBytes)
+    }
+
+    fun <T> String.toModelOrNull(clazz: Class<T>): T? {
+        return runCatching {
+            Moshi.Builder()
+                .build()
+                .adapter(clazz)
+                .fromJson(this)
+        }.getOrNull()
+    }
+
+    fun <T> String.toModelOrDefault(clazz: Class<T>, creator: () -> T): T {
+        return toModelOrNull(clazz) ?: creator()
     }
 }
