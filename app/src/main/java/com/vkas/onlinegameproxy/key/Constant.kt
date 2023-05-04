@@ -115,6 +115,8 @@ object Constant {
     const val BUBBLE_CLOAK = "bubble_cloak"
     //是否是黑名单用户
     const val BLACKLIST_USER_OG  ="blacklistUserOg"
+    //黑名单key
+    const val BLACKLIST_KEY  ="flare"
     //下发服务器数据
     const val SEND_SERVER_DATA ="sendServerData"
 }

@@ -5,6 +5,7 @@ import com.blankj.utilcode.util.LogUtils
 import com.google.android.gms.ads.AdValue
 import com.google.android.gms.ads.ResponseInfo
 import com.vkas.onlinegameproxy.BuildConfig
+import com.vkas.onlinegameproxy.app.App.Companion.mmkvOg
 import com.vkas.onlinegameproxy.bean.OgDetailBean
 import com.vkas.onlinegameproxy.key.Constant
 import com.vkas.onlinegameproxy.net.HttpApi
@@ -125,6 +126,10 @@ object OnlineOkHttpUtils {
 //        if (BuildConfig.DEBUG) {
 //            return
 //        }
+        val data = mmkvOg.decodeString(Constant.BLACKLIST_USER_OG,"")
+        if(!data.isNullOrBlank()){
+            return
+        }
         val params = OnlineTbaUtils.cloakJson()
         KLog.e("TBA","json--黑名单-->${JsonUtil.toJson(params)}")
         httpApi.get(
@@ -133,16 +138,12 @@ object OnlineOkHttpUtils {
             object : IHttpCallback {
                 override fun onSuccess(data: Any?) {
                     KLog.e("TBA", "Cloak接入--成功--->${data}")
-                    if (data == "flare") {
-                        MmkvUtils.set(Constant.BLACKLIST_USER_OG, true)
-                    } else {
-                        MmkvUtils.set(Constant.BLACKLIST_USER_OG, false)
-                    }
+                    MmkvUtils.set(Constant.BLACKLIST_USER_OG, data.toString())
                 }
 
                 override fun onFailed(error: Any?) {
                     KLog.e("TBA", "Cloak接入--失败-- $error")
-                    MmkvUtils.set(Constant.BLACKLIST_USER_OG, true)
+                    MmkvUtils.set(Constant.BLACKLIST_USER_OG, "")
                 }
             }, true
         )

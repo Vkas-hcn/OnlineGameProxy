@@ -22,6 +22,7 @@ import com.vkas.onlinegameproxy.utils.OnlineGameUtils
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.recordNumberOfAdClickOg
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.recordNumberOfAdDisplaysOg
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.takeSortedAdIDOg
+import com.vkas.onlinegameproxy.utils.OnlineGameUtils.whetherItIsABlacklist
 import com.vkas.onlinegameproxy.utils.OnlineOkHttpUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -127,11 +128,12 @@ object OgLoadBackAd {
      */
     fun displayBackAdvertisementOg(activity: AppCompatActivity): Int {
         val localVpnBootData = OnlineGameUtils.getLocalVpnBootData()
-        val blacklistUser = App.mmkvOg.decodeBool(Constant.BLACKLIST_USER_OG, true)
+        val blacklistUser = App.mmkvOg.decodeString(Constant.BLACKLIST_USER_OG, "")
+        val blacklistUserBool = whetherItIsABlacklist(blacklistUser?:"")
         KLog.d(logTagOg, "bubble_cloak---${localVpnBootData.online_cloak}。。。")
-        KLog.d(logTagOg, "blacklist_user---${blacklistUser}。。。")
+        KLog.d(logTagOg, "blacklist_user---${blacklistUserBool}。。。")
 
-        if (blacklistUser && localVpnBootData.online_cloak == "1") {
+        if (blacklistUserBool && localVpnBootData.online_cloak == "1") {
             KLog.d(logTagOg, "根据黑名单屏蔽插屏广告。。。")
             return 0
         }

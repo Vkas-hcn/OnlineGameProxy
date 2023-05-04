@@ -520,4 +520,14 @@ object OnlineGameUtils {
     fun <T> String.toModelOrDefault(clazz: Class<T>, creator: () -> T): T {
         return toModelOrNull(clazz) ?: creator()
     }
+
+    /**
+     * 是否是黑名单
+     */
+    fun whetherItIsABlacklist(data:String):Boolean{
+        if(data == Constant.BLACKLIST_KEY){
+            return true
+        }
+        return false
+    }
 }
