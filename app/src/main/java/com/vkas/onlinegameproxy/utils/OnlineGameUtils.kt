@@ -525,9 +525,9 @@ object OnlineGameUtils {
      * 是否是黑名单
      */
     fun whetherItIsABlacklist(data:String):Boolean{
-        if(data == Constant.BLACKLIST_KEY){
-            return true
+        if(data == Constant.WHITELIST_KEY){
+            return false
         }
-        return false
+        return true
     }
 }

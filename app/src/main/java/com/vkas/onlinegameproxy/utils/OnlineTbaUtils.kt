@@ -224,7 +224,7 @@ object OnlineTbaUtils {
             //android_id
             "cyril" to DeviceUtils.getAndroidID(),
             //os
-            "flinty" to AppUtils.getAppVersionName(),
+            "flinty" to "executor",
             //app_version
             "stingray" to AppUtils.getAppVersionName(),//应用的版本
             //brand

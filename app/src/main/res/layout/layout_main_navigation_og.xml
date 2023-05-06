@@ -59,6 +59,7 @@
                     android:paddingTop="20dp"
                     android:paddingBottom="20dp"
                     android:text="@string/contact_us"
+                    android:visibility="gone"
                     android:textColor="#FFFFFFFF"
                     android:textSize="17sp" />
 
@@ -66,7 +67,6 @@
                     android:id="@+id/tv_privacy_policy_pt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
                     android:layout_marginBottom="10dp"
                     android:drawablePadding="12dp"
                     android:gravity="start|center_vertical"
