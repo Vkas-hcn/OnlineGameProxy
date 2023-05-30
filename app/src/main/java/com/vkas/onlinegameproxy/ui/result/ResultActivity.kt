@@ -2,7 +2,6 @@ package com.vkas.onlinegameproxy.ui.result
 
 import android.os.Bundle
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
 import com.google.gson.reflect.TypeToken
 import com.jeremyliao.liveeventbus.LiveEventBus
 import com.vkas.onlinegameproxy.BR
@@ -11,8 +10,6 @@ import com.vkas.onlinegameproxy.ad.OgLoadResultAd
 import com.vkas.onlinegameproxy.app.App
 import com.vkas.onlinegameproxy.app.App.Companion.mmkvOg
 import com.vkas.onlinegameproxy.base.AdBase
-import com.vkas.onlinegameproxy.base.BaseActivity
-import com.vkas.onlinegameproxy.base.BaseViewModel
 import com.vkas.onlinegameproxy.bean.OgVpnBean
 import com.vkas.onlinegameproxy.databinding.ActivityResultOgBinding
 import com.vkas.onlinegameproxy.key.Constant
@@ -21,8 +18,6 @@ import com.vkas.onlinegameproxy.utils.OnlineGameUtils
 import com.xuexiang.xutil.net.JsonUtil
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 
 class ResultActivity : BaseActivity<ActivityResultOgBinding, BaseViewModel>() {
     private var isConnectionOg: Boolean = false

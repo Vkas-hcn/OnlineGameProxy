@@ -1,9 +1,10 @@
 package com.vkas.onlinegameproxy.bean
 
 import androidx.annotation.Keep
+import java.io.Serializable
 
 @Keep
-class OgAdBean (
+data class OgAdBean (
     var ongpro_o_open: MutableList<OgDetailBean> = ArrayList(),
     var ongpro_n_home: MutableList<OgDetailBean> = ArrayList(),
     var ongpro_n_result: MutableList<OgDetailBean> = ArrayList(),
@@ -13,7 +14,7 @@ class OgAdBean (
 
     var ongpro_cm: Int = 0,
     var ongpro_sm: Int = 0
-)
+):Serializable
 @Keep
 data class OgDetailBean(
     val ongpro_id: String,

@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.KeyEvent
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.reflect.TypeToken
 import com.jeremyliao.liveeventbus.LiveEventBus
@@ -16,7 +15,6 @@ import com.vkas.onlinegameproxy.ad.OgLoadBackAd
 import com.vkas.onlinegameproxy.ad.OgLoadListAd
 import com.vkas.onlinegameproxy.app.App
 import com.vkas.onlinegameproxy.base.AdBase
-import com.vkas.onlinegameproxy.base.BaseActivity
 import com.vkas.onlinegameproxy.bean.OgVpnBean
 import com.vkas.onlinegameproxy.bean.OpRemoteBean
 import com.vkas.onlinegameproxy.databinding.ActivityServiceListOgBinding
@@ -27,8 +25,6 @@ import com.vkas.onlinegameproxy.utils.OnlineGameUtils
 import com.xuexiang.xutil.net.JsonUtil
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 
 class ListActivity : BaseActivity<ActivityServiceListOgBinding, ListViewModel>() {
     private lateinit var selectAdapter: ListAdapter

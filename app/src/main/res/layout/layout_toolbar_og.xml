@@ -1,49 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:binding="http://schemas.android.com/apk/res-auto">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/fl_title"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
-    <data>
-
-    </data>
-
-    <FrameLayout
-        android:id="@+id/fl_title"
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="56dp"
+        android:layout_marginTop="20dp"
+        android:paddingStart="20dp"
+        android:paddingTop="14dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="14dp"
+        binding:contentInsetStart="0dp">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:paddingTop="14dp"
-            android:paddingBottom="14dp"
-            android:layout_marginTop="20dp"
-            binding:contentInsetStart="0dp">
+            android:layout_height="match_parent">
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+            <ImageView
+                android:id="@+id/img_back"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/ic_back_arrow" />
 
-                <ImageView
-                    android:id="@+id/img_back"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_back_arrow" />
-
-                <TextView
-                    android:id="@+id/tv_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:gravity="center"
-                    android:textColor="@color/white"
-                    android:textSize="16sp"/>
-            </RelativeLayout>
-        </androidx.appcompat.widget.Toolbar>
-    </FrameLayout>
-
-</layout>
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+        </RelativeLayout>
+    </androidx.appcompat.widget.Toolbar>
+</FrameLayout>

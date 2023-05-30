@@ -19,7 +19,6 @@ import com.google.firebase.ktx.initialize
 import com.jeremyliao.liveeventbus.LiveEventBus
 import com.tencent.mmkv.MMKV
 import com.vkas.onlinegameproxy.BuildConfig
-import com.vkas.onlinegameproxy.base.AppManagerOgMVVM
 import com.vkas.onlinegameproxy.key.Constant
 import com.vkas.onlinegameproxy.ui.main.MainActivity
 import com.vkas.onlinegameproxy.ui.start.StartActivity

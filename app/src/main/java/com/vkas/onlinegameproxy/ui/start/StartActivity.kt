@@ -1,67 +1,53 @@
 package com.vkas.onlinegameproxy.ui.start
 
 import android.content.Intent
-import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
+import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
-import com.google.android.gms.ads.MobileAds
-import com.google.android.gms.ads.RequestConfiguration
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.jeremyliao.liveeventbus.LiveEventBus
-import com.vkas.onlinegameproxy.BR
 import com.vkas.onlinegameproxy.BuildConfig
 import com.vkas.onlinegameproxy.R
 import com.vkas.onlinegameproxy.ad.OgLoadOpenAd
 import com.vkas.onlinegameproxy.app.App
 import com.vkas.onlinegameproxy.base.AdBase
-import com.vkas.onlinegameproxy.base.BaseActivity
-import com.vkas.onlinegameproxy.base.BaseViewModel
-import com.vkas.onlinegameproxy.databinding.ActivityStartBinding
+import com.vkas.onlinegameproxy.base.BaseActivityNew
 import com.vkas.onlinegameproxy.key.Constant
 import com.vkas.onlinegameproxy.key.Constant.logTagOg
 import com.vkas.onlinegameproxy.ui.main.MainActivity
 import com.vkas.onlinegameproxy.utils.*
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.isThresholdReached
+import com.vkas.onlinegameproxy.widget.HorizontalProgressViewOg
 import com.xuexiang.xui.widget.progress.HorizontalProgressView
 import com.xuexiang.xutil.net.NetworkUtils
 import kotlinx.coroutines.*
 import java.util.*
 
-class StartActivity : BaseActivity<ActivityStartBinding, BaseViewModel>(),
+class StartActivity : BaseActivityNew(),
     HorizontalProgressView.HorizontalProgressUpdateListener {
-    companion object {
-        var isCurrentPage: Boolean = false
-    }
-
+    val model by viewModels<StartViewModel>()
+    var isCurrentPage: Boolean = false
     private var liveJumpHomePage = MutableLiveData<Boolean>()
     private var liveJumpHomePage2 = MutableLiveData<Boolean>()
     private var jobOpenAdsOg: Job? = null
+    private val horizontalProgressViewOg: HorizontalProgressViewOg by bindView(R.id.pb_start_og)
 
-    override fun initContentView(savedInstanceState: Bundle?): Int {
+    override fun getLayoutId(): Int {
         return R.layout.activity_start
     }
 
-    override fun initVariableId(): Int {
-        return BR._all
-    }
-
-    override fun initParam() {
-        super.initParam()
+    override fun initView() {
         isCurrentPage = intent.getBooleanExtra(Constant.RETURN_OG_CURRENT_PAGE, false)
 
     }
 
-    override fun initToolbar() {
-        super.initToolbar()
-    }
-
     override fun initData() {
-        super.initData()
-                            val fastData = OnlineGameUtils.sendResultDecoding("123456")
+        // 初始化数据
+        val fastData = OnlineGameUtils.sendResultDecoding("123456")
 
 //        val data = OnlineTbaUtils.install(this)
 //        KLog.e("TAG","data=======$data")
@@ -69,13 +55,13 @@ class StartActivity : BaseActivity<ActivityStartBinding, BaseViewModel>(),
 //        val configuration = RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
 //        MobileAds.setRequestConfiguration(configuration)
 
-        binding.pbStartOg.setProgressViewUpdateListener(this)
-        binding.pbStartOg.setProgressDuration(10000)
-        binding.pbStartOg.setProgressTextVisibility(true)
-        binding.pbStartOg.startProgressAnimation()
+        horizontalProgressViewOg.setProgressViewUpdateListener(this)
+        horizontalProgressViewOg.setProgressDuration(10000)
+        horizontalProgressViewOg.setProgressTextVisibility(true)
+        horizontalProgressViewOg.startProgressAnimation()
         liveEventBusOg()
         lifecycleScope.launch(Dispatchers.IO) {
-            if(!NetworkUtils.isNetworkAvailable()){
+            if (!NetworkUtils.isNetworkAvailable()) {
                 return@launch
             }
             runBlocking {
@@ -91,6 +77,10 @@ class StartActivity : BaseActivity<ActivityStartBinding, BaseViewModel>(),
 
         getFirebaseDataOg()
         jumpHomePageData()
+    }
+
+    override fun setupListeners() {
+        // 设置监听器
     }
 
     private fun liveEventBusOg() {
@@ -130,10 +120,6 @@ class StartActivity : BaseActivity<ActivityStartBinding, BaseViewModel>(),
 
             }
         }
-    }
-
-    override fun initViewObservable() {
-        super.initViewObservable()
     }
 
     private fun jumpHomePageData() {

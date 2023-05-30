@@ -11,33 +11,33 @@ import android.view.ViewGroup
 import android.webkit.SslErrorHandler
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.FrameLayout
+import android.widget.ImageView
+import androidx.fragment.app.Fragment
 import com.vkas.onlinegameproxy.BR
 import com.vkas.onlinegameproxy.R
-import com.vkas.onlinegameproxy.base.BaseActivity
-import com.vkas.onlinegameproxy.base.BaseViewModel
-import com.vkas.onlinegameproxy.databinding.ActivityWebOgBinding
+import com.vkas.onlinegameproxy.base.BaseActivityNew
 import com.vkas.onlinegameproxy.key.Constant
+import com.vkas.onlinegameproxy.widget.HorizontalProgressViewOg
 
-class WebActivity : BaseActivity<ActivityWebOgBinding, BaseViewModel>() {
-    override fun initContentView(savedInstanceState: Bundle?): Int {
+class WebActivity : BaseActivityNew() {
+    private val webTitleOgF: FrameLayout by bindView(R.id.web_title_og)
+    private lateinit var webTitleOg: ImageView
+
+    private val ppWebOg: WebView by bindView(R.id.pp_web_og)
+
+    override fun getLayoutId(): Int {
         return R.layout.activity_web_og
-    }
-
-    override fun initVariableId(): Int {
-        return BR._all
-    }
-
-    override fun initToolbar() {
-        super.initToolbar()
-        binding.webTitleOg.imgBack.setOnClickListener {
-            finish()
-        }
     }
 
     override fun initData() {
         super.initData()
-        binding.ppWebOg.loadUrl(Constant.PRIVACY_OG_AGREEMENT)
-        binding.ppWebOg.webViewClient = object : WebViewClient() {
+        webTitleOg =webTitleOgF.findViewById(R.id.img_back)
+        webTitleOg.setOnClickListener {
+            finish()
+        }
+        ppWebOg.loadUrl(Constant.PRIVACY_OG_AGREEMENT)
+        ppWebOg.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
                 view.loadUrl(url)
                 return true
@@ -58,7 +58,7 @@ class WebActivity : BaseActivity<ActivityWebOgBinding, BaseViewModel>() {
             }
         }
 
-        binding.ppWebOg.webViewClient = object : WebViewClient() {
+        ppWebOg.webViewClient = object : WebViewClient() {
             override fun onReceivedSslError(
                 view: WebView,
                 handler: SslErrorHandler, error: SslError
@@ -101,18 +101,18 @@ class WebActivity : BaseActivity<ActivityWebOgBinding, BaseViewModel>() {
 
     //点击返回上一页面而不是退出浏览器
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_BACK && binding.ppWebOg.canGoBack()) {
-            binding.ppWebOg.goBack()
+        if (keyCode == KeyEvent.KEYCODE_BACK && ppWebOg.canGoBack()) {
+            ppWebOg.goBack()
             return true
         }
         return super.onKeyDown(keyCode, event)
     }
 
     override fun onDestroy() {
-        binding.ppWebOg.loadDataWithBaseURL(null, "", "text/html", "utf-8", null)
-        binding.ppWebOg.clearHistory()
-        (binding.ppWebOg.parent as ViewGroup).removeView(binding.ppWebOg)
-        binding.ppWebOg.destroy()
+        ppWebOg.loadDataWithBaseURL(null, "", "text/html", "utf-8", null)
+        ppWebOg.clearHistory()
+        (ppWebOg.parent as ViewGroup).removeView(ppWebOg)
+        ppWebOg.destroy()
         super.onDestroy()
     }
 }

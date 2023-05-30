@@ -2,11 +2,7 @@ package com.vkas.onlinegameproxy.ui.list
 
 import android.app.Application
 import androidx.lifecycle.MutableLiveData
-import com.google.gson.reflect.TypeToken
-import com.vkas.onlinegameproxy.app.App.Companion.mmkvOg
-import com.vkas.onlinegameproxy.base.BaseViewModel
 import com.vkas.onlinegameproxy.bean.OgVpnBean
-import com.vkas.onlinegameproxy.key.Constant
 import com.vkas.onlinegameproxy.utils.KLog
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.getDataFromTheServer
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.getFastIpOg

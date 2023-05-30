@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
@@ -19,7 +20,6 @@ import com.google.gson.reflect.TypeToken
 import com.vkas.onlinegameproxy.R
 import com.vkas.onlinegameproxy.app.App.Companion.mmkvOg
 import com.vkas.onlinegameproxy.base.AdBase
-import com.vkas.onlinegameproxy.base.BaseViewModel
 import com.vkas.onlinegameproxy.bean.OgIp2Bean
 import com.vkas.onlinegameproxy.bean.OgIpBean
 import com.vkas.onlinegameproxy.bean.OgVpnBean
@@ -32,7 +32,7 @@ import com.xuexiang.xutil.XUtil
 import com.xuexiang.xutil.net.JsonUtil
 import java.util.*
 
-class MainViewModel (application: Application) : BaseViewModel(application) {
+class MainViewModel: ViewModel(){
     //初始化服务器数据
     val liveInitializeServerData: MutableLiveData<OgVpnBean> by lazy {
         MutableLiveData<OgVpnBean>()
