@@ -128,6 +128,6 @@ async fn create_redir_listener(addr: SocketAddr) -> io::Result<TcpListener> {
 
     // bind, listen as original
     socket.bind(addr)?;
-    // listen backlogs = 1024 as mio's default
+    // listen bacKLogUtilss = 1024 as mio's default
     socket.listen(1024)
 }

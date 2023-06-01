@@ -3555,7 +3555,7 @@ evhttp_accept_socket_with_handle(struct evhttp *http, evutil_socket_t fd)
 
 	listener = evconnlistener_new(http->base, NULL, NULL,
 	    flags,
-	    0, /* Backlog is '0' because we already said 'listen' */
+	    0, /* BacKLogUtils is '0' because we already said 'listen' */
 	    fd);
 	if (!listener)
 		return (NULL);

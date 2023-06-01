@@ -1,41 +1,92 @@
 package com.vkas.onlinegameproxy.ui.list
 
-import com.chad.library.adapter.base.BaseQuickAdapter
-import com.chad.library.adapter.base.viewholder.BaseViewHolder
+import android.content.Context
+import android.view.View
+import android.widget.ImageView
+import androidx.recyclerview.widget.RecyclerView
 import com.vkas.onlinegameproxy.R
 import com.vkas.onlinegameproxy.bean.OgVpnBean
 import com.vkas.onlinegameproxy.key.Constant
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.getFlagThroughCountryEc
+import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
+import android.view.LayoutInflater
+import android.view.ViewGroup
 
-class ListAdapter (data: MutableList<OgVpnBean>?) :
-    BaseQuickAdapter<OgVpnBean, BaseViewHolder>(
-        R.layout.item_service,
-        data
-    ) {
 
-    override fun convert(holder: BaseViewHolder, item: OgVpnBean) {
-        if (item.og_best == true) {
-            holder.setText(R.id.txt_country, Constant.FASTER_OG_SERVER)
-            holder.setImageResource(
-                R.id.img_flag,
-                getFlagThroughCountryEc(Constant.FASTER_OG_SERVER)
-            )
-        } else {
-            holder.setText(R.id.txt_country, item.ongpro_country + "-" + item.ongpro_city)
-            holder.setImageResource(
-                R.id.img_flag,
-                getFlagThroughCountryEc(item.ongpro_country.toString())
-            )
+class ListAdapter(private val dataList: MutableList<OgVpnBean>) :
+    RecyclerView.Adapter<ListAdapter.ViewHolder>() {
+
+   inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val txtCountry: TextView = itemView.findViewById(R.id.txt_country)
+        var imgFlag: ImageView = itemView.findViewById(R.id.img_flag)
+        var conItem: ConstraintLayout = itemView.findViewById(R.id.con_item)
+        var imgChek: ImageView = itemView.findViewById(R.id.img_chek)
+        init {
+            itemView.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    // 处理 item 点击事件
+                    onItemClick(position)
+                }
+            }
         }
-        if(holder.adapterPosition%2==0){
-            holder.setBackgroundResource(R.id.con_item, R.drawable.bg_list_item)
-        }else{
-            holder.setBackgroundResource(R.id.con_item, R.color.transparent)
+    }
+    // 定义点击事件的回调接口
+    interface OnItemClickListener {
+        fun onItemClick(position: Int)
+    }
+
+    private var onItemClickListener: OnItemClickListener? = null
+
+    fun setOnItemClickListener(listener: OnItemClickListener) {
+        onItemClickListener = listener
+    }
+
+    // 在 item 点击事件中触发回调
+    private fun onItemClick(position: Int) {
+        onItemClickListener?.onItemClick(position)
+    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val context: Context = parent.context
+        val inflater = LayoutInflater.from(context)
+
+        // 加载自定义的布局文件
+        val itemView: View = inflater.inflate(R.layout.item_service, parent, false)
+
+        // 创建ViewHolder对象
+        return ViewHolder(itemView)
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        // 获取数据
+        val item = dataList[position]
+        // 将数据绑定到视图上
+        if (item.og_best == true) {
+            holder.txtCountry.text = Constant.FASTER_OG_SERVER
+            holder.imgFlag.setImageResource(getFlagThroughCountryEc(Constant.FASTER_OG_SERVER))
+        } else {
+
+            holder.txtCountry.text = String.format(item.ongpro_country + "-" + item.ongpro_city)
+            holder.imgFlag.setImageResource(getFlagThroughCountryEc(item.ongpro_country.toString()))
+        }
+        if (position % 2 == 0) {
+            holder.conItem.setBackgroundResource(R.drawable.bg_list_item)
+        } else {
+            holder.conItem.setBackgroundResource(R.color.transparent)
         }
         if (item.og_check == true) {
-            holder.setBackgroundResource(R.id.img_chek, R.drawable.ic_item_chek)
+            holder.imgChek.setBackgroundResource(R.drawable.ic_item_chek)
         } else {
-            holder.setBackgroundResource(R.id.img_chek, R.drawable.ic_item_dischek)
+            holder.imgChek.setBackgroundResource(R.drawable.ic_item_dischek)
         }
+    }
+
+    override fun getItemCount(): Int {
+        return dataList.size
+    }
+    fun addData(newData: MutableList<OgVpnBean>) {
+        dataList.addAll(newData)
+        notifyDataSetChanged()
     }
 }

@@ -71,8 +71,8 @@ with newer versions.
   * Moved some core applications from contrib repository to src/apps (and include/lwip/apps)
 
   +++ Raw API:
-    * Changed TCP listen backlog: removed tcp_accepted(), added the function pair tcp_backlog_delayed()/
-      tcp_backlog_accepted() to explicitly delay backlog handling on a connection pcb
+    * Changed TCP listen bacKLogUtils: removed tcp_accepted(), added the function pair tcp_bacKLogUtils_delayed()/
+      tcp_bacKLogUtils_accepted() to explicitly delay bacKLogUtils handling on a connection pcb
 
   +++ Socket API:
     * Added an implementation for posix sendmsg()

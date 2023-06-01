@@ -166,7 +166,7 @@ tcp_tmr(void)
   }
 }
 
-#if LWIP_CALLBACK_API || TCP_LISTEN_BACKLOG
+#if LWIP_CALLBACK_API || TCP_LISTEN_BACKLogUtils
 /** Called when a listen pcb is closed. Iterates one pcb list and removes the
  * closed listener pcb from pcb->listener if matching.
  */
@@ -188,7 +188,7 @@ tcp_remove_listener(struct tcp_pcb *list, struct tcp_pcb_listen *lpcb)
 static void
 tcp_listen_closed(struct tcp_pcb *pcb)
 {
-#if LWIP_CALLBACK_API || TCP_LISTEN_BACKLOG
+#if LWIP_CALLBACK_API || TCP_LISTEN_BACKLogUtils
   size_t i;
   LWIP_ASSERT("pcb != NULL", pcb != NULL);
   LWIP_ASSERT("pcb->state == LISTEN", pcb->state == LISTEN);
@@ -199,52 +199,52 @@ tcp_listen_closed(struct tcp_pcb *pcb)
   LWIP_UNUSED_ARG(pcb);
 }
 
-#if TCP_LISTEN_BACKLOG
+#if TCP_LISTEN_BACKLogUtils
 /** @ingroup tcp_raw
- * Delay accepting a connection in respect to the listen backlog:
+ * Delay accepting a connection in respect to the listen bacKLogUtils:
  * the number of outstanding connections is increased until
- * tcp_backlog_accepted() is called.
+ * tcp_bacKLogUtils_accepted() is called.
  *
- * ATTENTION: the caller is responsible for calling tcp_backlog_accepted()
- * or else the backlog feature will get out of sync!
+ * ATTENTION: the caller is responsible for calling tcp_bacKLogUtils_accepted()
+ * or else the bacKLogUtils feature will get out of sync!
  *
  * @param pcb the connection pcb which is not fully accepted yet
  */
 void
-tcp_backlog_delayed(struct tcp_pcb *pcb)
+tcp_bacKLogUtils_delayed(struct tcp_pcb *pcb)
 {
   LWIP_ASSERT("pcb != NULL", pcb != NULL);
-  if ((pcb->flags & TF_BACKLOGPEND) == 0) {
+  if ((pcb->flags & TF_BACKLogUtilsPEND) == 0) {
     if (pcb->listener != NULL) {
       pcb->listener->accepts_pending++;
       LWIP_ASSERT("accepts_pending != 0", pcb->listener->accepts_pending != 0);
-      tcp_set_flags(pcb, TF_BACKLOGPEND);
+      tcp_set_flags(pcb, TF_BACKLogUtilsPEND);
     }
   }
 }
 
 /** @ingroup tcp_raw
  * A delayed-accept a connection is accepted (or closed/aborted): decreases
- * the number of outstanding connections after calling tcp_backlog_delayed().
+ * the number of outstanding connections after calling tcp_bacKLogUtils_delayed().
  *
- * ATTENTION: the caller is responsible for calling tcp_backlog_accepted()
- * or else the backlog feature will get out of sync!
+ * ATTENTION: the caller is responsible for calling tcp_bacKLogUtils_accepted()
+ * or else the bacKLogUtils feature will get out of sync!
  *
  * @param pcb the connection pcb which is now fully accepted (or closed/aborted)
  */
 void
-tcp_backlog_accepted(struct tcp_pcb *pcb)
+tcp_bacKLogUtils_accepted(struct tcp_pcb *pcb)
 {
   LWIP_ASSERT("pcb != NULL", pcb != NULL);
-  if ((pcb->flags & TF_BACKLOGPEND) != 0) {
+  if ((pcb->flags & TF_BACKLogUtilsPEND) != 0) {
     if (pcb->listener != NULL) {
       LWIP_ASSERT("accepts_pending != 0", pcb->listener->accepts_pending != 0);
       pcb->listener->accepts_pending--;
-      tcp_clear_flags(pcb, TF_BACKLOGPEND);
+      tcp_clear_flags(pcb, TF_BACKLogUtilsPEND);
     }
   }
 }
-#endif /* TCP_LISTEN_BACKLOG */
+#endif /* TCP_LISTEN_BACKLogUtils */
 
 /**
  * Closes the TX side of a connection held by the PCB.
@@ -337,7 +337,7 @@ tcp_close_shutdown_fin(struct tcp_pcb *pcb)
     case SYN_RCVD:
       err = tcp_send_fin(pcb);
       if (err == ERR_OK) {
-        tcp_backlog_accepted(pcb);
+        tcp_bacKLogUtils_accepted(pcb);
         MIB2_STATS_INC(mib2.tcpattemptfails);
         pcb->state = FIN_WAIT_1;
       }
@@ -516,7 +516,7 @@ tcp_abandon(struct tcp_pcb *pcb, int reset)
       tcp_segs_free(pcb->ooseq);
     }
 #endif /* TCP_QUEUE_OOSEQ */
-    tcp_backlog_accepted(pcb);
+    tcp_bacKLogUtils_accepted(pcb);
     if (send_rst) {
       LWIP_DEBUGF(TCP_RST_DEBUG, ("tcp_abandon: sending RST\n"));
       tcp_rst(pcb, seqno, ackno, &pcb->local_ip, &pcb->remote_ip, local_port, pcb->remote_port);
@@ -723,17 +723,17 @@ tcp_accept_null(void *arg, struct tcp_pcb *pcb, err_t err)
  * connection to LISTEN is an irreversible process.
  *
  * @param pcb the original tcp_pcb
- * @param backlog the incoming connections queue limit
+ * @param bacKLogUtils the incoming connections queue limit
  * @return tcp_pcb used for listening, consumes less memory.
  *
  * @note The original tcp_pcb is freed. This function therefore has to be
  *       called like this:
- *             tpcb = tcp_listen_with_backlog(tpcb, backlog);
+ *             tpcb = tcp_listen_with_bacKLogUtils(tpcb, bacKLogUtils);
  */
 struct tcp_pcb *
-tcp_listen_with_backlog(struct tcp_pcb *pcb, u8_t backlog)
+tcp_listen_with_bacKLogUtils(struct tcp_pcb *pcb, u8_t bacKLogUtils)
 {
-  return tcp_listen_with_backlog_and_err(pcb, backlog, NULL);
+  return tcp_listen_with_bacKLogUtils_and_err(pcb, bacKLogUtils, NULL);
 }
 
 /**
@@ -744,21 +744,21 @@ tcp_listen_with_backlog(struct tcp_pcb *pcb, u8_t backlog)
  * connection to LISTEN is an irreversible process.
  *
  * @param pcb the original tcp_pcb
- * @param backlog the incoming connections queue limit
+ * @param bacKLogUtils the incoming connections queue limit
  * @param err when NULL is returned, this contains the error reason
  * @return tcp_pcb used for listening, consumes less memory.
  *
  * @note The original tcp_pcb is freed. This function therefore has to be
  *       called like this:
- *             tpcb = tcp_listen_with_backlog_and_err(tpcb, backlog, &err);
+ *             tpcb = tcp_listen_with_bacKLogUtils_and_err(tpcb, bacKLogUtils, &err);
  */
 struct tcp_pcb *
-tcp_listen_with_backlog_and_err(struct tcp_pcb *pcb, u8_t backlog, err_t *err)
+tcp_listen_with_bacKLogUtils_and_err(struct tcp_pcb *pcb, u8_t bacKLogUtils, err_t *err)
 {
   struct tcp_pcb_listen *lpcb = NULL;
   err_t res;
 
-  LWIP_UNUSED_ARG(backlog);
+  LWIP_UNUSED_ARG(bacKLogUtils);
   LWIP_ERROR("tcp_listen: pcb already connected", pcb->state == CLOSED, res = ERR_CLSD; goto done);
 
   /* already listening? */
@@ -809,10 +809,10 @@ tcp_listen_with_backlog_and_err(struct tcp_pcb *pcb, u8_t backlog, err_t *err)
 #if LWIP_CALLBACK_API
   lpcb->accept = tcp_accept_null;
 #endif /* LWIP_CALLBACK_API */
-#if TCP_LISTEN_BACKLOG
+#if TCP_LISTEN_BACKLogUtils
   lpcb->accepts_pending = 0;
-  tcp_backlog_set(lpcb, backlog);
-#endif /* TCP_LISTEN_BACKLOG */
+  tcp_bacKLogUtils_set(lpcb, bacKLogUtils);
+#endif /* TCP_LISTEN_BACKLogUtils */
   TCP_REG(&tcp_listen_pcbs.pcbs, (struct tcp_pcb *)lpcb);
   res = ERR_OK;
 done:
@@ -1926,7 +1926,7 @@ tcp_pcb_purge(struct tcp_pcb *pcb)
 
     LWIP_DEBUGF(TCP_DEBUG, ("tcp_pcb_purge\n"));
 
-    tcp_backlog_accepted(pcb);
+    tcp_bacKLogUtils_accepted(pcb);
 
     if (pcb->refused_data != NULL) {
       LWIP_DEBUGF(TCP_DEBUG, ("tcp_pcb_purge: data left on ->refused_data\n"));

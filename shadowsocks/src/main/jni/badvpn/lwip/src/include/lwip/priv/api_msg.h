@@ -143,11 +143,11 @@ struct api_msg {
       enum netconn_igmp join_or_leave;
     } jl;
 #endif /* LWIP_IGMP || (LWIP_IPV6 && LWIP_IPV6_MLD) */
-#if TCP_LISTEN_BACKLOG
+#if TCP_LISTEN_BACKLogUtils
     struct {
-      u8_t backlog;
+      u8_t bacKLogUtils;
     } lb;
-#endif /* TCP_LISTEN_BACKLOG */
+#endif /* TCP_LISTEN_BACKLogUtils */
   } msg;
 #if LWIP_NETCONN_SEM_PER_THREAD
   sys_sem_t* op_completed_sem;
@@ -197,9 +197,9 @@ void lwip_netconn_do_disconnect      (void *m);
 void lwip_netconn_do_listen          (void *m);
 void lwip_netconn_do_send            (void *m);
 void lwip_netconn_do_recv            (void *m);
-#if TCP_LISTEN_BACKLOG
+#if TCP_LISTEN_BACKLogUtils
 void lwip_netconn_do_accepted        (void *m);
-#endif /* TCP_LISTEN_BACKLOG */
+#endif /* TCP_LISTEN_BACKLogUtils */
 void lwip_netconn_do_write           (void *m);
 void lwip_netconn_do_getaddr         (void *m);
 void lwip_netconn_do_close           (void *m);

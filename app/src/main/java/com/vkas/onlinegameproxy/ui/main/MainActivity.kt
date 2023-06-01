@@ -6,10 +6,9 @@ import android.os.Bundle
 import android.os.RemoteException
 import android.view.KeyEvent
 import android.view.View
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 import androidx.activity.viewModels
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.lifecycle.*
 import androidx.preference.PreferenceDataStore
@@ -23,7 +22,7 @@ import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.StartService
 import com.google.gson.reflect.TypeToken
-import com.jeremyliao.liveeventbus.LiveEventBus
+import com.lsxiao.apollo.core.annotations.Receive
 import com.vkas.onlinegameproxy.R
 import com.vkas.onlinegameproxy.ad.OgLoadConnectAd
 import com.vkas.onlinegameproxy.ad.OgLoadHomeAd
@@ -51,14 +50,9 @@ import kotlinx.coroutines.*
 
 class MainActivity : BaseActivityNew(),
     ShadowsocksConnection.Callback,
-    OnPreferenceDataStoreChangeListener, LifecycleObserver {
+    OnPreferenceDataStoreChangeListener, LifecycleObserver, View.OnClickListener {
 
-    var state = BaseService.State.Idle
-    private var jobHeart: Job? = null
 
-    //重复点击
-    var repeatClick = false
-    private var jobRepeatClick: Job? = null
 
     // 跳转结果页
     private var liveJumpResultsPage = MutableLiveData<Bundle>()
@@ -69,39 +63,34 @@ class MainActivity : BaseActivityNew(),
     private var jobNativeAdsOg: Job? = null
     private var jobStartOg: Job? = null
 
-    //连接vpn job
-    private var jobVpnOg: Job? = null
 
-    //关闭插屏状态
-    private var turnOffTouchScreenStatus: Boolean? = null
-
-    //当前执行连接操作
-    private var performConnectionOperations: Boolean = false
 
     //是否点击连接
     private var clickToConnect: Boolean = false
-
-    //是否执行A方案
-    private var whetherToImplementPlanA = false
-
-    //是否执行B方案
-    private var whetherToImplementPlanB = false
-    val onlineConfig: OpRemoteBean = OnlineGameUtils.getLocalVpnBootData()
-
     val model by viewModels<MainViewModel>()
     private val txtTimerOg: TextView by bindView(R.id.txt_timer_og)
 
 
-    private val proList: TextView by bindView(R.id.pro_list)
+    private val proList: ProgressBar by bindView(R.id.pro_list)
     private val slMain: SlidingMenu by bindView(R.id.sl_main)
     private val txtCountry: TextView by bindView(R.id.txt_country)
     private val imgCountry: ImageView by bindView(R.id.img_country)
-    private val imgState:ImageView by bindView(R.id.img_state)
+    private val imgState: ImageView by bindView(R.id.img_state)
     private val lavViewOg: LottieAnimationView by bindView(R.id.lav_view_og)
     private val lavViewGu: LottieAnimationView by bindView(R.id.lav_view_gu)
     private val viewGuideMask: View by bindView(R.id.view_guide_mask)
     private val ogAdFrame: FrameLayout by bindView(R.id.og_ad_frame)
     private val imgOgAdFrame: ImageView by bindView(R.id.img_og_ad_frame)
+    private val imgNav: ImageView by bindView(R.id.img_nav)
+    private val flConnect: FrameLayout by bindView(R.id.fl_connect)
+    private val linearLayout3: LinearLayout by bindView(R.id.linearLayout3)
+    private lateinit var inHomeNavigation: View
+
+    private lateinit var constraintLayout: ConstraintLayout
+
+    private lateinit var tvPrivacyPolicyPt: TextView
+    private lateinit var tvSharePt: TextView
+    private lateinit var tvUpgrade: TextView
 
 
     companion object {
@@ -112,60 +101,59 @@ class MainActivity : BaseActivityNew(),
         return R.layout.activity_main
     }
 
-    private fun liveEventBusReceive() {
-        LiveEventBus
-            .get(Constant.TIMER_OG_DATA, String::class.java)
-            .observeForever {
-                txtTimerOg.text = it
-            }
-        LiveEventBus
-            .get(Constant.STOP_VPN_CONNECTION, Boolean::class.java)
-            .observeForever {
-                if (state.canStop) {
-                    performConnectionOperations = false
-                    Core.stopService()
-                }
-            }
+    @Receive(Constant.TIMER_OG_DATA)
+    fun apolloTimerOgData(it: String) {
+        txtTimerOg.text = it
 
-        //更新服务器(未连接)
-        LiveEventBus
-            .get(Constant.NOT_CONNECTED_OG_RETURN, OgVpnBean::class.java)
-            .observeForever {
-                model.updateSkServer(it, false)
-            }
-        //更新服务器(已连接)
-        LiveEventBus
-            .get(Constant.CONNECTED_OG_RETURN, OgVpnBean::class.java)
-            .observeForever {
-                model.updateSkServer(it, true)
-            }
-        //插屏关闭后跳转
-        LiveEventBus
-            .get(Constant.PLUG_OG_ADVERTISEMENT_SHOW, Boolean::class.java)
-            .observeForever {
-                KLog.e("state", "插屏关闭接收=${it}")
-                //重复点击
-                jobRepeatClick = lifecycleScope.launch {
-                    if (!repeatClick) {
-                        KLog.e("state", "插屏关闭后跳转=${it}")
-                        AdBase.getConnectInstance().advertisementLoadingOg(this@MainActivity)
-                        connectOrDisconnectOg(it)
-                        repeatClick = true
-                    }
-                    delay(1000)
-                    repeatClick = false
-                }
-            }
+    }
+
+    @Receive(Constant.NOT_CONNECTED_OG_RETURN)
+    fun apolloNotConnectedOgReturn(it: OgVpnBean) {
+        model.updateSkServer(it, false)
+
+    }
+
+    @Receive(Constant.CONNECTED_OG_RETURN)
+    fun apolloConnectedOgReturn(it: OgVpnBean) {
+        model.updateSkServer(it, true)
+    }
+
+    @Receive(Constant.PLUG_OG_ADVERTISEMENT_SHOW)
+    fun apolloPlugOgAdvertisementShow(it: Boolean) {
+        AdBase.getConnectInstance().advertisementLoadingOg(this@MainActivity)
+        model.connectOrDisconnectOg(it,this)
+    }
+
+    override fun initView() {
+        super.initView()
+        inHomeNavigation = findViewById(R.id.in_home_navigation)
+        constraintLayout = inHomeNavigation.findViewById(R.id.constraintLayout)
+        tvPrivacyPolicyPt = inHomeNavigation.findViewById(R.id.tv_privacy_policy_pt)
+        tvSharePt = inHomeNavigation.findViewById(R.id.tv_share_pt)
+        tvUpgrade = inHomeNavigation.findViewById(R.id.tv_upgrade)
     }
 
     override fun initData() {
         super.initData()
         MmkvUtils.set(Constant.SLIDING, true)
-        liveEventBusReceive()
+        vpnAdOgFun(false)
+        vpnStateFun(0)
+        homeGuideOgFun(false)
         if (model.whetherParsingIsIllegalIp()) {
             model.whetherTheBulletBoxCannotBeUsed(this@MainActivity)
             return
         }
+        slMain.setOnClickListener(this)
+        imgNav.setOnClickListener(this)
+        flConnect.setOnClickListener(this)
+        linearLayout3.setOnClickListener(this)
+        viewGuideMask.setOnClickListener(this)
+        lavViewGu.setOnClickListener(this)
+
+        constraintLayout.setOnClickListener(this)
+        tvPrivacyPolicyPt.setOnClickListener(this)
+        tvSharePt.setOnClickListener(this)
+        tvUpgrade.setOnClickListener(this)
 
         // 设置状态
         changeState(BaseService.State.Idle, animate = false)
@@ -183,7 +171,7 @@ class MainActivity : BaseActivityNew(),
             val serviceData = mmkvOg.decodeString("currentServerData", "").toString()
             val currentServerData: OgVpnBean =
                 JsonUtil.fromJson(serviceData, object : TypeToken<OgVpnBean?>() {}.type)
-            setFastInformation(currentServerData)
+            model.setFastInformation(currentServerData, txtCountry, imgCountry)
         }
 
         AdBase.getHomeInstance().whetherToShowOg = false
@@ -193,66 +181,74 @@ class MainActivity : BaseActivityNew(),
 
         // 显示VPN指南
         showVpnGuide()
-        if (onlineConfig.online_start == "1") {
-            judgeVpnScheme()
-        }
 
         // 跳转结果页
         jumpResultsPageData()
         setServiceData()
+        vpnStateLiveFun()
     }
-    fun vpnAdOgFun(vpnAdOg:Boolean){
-        if(vpnAdOg){
+
+    private fun vpnStateLiveFun() {
+        model.vpnStateLive.observe(this, {
+            vpnStateFun(it)
+        })
+    }
+
+    fun vpnAdOgFun(vpnAdOg: Boolean) {
+        if (vpnAdOg) {
             ogAdFrame.visibility = View.VISIBLE
-        }else{
+        } else {
             ogAdFrame.visibility = View.GONE
         }
-        if(vpnAdOg){
+        if (vpnAdOg) {
             imgOgAdFrame.visibility = View.GONE
-        }else{
+        } else {
             imgOgAdFrame.visibility = View.VISIBLE
         }
     }
-    var vpnState :Int = 0
-    fun vpnStateFun(vpnStateValue:Int){
-        vpnState = vpnStateValue
-        when(vpnState){
-            0->{
-                imgState.visibility =View.VISIBLE
-                lavViewOg.visibility =View.GONE
-            }
-            1->{
-                imgState.visibility =View.GONE
-                lavViewOg.visibility =View.VISIBLE
-            }
-            2->{
-                imgState.visibility =View.VISIBLE
-                lavViewOg.visibility =View.GONE
-            }
-        }
-    }
-    fun homeGuideOgFun(homeGuideOg:Boolean){
-        when(homeGuideOg){
-            true->{
-                viewGuideMask.visibility = View.VISIBLE
-                lavViewGu.visibility = View.GONE
-            }
-            false ->{
-                viewGuideMask.visibility = View.GONE
-                lavViewGu.visibility = View.VISIBLE
-            }
-        }
-    }
-    fun sidebarShowsOgFun(sidebarShowsOg:Boolean){
-        if(sidebarShowsOg){
 
+    fun vpnStateFun(vpnStateValue: Int) {
+        MainFun.vpnState = vpnStateValue
+        when (MainFun.vpnState) {
+            0 -> {
+                imgState.visibility = View.VISIBLE
+                lavViewOg.visibility = View.GONE
+            }
+            1 -> {
+                imgState.visibility = View.GONE
+                lavViewOg.visibility = View.VISIBLE
+            }
+            2 -> {
+                imgState.visibility = View.VISIBLE
+                lavViewOg.visibility = View.GONE
+            }
         }
     }
+
+    fun homeGuideOgFun(homeGuideOg: Boolean) {
+        when (homeGuideOg) {
+            true -> {
+                viewGuideMask.visibility = View.VISIBLE
+                lavViewGu.visibility = View.VISIBLE
+                lavViewOg.visibility = View.GONE
+            }
+            false -> {
+                viewGuideMask.visibility = View.GONE
+                lavViewGu.visibility = View.GONE
+                lavViewOg.visibility = View.VISIBLE
+
+            }
+        }
+    }
+
     private fun initHomeAd() {
         vpnAdOgFun(false)
         jobNativeAdsOg = lifecycleScope.launch {
             while (isActive) {
-                OgLoadHomeAd.setDisplayHomeNativeAdOg(this@MainActivity, binding)
+                OgLoadHomeAd.setDisplayHomeNativeAdOg(
+                    this@MainActivity, ogAdFrame,
+                    imgOgAdFrame
+                )
                 if (AdBase.getHomeInstance().whetherToShowOg) {
                     jobNativeAdsOg?.cancel()
                     jobNativeAdsOg = null
@@ -267,7 +263,9 @@ class MainActivity : BaseActivityNew(),
             lifecycleScope.launch(Dispatchers.Main.immediate) {
                 delay(300L)
                 if (lifecycle.currentState == Lifecycle.State.RESUMED) {
-                    startActivityForResult(ResultActivity::class.java, 0x11, it)
+                    val intent = Intent(this@MainActivity, ResultActivity::class.java)
+                    intent.putExtras(it)
+                    startActivityForResult(intent, 0x11, it)
                 }
             }
         })
@@ -278,7 +276,7 @@ class MainActivity : BaseActivityNew(),
 
     private fun setServiceData() {
         model.liveInitializeServerData.observe(this, {
-            setFastInformation(it)
+            model.setFastInformation(it, txtCountry, imgCountry)
         })
         model.liveUpdateServerData.observe(this, {
             whetherRefreshServer = true
@@ -286,154 +284,27 @@ class MainActivity : BaseActivityNew(),
         })
         model.liveNoUpdateServerData.observe(this, {
             whetherRefreshServer = false
-            setFastInformation(it)
+            model.setFastInformation(it, txtCountry, imgCountry)
             connect.launch(null)
         })
     }
 
-    inner class OgClick {
-        fun linkService() {
-            lifecycleScope.launch {
-                if (vpnState != 1 && !viewGuideMask.isVisible) {
-                    if (OnlineGameUtils.deliverServerTransitions()) {
-                        proList.visibility = View.GONE
-                        connect.launch(null)
 
-                    } else {
-                        proList.visibility = View.VISIBLE
-                        delay(2000)
-                        proList.visibility = View.GONE
-                    }
-                }
-            }
-
-//            if (binding.vpnState == 0) {
-//                UnLimitedUtils.getBuriedPointOg("unlimF_clickv")
-//            }
-        }
-
-        fun toNav() {
-            if (vpnState != 1 && !viewGuideMask.isVisible) {
-                slMain.open()
-            }
-        }
-
-        fun linkServiceGuide() {
-            if (vpnState != 1 && viewGuideMask.isVisible) {
-                connect.launch(null)
-            }
-        }
-
-        fun clickService() {
-            lifecycleScope.launch {
-                if (vpnState != 1 && !viewGuideMask.isVisible) {
-                    if (OnlineGameUtils.deliverServerTransitions()) {
-                        proList.visibility = View.GONE
-                        jumpToServerList()
-                    } else {
-                        proList.visibility = View.VISIBLE
-                        delay(2000)
-                       proList.visibility = View.GONE
-                    }
-                }
-            }
-        }
-
-        fun clickMain() {
-//            KLog.e("TAG", "binding.sidebarShowsOg===>${binding.sidebarShowsOg}")
-//            if (binding.sidebarShowsOg == true) {
-//                binding.sidebarShowsOg = false
-//            }
-        }
-
-        fun clickMainMenu() {
-
-        }
-
-        fun toContactUs() {
-            val uri = Uri.parse("mailto:${Constant.MAILBOX_OG_ADDRESS}")
-            val intent = Intent(Intent.ACTION_SENDTO, uri)
-            runCatching {
-                startActivity(intent)
-            }.onFailure {
-                ToastUtils.toast("Please set up a Mail account")
-            }
-        }
-
-        fun toPrivacyPolicy() {
-            startActivity(WebActivity::class.java)
-        }
-
-        fun toShare() {
-            val intent = Intent()
-            intent.action = Intent.ACTION_SEND
-            intent.putExtra(
-                Intent.EXTRA_TEXT,
-                Constant.SHARE_OG_ADDRESS + this@MainActivity.packageName
-            )
-            intent.type = "text/plain"
-            startActivity(intent)
-        }
-
-        fun toUpgrade() {
-            model.openInBrowser(
-                this@MainActivity,
-                Constant.SHARE_OG_ADDRESS + this@MainActivity.packageName
-            )
-        }
-
-//        fun clickHome() {
-//            if (binding.homeGuideOg == false && !(state.name != "Connected" && binding.vpnState == 1)) {
-//                binding.sidebarShowsOg = false
-//            }
-//        }
-//
-//        fun clickSetting() {
-//            if (binding.homeGuideOg == false && !(state.name != "Connected" && binding.vpnState == 1)) {
-//                binding.sidebarShowsOg = true
-//            }
-//        }
-
-        fun toHomeGuideOg() {}
-    }
-
-    /**
-     * 跳转服务器列表
-     */
-    fun jumpToServerList() {
+    fun linkService() {
         lifecycleScope.launch {
-            if (lifecycle.currentState != Lifecycle.State.RESUMED) {
-                return@launch
+            if (MainFun.vpnState != 1 && !viewGuideMask.isVisible) {
+                if (OnlineGameUtils.deliverServerTransitions()) {
+                    proList.visibility = View.GONE
+                    connect.launch(null)
+                } else {
+                    proList.visibility = View.VISIBLE
+                    delay(2000)
+                    proList.visibility = View.GONE
+                }
             }
-            val bundle = Bundle()
-            if (state.name == "Connected") {
-                bundle.putBoolean(Constant.WHETHER_OG_CONNECTED, true)
-            } else {
-                bundle.putBoolean(Constant.WHETHER_OG_CONNECTED, false)
-            }
-            AdBase.getBackInstance().advertisementLoadingOg(this@MainActivity)
-            val serviceData = mmkvOg.decodeString("currentServerData", "").toString()
-            bundle.putString(Constant.CURRENT_OG_SERVICE, serviceData)
-            startActivity(ListActivity::class.java, bundle)
         }
     }
 
-    /**
-     * 设置fast信息
-     */
-    private fun setFastInformation(elVpnBean: OgVpnBean) {
-        MmkvUtils.set(Constant.IP_AFTER_VPN_LINK_OG, elVpnBean.ongpro_ip)
-        MmkvUtils.set(Constant.IP_AFTER_VPN_CITY_OG, elVpnBean.ongpro_city)
-        if (elVpnBean.og_best == true) {
-            txtCountry.text = Constant.FASTER_OG_SERVER
-            imgCountry.setImageResource(getFlagThroughCountryEc(Constant.FASTER_OG_SERVER))
-
-        } else {
-            txtCountry.text = elVpnBean.ongpro_country.toString()
-            imgCountry.setImageResource(getFlagThroughCountryEc(elVpnBean.ongpro_country.toString()))
-
-        }
-    }
 
     private val connect = registerForActivityResult(StartService()) {
         homeGuideOgFun(false)
@@ -455,95 +326,116 @@ class MainActivity : BaseActivityNew(),
     /**
      * 启动VPN
      */
+//    private fun startVpn2() {
+//        vpnStateFun(1)
+//        clickToConnect = true
+//        changeOfVpnStatus()
+//        jobStartOg = lifecycleScope.launch {
+//            App.isAppOpenSameDayOg()
+//            if (isThresholdReached() || Utils.isNullOrEmpty(OgLoadConnectAd.idOg)) {
+//                delay(2000L)
+//                KLogUtils.d("广告达到上线,或者无广告位")
+//                val showState =
+//                    OgLoadConnectAd
+//                        .displayConnectAdvertisementOg(this@MainActivity)
+//                if (showState != 2) {
+//                    connectOrDisconnectOg(false)
+//                }
+//                return@launch
+//            }
+//            AdBase.getConnectInstance().advertisementLoadingOg(this@MainActivity)
+////            AdBase.getResultInstance().advertisementLoadingOg(this@MainActivity)
+//            try {
+//                withTimeout(10000L) {
+//                    delay(2000L)
+//                    KLogUtils.e("jobStartOg?.isActive=${jobStartOg?.isActive}")
+//                    while (jobStartOg?.isActive == true) {
+//                        val showState =
+//                            OgLoadConnectAd
+//                                .displayConnectAdvertisementOg(this@MainActivity)
+//                        if (showState == 2) {
+//                            jobStartOg?.cancel()
+//                            jobStartOg = null
+//                        }
+//                        if (showState == 0) {
+//                            jobStartOg?.cancel()
+//                            jobStartOg = null
+//                            connectOrDisconnectOg(false)
+//                        }
+//                        delay(1000L)
+//                    }
+//
+//                }
+//            } catch (e: TimeoutCancellationException) {
+//                KLogUtils.d("connect---插屏超时")
+//                connectOrDisconnectOg(false)
+//            }
+//        }
+//    }
+
+    /**
+     * 启动VPN
+     */
     private fun startVpn() {
-        vpnStateFun(1)
-        clickToConnect = true
+        val vpnState = 1
+        val clickToConnect = true
+        val isThresholdReached = isThresholdReached()
+        val idOgEmpty = Utils.isNullOrEmpty(OgLoadConnectAd.idOg)
+
+        vpnStateFun(vpnState)
         changeOfVpnStatus()
+
         jobStartOg = lifecycleScope.launch {
             App.isAppOpenSameDayOg()
-            if (isThresholdReached() || Utils.isNullOrEmpty(OgLoadConnectAd.idOg)) {
-                delay(2000L)
-                KLog.d(logTagOg, "广告达到上线,或者无广告位")
-                val showState =
-                    OgLoadConnectAd
-                        .displayConnectAdvertisementOg(this@MainActivity)
-                if (showState != 2) {
-                    connectOrDisconnectOg(false)
-                }
+            delay(2000L)
+
+            if (isThresholdReached || idOgEmpty) {
+                model.handleThresholdOrEmptyIdOg(this@MainActivity)
                 return@launch
             }
+
             AdBase.getConnectInstance().advertisementLoadingOg(this@MainActivity)
-//            AdBase.getResultInstance().advertisementLoadingOg(this@MainActivity)
+            AdBase.getResultInstance().advertisementLoadingOg(this@MainActivity)
+
             try {
                 withTimeout(10000L) {
                     delay(2000L)
-                    KLog.e(logTagOg, "jobStartOg?.isActive=${jobStartOg?.isActive}")
+                    KLogUtils.e("jobStartOg?.isActive=${jobStartOg?.isActive}")
+
                     while (jobStartOg?.isActive == true) {
                         val showState =
-                            OgLoadConnectAd
-                                .displayConnectAdvertisementOg(this@MainActivity)
-                        if (showState == 2) {
-                            jobStartOg?.cancel()
-                            jobStartOg = null
+                            OgLoadConnectAd.displayConnectAdvertisementOg(this@MainActivity)
+
+                        when (showState) {
+                            "22" -> {
+                                jobStartOg?.cancel()
+                                jobStartOg = null
+                            }
+                            "00" -> {
+                                jobStartOg?.cancel()
+                                jobStartOg = null
+                                model.connectOrDisconnectOg(false,this@MainActivity)
+                            }
                         }
-                        if (showState == 0) {
-                            jobStartOg?.cancel()
-                            jobStartOg = null
-                            connectOrDisconnectOg(false)
-                        }
+
                         delay(1000L)
                     }
-
                 }
             } catch (e: TimeoutCancellationException) {
-                KLog.d(logTagOg, "connect---插屏超时")
-                connectOrDisconnectOg(false)
+                KLogUtils.d("connect---插屏超时")
+                model.connectOrDisconnectOg(false,this@MainActivity)
             }
         }
     }
 
 
-    /**
-     * 连接或断开
-     * 是否后台关闭（true：后台关闭；false：手动关闭）
-     */
-    private fun connectOrDisconnectOg(isBackgroundClosed: Boolean) {
-        KLog.e("state", "连接或断开")
-//        if (model.whetherParsingIsIllegalIp()) {
-//            model.whetherTheBulletBoxCannotBeUsed(this@MainActivity)
-//            return
-//        }
-        performConnectionOperations = if (state.canStop) {
-            if (!isBackgroundClosed) {
-                model.jumpConnectionResultsPage(false)
-            }
-            if ((lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED))) {
-                Core.stopService()
-            } else {
-                vpnStateFun(2)
-            }
-            false
-        } else {
-            if ((lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED))) {
-                Core.startService()
-                if (!whetherToImplementPlanA && !whetherToImplementPlanB) {
-                    model.clearAllAdsReload(this@MainActivity)
-                }
-            } else {
-                vpnStateFun(0)
-            }
-            if (!isBackgroundClosed) {
-                model.jumpConnectionResultsPage(true)
-            }
-            true
-        }
-    }
+
 
     private fun changeState(
         state: BaseService.State,
         animate: Boolean = true
     ) {
-        this.state = state
+        model.state = state
         connectionStatusJudgment(state.name)
         stateListener?.invoke(state)
     }
@@ -552,10 +444,10 @@ class MainActivity : BaseActivityNew(),
      * 连接状态判断
      */
     private fun connectionStatusJudgment(state: String) {
-        KLog.e("TAG", "connectionStatusJudgment=${state}")
-        if (performConnectionOperations && state != "Connected") {
+        KLogUtils.e("connectionStatusJudgment=${state}")
+        if (model.performConnectionOperations && state != "Connected") {
             //vpn连接失败
-            KLog.d(logTagOg, "vpn连接失败")
+            KLogUtils.d("vpn连接失败")
 //            EasyConnectUtils.getBuriedPointOg("unlimF_vF")
             ToastUtils.toast(getString(R.string.connected_failed), 3000)
         }
@@ -576,20 +468,18 @@ class MainActivity : BaseActivityNew(),
     private fun connectionServerSuccessful() {
         vpnStateFun(2)
         changeOfVpnStatus()
-        whetherToImplementPlanB = true
         App.isVpnGlobalLink = true
-        getHeartbeatReportedConnect(App.isVpnGlobalLink)
+        MainFun.getHeartbeatReportedConnect(App.isVpnGlobalLink, this)
     }
 
     /**
      * 断开服务器
      */
     private fun disconnectServerSuccessful() {
-        KLog.e("TAG", "断开服务器")
         vpnStateFun(0)
         changeOfVpnStatus()
         App.isVpnGlobalLink = false
-        getHeartbeatReportedDisConnect()
+        MainFun.getHeartbeatReportedDisConnect()
     }
 
     /**
@@ -597,12 +487,11 @@ class MainActivity : BaseActivityNew(),
      * 是否连接
      */
     private fun changeOfVpnStatus() {
-
-        when (vpnState) {
+        when (MainFun.vpnState) {
             0 -> {
-               imgState.setImageResource(R.drawable.ic_main_connect)
-               txtTimerOg.text = getString(R.string._00_00_00)
-               txtTimerOg.setTextColor(getColor(R.color.vpn_color))
+                imgState.setImageResource(R.drawable.ic_main_connect)
+                txtTimerOg.text = getString(R.string._00_00_00)
+                txtTimerOg.setTextColor(getColor(R.color.vpn_color))
                 OgTimerThread.endTiming()
                 lavViewOg.pauseAnimation()
                 lavViewOg.visibility = View.GONE
@@ -625,69 +514,12 @@ class MainActivity : BaseActivityNew(),
     private fun showVpnGuide() {
         lifecycleScope.launch {
             delay(300)
-            if (state.name != "Connected") {
+            if (model.state.name != "Connected") {
                 homeGuideOgFun(true)
                 lavViewGu.playAnimation()
             } else {
                 homeGuideOgFun(false)
                 lavViewGu.pauseAnimation()
-            }
-        }
-    }
-
-    /**
-     * 判断Vpn方案
-     */
-    private fun judgeVpnScheme() {
-        if (!model.isItABuyingUser()) {
-            //非买量用户直接走A方案
-            whetherToImplementPlanA = true
-            return
-        }
-        val data = onlineConfig.online_ratio
-        if (Utils.isNullOrEmpty(data)) {
-            KLog.d(logTagOg, "判断Vpn方案---默认")
-            vpnCScheme("50")
-        } else {
-            //C
-            whetherToImplementPlanA = false
-            vpnCScheme(data)
-        }
-    }
-
-    /**
-     * vpn B 方案
-     */
-    private fun vpnBScheme() {
-        lifecycleScope.launch {
-            delay(300)
-            if (!state.canStop) {
-                connect.launch(null)
-            }
-        }
-    }
-
-    /**
-     * vpn C 方案
-     * 概率
-     */
-    private fun vpnCScheme(mProbability: String) {
-        val mProbabilityInt = mProbability.toIntOrNull()
-        if (mProbabilityInt == null) {
-            whetherToImplementPlanA = true
-        } else {
-            val random = (0..100).shuffled().last()
-            when {
-                random <= mProbabilityInt -> {
-                    //B
-                    KLog.d(logTagOg, "随机落在B方案")
-                    vpnBScheme() //20，代表20%为B用户；80%为A用户
-                }
-                else -> {
-                    //A
-                    KLog.d(logTagOg, "随机落在A方案")
-                    whetherToImplementPlanA = true
-                }
             }
         }
     }
@@ -729,17 +561,14 @@ class MainActivity : BaseActivityNew(),
             }
 
             if (App.nativeAdRefreshOg) {
-                //A方案热启动
-                if (onlineConfig.online_start == "2") {
-                    judgeVpnScheme()
-                }
                 changeOfVpnStatus()
                 AdBase.getHomeInstance().whetherToShowOg = false
                 if (AdBase.getHomeInstance().appAdDataOg != null) {
-                    KLog.d(logTagOg, "onResume------>1")
-                    OgLoadHomeAd.setDisplayHomeNativeAdOg(this@MainActivity, binding)
+                    OgLoadHomeAd.setDisplayHomeNativeAdOg(
+                        this@MainActivity, ogAdFrame,
+                        imgOgAdFrame
+                    )
                 } else {
-                    KLog.d(logTagOg, "onResume------>2")
                     AdBase.getHomeInstance().advertisementLoadingOg(this@MainActivity)
                     initHomeAd()
                 }
@@ -758,9 +587,6 @@ class MainActivity : BaseActivityNew(),
 
     override fun onDestroy() {
         super.onDestroy()
-        LiveEventBus
-            .get(Constant.PLUG_OG_ADVERTISEMENT_SHOW, Boolean::class.java)
-            .removeObserver {}
         DataStore.publicStore.unregisterChangeListener(this)
         connection.disconnect(this)
         jobStartOg?.cancel()
@@ -770,7 +596,7 @@ class MainActivity : BaseActivityNew(),
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 0x11 && whetherRefreshServer) {
-            setFastInformation(model.afterDisconnectionServerData)
+            model.setFastInformation(model.afterDisconnectionServerData, txtCountry, imgCountry)
             val serviceData = toJson(model.afterDisconnectionServerData)
             MmkvUtils.set("currentServerData", serviceData)
             model.currentServerData = model.afterDisconnectionServerData
@@ -779,11 +605,11 @@ class MainActivity : BaseActivityNew(),
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (binding.viewGuideMask.isVisible) {
-                binding.homeGuideOg = false
+            if (viewGuideMask.isVisible) {
+                homeGuideOgFun(false)
                 lavViewGu.pauseAnimation()
             } else {
-                if (!(state.name != "Connected" && binding.vpnState == 1)) {
+                if (!(model.state.name != "Connected" && MainFun.vpnState == 1)) {
                     finish()
                 }
             }
@@ -791,40 +617,40 @@ class MainActivity : BaseActivityNew(),
         return true
     }
 
-    /**
-     * 心跳上报(链接)
-     */
-    private fun getHeartbeatReportedConnect(isConnected: Boolean) {
-        jobHeart?.cancel()
-        jobHeart = null
-        jobHeart = lifecycleScope.launch(Dispatchers.IO) {
-            while (isActive) {
-                var data: String
-                var ip: String
-                if (isConnected) {
-                    data = "as"
-                    ip = mmkvOg.decodeString(Constant.IP_AFTER_VPN_LINK_OG, "") ?: ""
-                } else {
-                    data = "is"
-                    ip = mmkvOg.decodeString(Constant.CURRENT_IP_OG, "") ?: ""
+
+    override fun onClick(v: View?) {
+        when (v?.id) {
+            R.id.img_nav -> {
+                if (MainFun.vpnState != 1 && !viewGuideMask.isVisible) {
+                    slMain.open()
                 }
-                if (isConnected) {
-                    OnlineOkHttpUtils.getHeartbeatReporting(data, ip)
+            }
+            R.id.view_guide_mask -> {
+            }
+            R.id.linearLayout3 -> {
+                model.clickService(this, model.state.name, viewGuideMask, proList)
+            }
+            R.id.fl_connect -> {
+                linkService()
+            }
+            R.id.lav_view_gu -> {
+                if (MainFun.vpnState != 1 && viewGuideMask.isVisible) {
+                    connect.launch(null)
                 }
-                delay(60000)
+            }
+            R.id.constraintLayout -> {
+            }
+            R.id.tv_privacy_policy_pt -> {
+                val intent = Intent(this@MainActivity, WebActivity::class.java)
+                startActivity(intent)
+            }
+            R.id.tv_share_pt -> {
+                model.toShare(this)
+            }
+            R.id.tv_upgrade -> {
+                model.toUpgrade(this)
             }
         }
     }
 
-    /**
-     * 心跳上报(断开)
-     */
-    private fun getHeartbeatReportedDisConnect() {
-        jobHeart?.cancel()
-        jobHeart = null
-        OnlineOkHttpUtils.getHeartbeatReporting(
-            "is",
-            mmkvOg.decodeString(Constant.CURRENT_IP_OG, "") ?: ""
-        )
-    }
 }

@@ -555,8 +555,8 @@ accept_function(void *arg, struct tcp_pcb *newpcb, err_t err)
   newconn->pcb.tcp = newpcb;
   setup_tcp(newconn);
 
-  /* handle backlog counter */
-  tcp_backlog_delayed(newpcb);
+  /* handle bacKLogUtils counter */
+  tcp_bacKLogUtils_delayed(newpcb);
 
   if (sys_mbox_trypost(&conn->acceptmbox, newconn) != ERR_OK) {
     /* When returning != ERR_OK, the pcb is aborted in tcp_process(),
@@ -1407,12 +1407,12 @@ lwip_netconn_do_listen(void *m)
           /* connection is not closed, cannot listen */
           err = ERR_VAL;
         } else {
-          u8_t backlog;
-#if TCP_LISTEN_BACKLOG
-          backlog = msg->msg.lb.backlog;
-#else  /* TCP_LISTEN_BACKLOG */
-          backlog = TCP_DEFAULT_LISTEN_BACKLOG;
-#endif /* TCP_LISTEN_BACKLOG */
+          u8_t bacKLogUtils;
+#if TCP_LISTEN_BACKLogUtils
+          bacKLogUtils = msg->msg.lb.bacKLogUtils;
+#else  /* TCP_LISTEN_BACKLogUtils */
+          bacKLogUtils = TCP_DEFAULT_LISTEN_BACKLogUtils;
+#endif /* TCP_LISTEN_BACKLogUtils */
 #if LWIP_IPV4 && LWIP_IPV6
           /* "Socket API like" dual-stack support: If IP to listen to is IP6_ADDR_ANY,
             * and NETCONN_FLAG_IPV6_V6ONLY is NOT set, use IP_ANY_TYPE to listen
@@ -1425,7 +1425,7 @@ lwip_netconn_do_listen(void *m)
           }
 #endif /* LWIP_IPV4 && LWIP_IPV6 */
 
-          lpcb = tcp_listen_with_backlog_and_err(msg->conn->pcb.tcp, backlog, &err);
+          lpcb = tcp_listen_with_bacKLogUtils_and_err(msg->conn->pcb.tcp, bacKLogUtils, &err);
 
           if (lpcb == NULL) {
             /* in this case, the old pcb is still allocated */
@@ -1453,9 +1453,9 @@ lwip_netconn_do_listen(void *m)
           }
         }
       } else if (msg->conn->state == NETCONN_LISTEN) {
-        /* already listening, allow updating of the backlog */
+        /* already listening, allow updating of the bacKLogUtils */
         err = ERR_OK;
-        tcp_backlog_set(msg->conn->pcb.tcp, msg->msg.lb.backlog);
+        tcp_bacKLogUtils_set(msg->conn->pcb.tcp, msg->msg.lb.bacKLogUtils);
       } else {
         err = ERR_CONN;
       }
@@ -1552,7 +1552,7 @@ lwip_netconn_do_recv(void *m)
   TCPIP_APIMSG_ACK(msg);
 }
 
-#if TCP_LISTEN_BACKLOG
+#if TCP_LISTEN_BACKLogUtils
 /** Indicate that a TCP pcb has been accepted
  * Called from netconn_accept
  *
@@ -1566,12 +1566,12 @@ lwip_netconn_do_accepted(void *m)
   msg->err = ERR_OK;
   if (msg->conn->pcb.tcp != NULL) {
     if (NETCONNTYPE_GROUP(msg->conn->type) == NETCONN_TCP) {
-      tcp_backlog_accepted(msg->conn->pcb.tcp);
+      tcp_bacKLogUtils_accepted(msg->conn->pcb.tcp);
     }
   }
   TCPIP_APIMSG_ACK(msg);
 }
-#endif /* TCP_LISTEN_BACKLOG */
+#endif /* TCP_LISTEN_BACKLogUtils */
 
 /**
  * See if more data needs to be written from a previous call to netconn_write.

@@ -635,12 +635,12 @@ tcp_listen_input(struct tcp_pcb_listen *pcb)
             ip_current_src_addr(), tcphdr->dest, tcphdr->src);
   } else if (flags & TCP_SYN) {
     LWIP_DEBUGF(TCP_DEBUG, ("TCP connection request %"U16_F" -> %"U16_F".\n", tcphdr->src, tcphdr->dest));
-#if TCP_LISTEN_BACKLOG
-    if (pcb->accepts_pending >= pcb->backlog) {
-      LWIP_DEBUGF(TCP_DEBUG, ("tcp_listen_input: listen backlog exceeded for port %"U16_F"\n", tcphdr->dest));
+#if TCP_LISTEN_BACKLogUtils
+    if (pcb->accepts_pending >= pcb->bacKLogUtils) {
+      LWIP_DEBUGF(TCP_DEBUG, ("tcp_listen_input: listen bacKLogUtils exceeded for port %"U16_F"\n", tcphdr->dest));
       return;
     }
-#endif /* TCP_LISTEN_BACKLOG */
+#endif /* TCP_LISTEN_BACKLogUtils */
     npcb = tcp_alloc(pcb->prio);
     /* If a new PCB could not be created (probably due to lack of memory),
        we don't do anything, but rely on the sender will retransmit the
@@ -653,10 +653,10 @@ tcp_listen_input(struct tcp_pcb_listen *pcb)
       LWIP_UNUSED_ARG(err); /* err not useful here */
       return;
     }
-#if TCP_LISTEN_BACKLOG
+#if TCP_LISTEN_BACKLogUtils
     pcb->accepts_pending++;
-    tcp_set_flags(npcb, TF_BACKLOGPEND);
-#endif /* TCP_LISTEN_BACKLOG */
+    tcp_set_flags(npcb, TF_BACKLogUtilsPEND);
+#endif /* TCP_LISTEN_BACKLogUtils */
     /* Set up the new PCB. */
     ip_addr_copy(npcb->local_ip, *ip_current_dest_addr());
     ip_addr_copy(npcb->remote_ip, *ip_current_src_addr());
@@ -673,9 +673,9 @@ tcp_listen_input(struct tcp_pcb_listen *pcb)
     npcb->snd_lbb = iss;
     npcb->snd_wl1 = seqno - 1;/* initialise to seqno-1 to force window update */
     npcb->callback_arg = pcb->callback_arg;
-#if LWIP_CALLBACK_API || TCP_LISTEN_BACKLOG
+#if LWIP_CALLBACK_API || TCP_LISTEN_BACKLogUtils
     npcb->listener = pcb;
-#endif /* LWIP_CALLBACK_API || TCP_LISTEN_BACKLOG */
+#endif /* LWIP_CALLBACK_API || TCP_LISTEN_BACKLogUtils */
     /* inherit socket options */
     npcb->so_options = pcb->so_options & SOF_INHERITED;
     npcb->netif_idx = pcb->netif_idx;
@@ -899,17 +899,17 @@ tcp_process(struct tcp_pcb *pcb)
         if (TCP_SEQ_BETWEEN(ackno, pcb->lastack + 1, pcb->snd_nxt)) {
           pcb->state = ESTABLISHED;
           LWIP_DEBUGF(TCP_DEBUG, ("TCP connection established %"U16_F" -> %"U16_F".\n", inseg.tcphdr->src, inseg.tcphdr->dest));
-#if LWIP_CALLBACK_API || TCP_LISTEN_BACKLOG
+#if LWIP_CALLBACK_API || TCP_LISTEN_BACKLogUtils
           if (pcb->listener == NULL) {
             /* listen pcb might be closed by now */
             err = ERR_VAL;
           } else
-#endif /* LWIP_CALLBACK_API || TCP_LISTEN_BACKLOG */
+#endif /* LWIP_CALLBACK_API || TCP_LISTEN_BACKLogUtils */
           {
 #if LWIP_CALLBACK_API
             LWIP_ASSERT("pcb->listener->accept != NULL", pcb->listener->accept != NULL);
 #endif
-            tcp_backlog_accepted(pcb);
+            tcp_bacKLogUtils_accepted(pcb);
             /* Call the accept function. */
             TCP_EVENT_ACCEPT(pcb->listener, pcb, pcb->callback_arg, ERR_OK, err);
           }

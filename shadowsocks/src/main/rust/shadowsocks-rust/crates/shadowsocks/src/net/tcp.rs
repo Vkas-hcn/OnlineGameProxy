@@ -187,7 +187,7 @@ impl TcpListener {
             socket.bind(*addr)?;
         }
 
-        // mio's default backlog is 1024
+        // mio's default bacKLogUtils is 1024
         let inner = socket.listen(1024)?;
 
         // Enable TFO if supported

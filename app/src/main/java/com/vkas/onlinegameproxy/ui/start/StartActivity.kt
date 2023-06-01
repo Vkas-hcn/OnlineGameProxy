@@ -9,7 +9,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ktx.remoteConfig
-import com.jeremyliao.liveeventbus.LiveEventBus
+import com.lsxiao.apollo.core.Apollo
+import com.lsxiao.apollo.core.annotations.Receive
 import com.vkas.onlinegameproxy.BuildConfig
 import com.vkas.onlinegameproxy.R
 import com.vkas.onlinegameproxy.ad.OgLoadOpenAd
@@ -46,20 +47,10 @@ class StartActivity : BaseActivityNew(),
     }
 
     override fun initData() {
-        // 初始化数据
-        val fastData = OnlineGameUtils.sendResultDecoding("123456")
-
-//        val data = OnlineTbaUtils.install(this)
-//        KLog.e("TAG","data=======$data")
-//        val testDeviceIds = listOf("9CDD654B92424BD2715643A8BFC44CD0")
-//        val configuration = RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
-//        MobileAds.setRequestConfiguration(configuration)
-
         horizontalProgressViewOg.setProgressViewUpdateListener(this)
         horizontalProgressViewOg.setProgressDuration(10000)
         horizontalProgressViewOg.setProgressTextVisibility(true)
         horizontalProgressViewOg.startProgressAnimation()
-        liveEventBusOg()
         lifecycleScope.launch(Dispatchers.IO) {
             if (!NetworkUtils.isNetworkAvailable()) {
                 return@launch
@@ -83,15 +74,12 @@ class StartActivity : BaseActivityNew(),
         // 设置监听器
     }
 
-    private fun liveEventBusOg() {
-        LiveEventBus
-            .get(Constant.OPEN_CLOSE_JUMP, Boolean::class.java)
-            .observeForever {
-                KLog.d(logTagOg, "关闭开屏内容-接收==${this.lifecycle.currentState}")
-                if (this.lifecycle.currentState == Lifecycle.State.STARTED) {
-                    jumpPage()
-                }
-            }
+    @Receive(Constant.OPEN_CLOSE_JUMP)
+     fun liveEventBusOg(it:Boolean) {
+        KLogUtils.d("关闭开屏内容-接收==${this.lifecycle.currentState}")
+        if (this.lifecycle.currentState == Lifecycle.State.STARTED) {
+            jumpPage()
+        }
     }
 
     private fun getFirebaseDataOg() {
@@ -100,7 +88,7 @@ class StartActivity : BaseActivityNew(),
 //            lifecycleScope.launch {
 //                val ips = listOf("192.168.0.1", "8.8.8.8", "114.114.114.114")
 //                val fastestIP = findFastestIP(ips)
-//                KLog.e("TAG", "Fastest IP: $fastestIP")
+//                KLogUtils.e("TAG", "Fastest IP: $fastestIP")
 //                delay(1500)
 //                MmkvUtils.set(
 //                    Constant.ADVERTISING_OG_DATA,
@@ -125,7 +113,6 @@ class StartActivity : BaseActivityNew(),
     private fun jumpHomePageData() {
         liveJumpHomePage2.observe(this, {
             lifecycleScope.launch(Dispatchers.Main.immediate) {
-                KLog.e("TAG", "isBackDataOg==${App.isBackDataOg}")
                 delay(300)
                 if (lifecycle.currentState == Lifecycle.State.RESUMED) {
                     jumpPage()
@@ -193,7 +180,7 @@ class StartActivity : BaseActivityNew(),
                     }
                 }
             } catch (e: TimeoutCancellationException) {
-                KLog.e("TimeoutCancellationException I'm sleeping $e")
+                KLogUtils.e("TimeoutCancellationException I'm sleeping $e")
                 jumpPage()
             }
         }
@@ -205,7 +192,7 @@ class StartActivity : BaseActivityNew(),
     private fun preloadedAdvertisement() {
         App.isAppOpenSameDayOg()
         if (isThresholdReached()) {
-            KLog.d(logTagOg, "广告达到上线")
+            KLogUtils.d( "广告达到上线")
             lifecycleScope.launch {
                 delay(2000L)
                 liveJumpHomePage.postValue(true)

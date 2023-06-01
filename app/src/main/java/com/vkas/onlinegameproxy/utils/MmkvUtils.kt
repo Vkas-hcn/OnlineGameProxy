@@ -16,7 +16,7 @@ object MmkvUtils {
     }
 
     fun putStringValue(name: String, value: String) {
-        KLog.e("MMkV====$name:$value")
+        KLogUtils.e("MMkV====$name:$value")
         MMKV.defaultMMKV().encode(name, value)
     }
 
@@ -87,4 +87,34 @@ object MmkvUtils {
         }
         return result as T?
     }
+
+//    fun String.mmkSet(value: String){
+//        val kv = MMKV.defaultMMKV()
+//        kv.encode(this,value)
+//    }
+//    fun String.mmkSet(value: Int){
+//        val kv = MMKV.defaultMMKV()
+//        kv.encode(this,value)
+//    }
+//    fun String.mmkSet(value: Boolean){
+//        val kv = MMKV.defaultMMKV()
+//        kv.encode(this,value)
+//    }
+
+
+
+
+//    fun String.mmkGet():String{
+//        val kv = MMKV.mmkvWithID("OnlineGameProxy", MMKV.MULTI_PROCESS_MODE)
+//       return kv.decodeString(this)?:""
+//    }
+//    fun String.mmkSet(value: Int){
+//        val kv = MMKV.mmkvWithID("OnlineGameProxy", MMKV.MULTI_PROCESS_MODE)
+//        kv.encode(this,value)
+//    }
+//    fun String.mmkSet(value: Boolean){
+//        val kv = MMKV.mmkvWithID("OnlineGameProxy", MMKV.MULTI_PROCESS_MODE)
+//        kv.encode(this,value)
+//    }
+
 }

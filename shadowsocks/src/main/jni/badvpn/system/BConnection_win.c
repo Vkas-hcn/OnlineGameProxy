@@ -36,7 +36,7 @@
 
 #include <generated/blog_channel_BConnection.h>
 
-#define LISTEN_BACKLOG 128
+#define LISTEN_BACKLogUtils 128
 
 struct sys_addr {
     int len;
@@ -482,7 +482,7 @@ int BListener_InitFrom (BListener *o, struct BLisCon_from from,
     }
     
     // listen
-    if (listen(o->sock, LISTEN_BACKLOG) < 0) {
+    if (listen(o->sock, LISTEN_BACKLogUtils) < 0) {
         BLog(BLOG_ERROR, "listen failed");
         goto fail1;
     }

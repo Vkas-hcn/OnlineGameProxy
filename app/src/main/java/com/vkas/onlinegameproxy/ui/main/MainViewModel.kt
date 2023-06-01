@@ -1,38 +1,56 @@
 package com.vkas.onlinegameproxy.ui.main
 
-import android.app.Activity
 import android.app.AlertDialog
-import android.app.Application
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.lifecycleScope
+import com.github.shadowsocks.Core
+import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
 import com.google.gson.reflect.TypeToken
 import com.vkas.onlinegameproxy.R
+import com.vkas.onlinegameproxy.ad.OgLoadConnectAd
 import com.vkas.onlinegameproxy.app.App.Companion.mmkvOg
 import com.vkas.onlinegameproxy.base.AdBase
 import com.vkas.onlinegameproxy.bean.OgIp2Bean
 import com.vkas.onlinegameproxy.bean.OgIpBean
 import com.vkas.onlinegameproxy.bean.OgVpnBean
 import com.vkas.onlinegameproxy.key.Constant
-import com.vkas.onlinegameproxy.utils.KLog
+import com.vkas.onlinegameproxy.ui.list.ListActivity
+import com.vkas.onlinegameproxy.utils.KLogUtils
 import com.vkas.onlinegameproxy.utils.MmkvUtils
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils
 import com.xuexiang.xui.utils.Utils
 import com.xuexiang.xutil.XUtil
 import com.xuexiang.xutil.net.JsonUtil
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.*
 
-class MainViewModel: ViewModel(){
+class MainViewModel : ViewModel() {
+    //当前执行连接操作
+     var performConnectionOperations: Boolean = false
+    var state = BaseService.State.Idle
+    val vpnStateLive: MutableLiveData<Int> by lazy {
+        MutableLiveData<Int>()
+    }
+
     //初始化服务器数据
     val liveInitializeServerData: MutableLiveData<OgVpnBean> by lazy {
         MutableLiveData<OgVpnBean>()
@@ -132,7 +150,6 @@ class MainViewModel: ViewModel(){
                 data,
                 object : TypeToken<OgIpBean?>() {}.type
             )
-            KLog.e("code", "ptIpBean.country_code==${ptIpBean.country_code}")
             return ptIpBean.country_code == "IR" || ptIpBean.country_code == "CN" ||
                     ptIpBean.country_code == "HK" || ptIpBean.country_code == "MO"
         }
@@ -142,9 +159,6 @@ class MainViewModel: ViewModel(){
         val data = mmkvOg.decodeString(Constant.IP_INFORMATION2)
         val locale = Locale.getDefault()
         val language = locale.language
-        KLog.e("state", "language2=${language}")
-
-        KLog.e("state", "data2=${data}===isNullOrEmpty=${Utils.isNullOrEmpty(data)}")
         return if (Utils.isNullOrEmpty(data)) {
             language == "zh" || language == "fa"
         } else {
@@ -152,7 +166,6 @@ class MainViewModel: ViewModel(){
                 data,
                 object : TypeToken<OgIp2Bean?>() {}.type
             )
-            KLog.e("state", "OgIp2Bean.cc==${ptIpBean.cc}")
             return ptIpBean.cc == "IR" || ptIpBean.cc == "CN" ||
                     ptIpBean.cc == "HK" || ptIpBean.cc == "MO"
         }
@@ -185,49 +198,128 @@ class MainViewModel: ViewModel(){
             Toast.makeText(context, "Unable to open link", Toast.LENGTH_SHORT).show()
         }
     }
-    /**
-     *  清空所有广告重新加载
-     */
-    fun clearAllAdsReload(activity: Activity) {
-        // 开屏
-        AdBase.getOpenInstance().appAdDataOg = null
-        AdBase.getOpenInstance().adIndexOg = 0
-        AdBase.getOpenInstance().advertisementLoadingOg(activity)
-        // 首页原生
-        AdBase.getHomeInstance().appAdDataOg = null
-        AdBase.getHomeInstance().adIndexOg = 0
-        AdBase.getHomeInstance().advertisementLoadingOg(activity)
-        // 结果页原生
-        AdBase.getResultInstance().appAdDataOg = null
-        AdBase.getResultInstance().adIndexOg = 0
-        AdBase.getResultInstance().advertisementLoadingOg(activity)
-        // 连接插屏
-        AdBase.getConnectInstance().appAdDataOg = null
-        AdBase.getConnectInstance().adIndexOg = 0
-        AdBase.getConnectInstance().advertisementLoadingOg(activity)
-        // 服务器页插屏
-        AdBase.getBackInstance().appAdDataOg = null
-        AdBase.getBackInstance().adIndexOg = 0
-        AdBase.getBackInstance().advertisementLoadingOg(activity)
+
+
+    fun toShare(activity: MainActivity) {
+        val intent = Intent()
+        intent.action = Intent.ACTION_SEND
+        intent.putExtra(
+            Intent.EXTRA_TEXT,
+            Constant.SHARE_OG_ADDRESS + activity.packageName
+        )
+        intent.type = "text/plain"
+        activity.startActivity(intent)
+    }
+
+    fun toUpgrade(activity: AppCompatActivity) {
+        openInBrowser(
+            activity,
+            Constant.SHARE_OG_ADDRESS + activity.packageName
+        )
     }
 
     /**
-     * 检测广告位加载
+     * 跳转服务器列表
      */
-    fun detectingAdSpaceLoading(activity: Activity) {
-        // 首页原生
-        AdBase.getHomeInstance().advertisementLoadingOg(activity)
-        // 结果页原生
-        AdBase.getResultInstance().advertisementLoadingOg(activity)
-        // 连接插屏
-        AdBase.getConnectInstance().advertisementLoadingOg(activity)
-        // 服务器页插屏
-        AdBase.getBackInstance().advertisementLoadingOg(activity)
+    fun jumpToServerList(activity: AppCompatActivity, name: String) {
+        activity.lifecycleScope.launch {
+            if (activity.lifecycle.currentState != Lifecycle.State.RESUMED) {
+                return@launch
+            }
+            val bundle = Bundle()
+            if (name == "Connected") {
+                bundle.putBoolean(Constant.WHETHER_OG_CONNECTED, true)
+            } else {
+                bundle.putBoolean(Constant.WHETHER_OG_CONNECTED, false)
+            }
+            AdBase.getBackInstance().advertisementLoadingOg(activity)
+            val serviceData = mmkvOg.decodeString("currentServerData", "").toString()
+            bundle.putString(Constant.CURRENT_OG_SERVICE, serviceData)
+            val intent = Intent(activity, ListActivity::class.java)
+            intent.putExtras(bundle)
+            activity.startActivity(intent)
+        }
+    }
+
+    fun clickService(
+        activity: AppCompatActivity,
+        name: String,
+        viewGuideMask: View,
+        proList: ProgressBar
+    ) {
+        activity.lifecycleScope.launch {
+            if (MainFun.vpnState != 1 && !viewGuideMask.isVisible) {
+                if (OnlineGameUtils.deliverServerTransitions()) {
+                    proList.visibility = View.GONE
+                    jumpToServerList(activity, name)
+                } else {
+                    proList.visibility = View.VISIBLE
+                    delay(2000)
+                    proList.visibility = View.GONE
+                }
+            }
+        }
+    }
+
+    /**
+     * 设置fast信息
+     */
+    fun setFastInformation(elVpnBean: OgVpnBean, txtCountry: TextView, imgCountry: ImageView) {
+        MmkvUtils.set(Constant.IP_AFTER_VPN_LINK_OG, elVpnBean.ongpro_ip)
+        MmkvUtils.set(Constant.IP_AFTER_VPN_CITY_OG, elVpnBean.ongpro_city)
+        var data = false
+        if (elVpnBean.og_best == true) {
+            txtCountry.text = Constant.FASTER_OG_SERVER
+            imgCountry.setImageResource(OnlineGameUtils.getFlagThroughCountryEc(Constant.FASTER_OG_SERVER))
+        } else {
+            data = true
+        }
+        if (data) {
+            txtCountry.text = elVpnBean.ongpro_country.toString()
+            imgCountry.setImageResource(OnlineGameUtils.getFlagThroughCountryEc(elVpnBean.ongpro_country.toString()))
+
+        }
+    }
+
+    suspend fun handleThresholdOrEmptyIdOg(activity: AppCompatActivity) {
+        delay(2000L)
+        KLogUtils.d("广告达到上线,或者无广告位")
+
+        val showState = OgLoadConnectAd.displayConnectAdvertisementOg(activity)
+
+        if (showState != "22") {
+            connectOrDisconnectOg(false,activity)
+        }
     }
     /**
-     * 是否是买量用户
+     * 连接或断开
+     * 是否后台关闭（true：后台关闭；false：手动关闭）
      */
-    fun isItABuyingUser(): Boolean {
-        return OnlineGameUtils.isValuableUser()
+     fun connectOrDisconnectOg(isBackgroundClosed: Boolean,activity: AppCompatActivity) {
+        if (whetherParsingIsIllegalIp()) {
+            whetherTheBulletBoxCannotBeUsed(activity)
+            return
+        }
+        performConnectionOperations = if (state.canStop) {
+            if (!isBackgroundClosed) {
+                jumpConnectionResultsPage(false)
+            }
+            if ((activity.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED))) {
+                Core.stopService()
+            } else {
+                vpnStateLive.postValue(2)
+            }
+            false
+        } else {
+            if ((activity.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED))) {
+                Core.startService()
+            } else {
+                vpnStateLive.postValue(0)
+            }
+            if (!isBackgroundClosed) {
+                jumpConnectionResultsPage(true)
+            }
+            true
+        }
     }
 }

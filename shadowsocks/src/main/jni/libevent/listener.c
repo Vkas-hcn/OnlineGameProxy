@@ -107,7 +107,7 @@ struct evconnlistener_iocp {
 
 struct evconnlistener *
 evconnlistener_new_async(struct event_base *base,
-    evconnlistener_cb cb, void *ptr, unsigned flags, int backlog,
+    evconnlistener_cb cb, void *ptr, unsigned flags, int bacKLogUtils,
     evutil_socket_t fd); /* XXXX export this? */
 
 static int event_listener_enable(struct evconnlistener *);
@@ -154,7 +154,7 @@ static void listener_read_cb(evutil_socket_t, short, void *);
 
 struct evconnlistener *
 evconnlistener_new(struct event_base *base,
-    evconnlistener_cb cb, void *ptr, unsigned flags, int backlog,
+    evconnlistener_cb cb, void *ptr, unsigned flags, int bacKLogUtils,
     evutil_socket_t fd)
 {
 	struct evconnlistener_event *lev;
@@ -165,14 +165,14 @@ evconnlistener_new(struct event_base *base,
 			event_get_win32_extension_fns_();
 		if (ext->AcceptEx && ext->GetAcceptExSockaddrs)
 			return evconnlistener_new_async(base, cb, ptr, flags,
-				backlog, fd);
+				bacKLogUtils, fd);
 	}
 #endif
 
-	if (backlog > 0) {
-		if (listen(fd, backlog) < 0)
+	if (bacKLogUtils > 0) {
+		if (listen(fd, bacKLogUtils) < 0)
 			return NULL;
-	} else if (backlog < 0) {
+	} else if (bacKLogUtils < 0) {
 		if (listen(fd, 128) < 0)
 			return NULL;
 	}
@@ -208,7 +208,7 @@ evconnlistener_new(struct event_base *base,
 
 struct evconnlistener *
 evconnlistener_new_bind(struct event_base *base, evconnlistener_cb cb,
-    void *ptr, unsigned flags, int backlog, const struct sockaddr *sa,
+    void *ptr, unsigned flags, int bacKLogUtils, const struct sockaddr *sa,
     int socklen)
 {
 	struct evconnlistener *listener;
@@ -217,7 +217,7 @@ evconnlistener_new_bind(struct event_base *base, evconnlistener_cb cb,
 	int family = sa ? sa->sa_family : AF_UNSPEC;
 	int socktype = SOCK_STREAM | EVUTIL_SOCK_NONBLOCK;
 
-	if (backlog == 0)
+	if (bacKLogUtils == 0)
 		return NULL;
 
 	if (flags & LEV_OPT_CLOSE_ON_EXEC)
@@ -250,7 +250,7 @@ evconnlistener_new_bind(struct event_base *base, evconnlistener_cb cb,
 			goto err;
 	}
 
-	listener = evconnlistener_new(base, cb, ptr, flags, backlog, fd);
+	listener = evconnlistener_new(base, cb, ptr, flags, bacKLogUtils, fd);
 	if (!listener)
 		goto err;
 
@@ -802,7 +802,7 @@ static const struct evconnlistener_ops evconnlistener_iocp_ops = {
 
 struct evconnlistener *
 evconnlistener_new_async(struct event_base *base,
-    evconnlistener_cb cb, void *ptr, unsigned flags, int backlog,
+    evconnlistener_cb cb, void *ptr, unsigned flags, int bacKLogUtils,
     evutil_socket_t fd)
 {
 	struct sockaddr_storage ss;
@@ -816,10 +816,10 @@ evconnlistener_new_async(struct event_base *base,
 		goto err;
 
 	/* XXXX duplicate code */
-	if (backlog > 0) {
-		if (listen(fd, backlog) < 0)
+	if (bacKLogUtils > 0) {
+		if (listen(fd, bacKLogUtils) < 0)
 			goto err;
-	} else if (backlog < 0) {
+	} else if (bacKLogUtils < 0) {
 		if (listen(fd, 128) < 0)
 			goto err;
 	}

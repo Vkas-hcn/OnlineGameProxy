@@ -160,8 +160,8 @@ PACK_STRUCT_END
 #if (LWIP_TCP && ((TCP_MAXRTX > 12) || (TCP_SYNMAXRTX > 12)))
 #error "If you want to use TCP, TCP_MAXRTX and TCP_SYNMAXRTX must less or equal to 12 (due to tcp_backoff table), so, you have to reduce them in your lwipopts.h"
 #endif
-#if (LWIP_TCP && TCP_LISTEN_BACKLOG && ((TCP_DEFAULT_LISTEN_BACKLOG < 0) || (TCP_DEFAULT_LISTEN_BACKLOG > 0xff)))
-#error "If you want to use TCP backlog, TCP_DEFAULT_LISTEN_BACKLOG must fit into an u8_t"
+#if (LWIP_TCP && TCP_LISTEN_BACKLogUtils && ((TCP_DEFAULT_LISTEN_BACKLogUtils < 0) || (TCP_DEFAULT_LISTEN_BACKLogUtils > 0xff)))
+#error "If you want to use TCP bacKLogUtils, TCP_DEFAULT_LISTEN_BACKLogUtils must fit into an u8_t"
 #endif
 #if (LWIP_TCP && LWIP_TCP_SACK_OUT && !TCP_QUEUE_OOSEQ)
 #error "To use LWIP_TCP_SACK_OUT, TCP_QUEUE_OOSEQ needs to be enabled"

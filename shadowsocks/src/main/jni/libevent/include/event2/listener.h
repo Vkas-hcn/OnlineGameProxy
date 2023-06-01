@@ -108,8 +108,8 @@ typedef void (*evconnlistener_errorcb)(struct evconnlistener *, void *);
       callback is set.
    @param ptr A user-supplied pointer to give to the callback.
    @param flags Any number of LEV_OPT_* flags
-   @param backlog Passed to the listen() call to determine the length of the
-      acceptable connection backlog.  Set to -1 for a reasonable default.
+   @param bacKLogUtils Passed to the listen() call to determine the length of the
+      acceptable connection bacKLogUtils.  Set to -1 for a reasonable default.
       Set to 0 if the socket is already listening.
    @param fd The file descriptor to listen on.  It must be a nonblocking
       file descriptor, and it should already be bound to an appropriate
@@ -117,7 +117,7 @@ typedef void (*evconnlistener_errorcb)(struct evconnlistener *, void *);
 */
 EVENT2_EXPORT_SYMBOL
 struct evconnlistener *evconnlistener_new(struct event_base *base,
-    evconnlistener_cb cb, void *ptr, unsigned flags, int backlog,
+    evconnlistener_cb cb, void *ptr, unsigned flags, int bacKLogUtils,
     evutil_socket_t fd);
 /**
    Allocate a new evconnlistener object to listen for incoming TCP connections
@@ -129,14 +129,14 @@ struct evconnlistener *evconnlistener_new(struct event_base *base,
       callback is set.
    @param ptr A user-supplied pointer to give to the callback.
    @param flags Any number of LEV_OPT_* flags
-   @param backlog Passed to the listen() call to determine the length of the
-      acceptable connection backlog.  Set to -1 for a reasonable default.
+   @param bacKLogUtils Passed to the listen() call to determine the length of the
+      acceptable connection bacKLogUtils.  Set to -1 for a reasonable default.
    @param addr The address to listen for connections on.
    @param socklen The length of the address.
  */
 EVENT2_EXPORT_SYMBOL
 struct evconnlistener *evconnlistener_new_bind(struct event_base *base,
-    evconnlistener_cb cb, void *ptr, unsigned flags, int backlog,
+    evconnlistener_cb cb, void *ptr, unsigned flags, int bacKLogUtils,
     const struct sockaddr *sa, int socklen);
 /**
    Disable and deallocate an evconnlistener.

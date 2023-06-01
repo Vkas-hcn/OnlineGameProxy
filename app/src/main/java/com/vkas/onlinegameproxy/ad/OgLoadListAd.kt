@@ -2,6 +2,7 @@ package com.vkas.onlinegameproxy.ad
 
 import android.content.Context
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -12,19 +13,17 @@ import com.google.android.gms.ads.nativead.NativeAdOptions
 import com.google.android.gms.ads.nativead.NativeAdView
 import com.vkas.onlinegameproxy.base.AdBase
 import com.vkas.onlinegameproxy.bean.OgAdBean
-import com.vkas.onlinegameproxy.databinding.ActivityServiceListOgBinding
 import com.vkas.onlinegameproxy.key.Constant.logTagOg
-import com.vkas.onlinegameproxy.utils.KLog
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.recordNumberOfAdClickOg
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.takeSortedAdIDOg
 import java.util.*
 import com.vkas.onlinegameproxy.R
 import com.vkas.onlinegameproxy.app.App
 import com.vkas.onlinegameproxy.bean.OgDetailBean
+import com.vkas.onlinegameproxy.utils.KLogUtils
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.recordNumberOfAdDisplaysOg
 import com.vkas.onlinegameproxy.utils.OnlineOkHttpUtils
-import com.vkas.onlinegameproxy.utils.RoundCornerOutlineProvider
 
 object OgLoadListAd {
     private val adBase = AdBase.getListInstance()
@@ -38,7 +37,7 @@ object OgLoadListAd {
         ogDetailBean = OnlineGameUtils.beforeLoadLinkSettingsOg(adData.ongpro_n_ser.getOrNull(adBase.adIndexOg))
 
         idOg = takeSortedAdIDOg(adBase.adIndexOg, adData.ongpro_n_ser)
-        KLog.d(logTagOg, "list--原生广告id=$idOg;权重=${adData.ongpro_n_ser.getOrNull(adBase.adIndexOg)?.ongpro_y}")
+        KLogUtils.d("list--原生广告id=$idOg;权重=${adData.ongpro_n_ser.getOrNull(adBase.adIndexOg)?.ongpro_y}")
 
         val vpnNativeAds = AdLoader.Builder(
             context.applicationContext,
@@ -57,13 +56,12 @@ object OgLoadListAd {
         vpnNativeAds.withNativeAdOptions(adOptions)
         vpnNativeAds.forNativeAd {
             it.setOnPaidEventListener { adValue ->
-                KLog.e("TBA","home-----setOnPaidEventListener")
                 it.responseInfo?.let { it1 ->
                     OnlineOkHttpUtils.postAdEvent(adValue,
                         it1,ogDetailBean,"native", "ongpro_n_ser")
                 }
                 //重新缓存
-                AdBase.getHomeInstance().advertisementLoadingOg(context)
+                AdBase.getListInstance().advertisementLoadingOg(context)
             }
             adBase.appAdDataOg = it
         }
@@ -76,7 +74,7 @@ object OgLoadListAd {
           """"
                 adBase.isLoadingOg = false
                 adBase.appAdDataOg = null
-                KLog.d(logTagOg, "list--加载vpn原生加载失败: $error")
+                KLogUtils.d("list--加载vpn原生加载失败: $error")
 
                 if (adBase.adIndexOg < adData.ongpro_n_ser.size - 1) {
                     adBase.adIndexOg++
@@ -88,7 +86,7 @@ object OgLoadListAd {
 
             override fun onAdLoaded() {
                 super.onAdLoaded()
-                KLog.d(logTagOg, "list--加载vpn原生广告成功")
+                KLogUtils.d("list--加载vpn原生广告成功")
                 adBase.loadTimeOg = Date().time
                 adBase.isLoadingOg = false
                 adBase.adIndexOg = 0
@@ -96,7 +94,7 @@ object OgLoadListAd {
 
             override fun onAdOpened() {
                 super.onAdOpened()
-                KLog.d(logTagOg, "list--点击vpn原生广告")
+                KLogUtils.d("list--点击vpn原生广告")
                 recordNumberOfAdClickOg()
             }
         }).build().loadAd(AdRequest.Builder().build())
@@ -105,7 +103,7 @@ object OgLoadListAd {
     /**
      * 设置展示list原生广告
      */
-    fun setDisplayListNativeAdOg(activity: AppCompatActivity, binding: ActivityServiceListOgBinding) {
+    fun setDisplayListNativeAdOg(activity: AppCompatActivity, ogAdFrame: FrameLayout,imgOgAdFrame:ImageView) {
         activity.runOnUiThread {
             adBase.appAdDataOg?.let { adData ->
                 if (adData is NativeAd && !adBase.whetherToShowOg && activity.lifecycle.currentState == Lifecycle.State.RESUMED) {
@@ -116,16 +114,17 @@ object OgLoadListAd {
                     val adView = activity.layoutInflater.inflate(R.layout.layout_list_native_og, null) as NativeAdView
                     // 对应原生组件
                     setCorrespondingNativeComponentOg(adData, adView)
-                    binding.ogAdFrame.apply {
+                    ogAdFrame.apply {
                         removeAllViews()
                         addView(adView)
                     }
-                    binding.listAdOg = true
+                    ogAdFrame.visibility = View.VISIBLE
+                    imgOgAdFrame.visibility = View.GONE
                     recordNumberOfAdDisplaysOg()
                     adBase.whetherToShowOg = true
                     App.nativeAdRefreshOg = false
                     adBase.appAdDataOg = null
-                    KLog.d(logTagOg, "list-原生广告--展示")
+                    KLogUtils.d("list-原生广告--展示")
                     ogDetailBean= OnlineGameUtils.afterLoadLinkSettingsOg(ogDetailBean)
                 }
             }

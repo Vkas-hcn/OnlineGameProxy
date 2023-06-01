@@ -369,34 +369,34 @@ netconn_disconnect(struct netconn *conn)
  * Set a TCP netconn into listen mode
  *
  * @param conn the tcp netconn to set to listen mode
- * @param backlog the listen backlog, only used if TCP_LISTEN_BACKLOG==1
+ * @param bacKLogUtils the listen bacKLogUtils, only used if TCP_LISTEN_BACKLogUtils==1
  * @return ERR_OK if the netconn was set to listen (UDP and RAW netconns
  *         don't return any error (yet?))
  */
 err_t
-netconn_listen_with_backlog(struct netconn *conn, u8_t backlog)
+netconn_listen_with_bacKLogUtils(struct netconn *conn, u8_t bacKLogUtils)
 {
 #if LWIP_TCP
   API_MSG_VAR_DECLARE(msg);
   err_t err;
 
-  /* This does no harm. If TCP_LISTEN_BACKLOG is off, backlog is unused. */
-  LWIP_UNUSED_ARG(backlog);
+  /* This does no harm. If TCP_LISTEN_BACKLogUtils is off, bacKLogUtils is unused. */
+  LWIP_UNUSED_ARG(bacKLogUtils);
 
   LWIP_ERROR("netconn_listen: invalid conn", (conn != NULL), return ERR_ARG;);
 
   API_MSG_VAR_ALLOC(msg);
   API_MSG_VAR_REF(msg).conn = conn;
-#if TCP_LISTEN_BACKLOG
-  API_MSG_VAR_REF(msg).msg.lb.backlog = backlog;
-#endif /* TCP_LISTEN_BACKLOG */
+#if TCP_LISTEN_BACKLogUtils
+  API_MSG_VAR_REF(msg).msg.lb.bacKLogUtils = bacKLogUtils;
+#endif /* TCP_LISTEN_BACKLogUtils */
   err = netconn_apimsg(lwip_netconn_do_listen, &API_MSG_VAR_REF(msg));
   API_MSG_VAR_FREE(msg);
 
   return err;
 #else /* LWIP_TCP */
   LWIP_UNUSED_ARG(conn);
-  LWIP_UNUSED_ARG(backlog);
+  LWIP_UNUSED_ARG(bacKLogUtils);
   return ERR_ARG;
 #endif /* LWIP_TCP */
 }
@@ -417,9 +417,9 @@ netconn_accept(struct netconn *conn, struct netconn **new_conn)
   err_t err;
   void *accept_ptr;
   struct netconn *newconn;
-#if TCP_LISTEN_BACKLOG
+#if TCP_LISTEN_BACKLogUtils
   API_MSG_VAR_DECLARE(msg);
-#endif /* TCP_LISTEN_BACKLOG */
+#endif /* TCP_LISTEN_BACKLogUtils */
 
   LWIP_ERROR("netconn_accept: invalid pointer",    (new_conn != NULL),                  return ERR_ARG;);
   *new_conn = NULL;
@@ -442,25 +442,25 @@ netconn_accept(struct netconn *conn, struct netconn **new_conn)
     return ERR_CLSD;
   }
 
-#if TCP_LISTEN_BACKLOG
+#if TCP_LISTEN_BACKLogUtils
   /* need to allocate API message here so empty message pool does not result in event loss
    * see bug #47512: MPU_COMPATIBLE may fail on empty pool */
   API_MSG_VAR_ALLOC(msg);
-#endif /* TCP_LISTEN_BACKLOG */
+#endif /* TCP_LISTEN_BACKLogUtils */
 
   if (netconn_is_nonblocking(conn)) {
     if (sys_arch_mbox_tryfetch(&conn->acceptmbox, &accept_ptr) == SYS_ARCH_TIMEOUT) {
-#if TCP_LISTEN_BACKLOG
+#if TCP_LISTEN_BACKLogUtils
       API_MSG_VAR_FREE(msg);
-#endif /* TCP_LISTEN_BACKLOG */
+#endif /* TCP_LISTEN_BACKLogUtils */
       return ERR_WOULDBLOCK;
     }
   } else {
 #if LWIP_SO_RCVTIMEO
     if (sys_arch_mbox_fetch(&conn->acceptmbox, &accept_ptr, conn->recv_timeout) == SYS_ARCH_TIMEOUT) {
-#if TCP_LISTEN_BACKLOG
+#if TCP_LISTEN_BACKLogUtils
       API_MSG_VAR_FREE(msg);
-#endif /* TCP_LISTEN_BACKLOG */
+#endif /* TCP_LISTEN_BACKLogUtils */
       return ERR_TIMEOUT;
     }
 #else
@@ -472,26 +472,26 @@ netconn_accept(struct netconn *conn, struct netconn **new_conn)
 
   if (lwip_netconn_is_err_msg(accept_ptr, &err)) {
     /* a connection has been aborted: e.g. out of pcbs or out of netconns during accept */
-#if TCP_LISTEN_BACKLOG
+#if TCP_LISTEN_BACKLogUtils
     API_MSG_VAR_FREE(msg);
-#endif /* TCP_LISTEN_BACKLOG */
+#endif /* TCP_LISTEN_BACKLogUtils */
     return err;
   }
   if (accept_ptr == NULL) {
     /* connection has been aborted */
-#if TCP_LISTEN_BACKLOG
+#if TCP_LISTEN_BACKLogUtils
     API_MSG_VAR_FREE(msg);
-#endif /* TCP_LISTEN_BACKLOG */
+#endif /* TCP_LISTEN_BACKLogUtils */
     return ERR_CLSD;
   }
   newconn = (struct netconn *)accept_ptr;
-#if TCP_LISTEN_BACKLOG
+#if TCP_LISTEN_BACKLogUtils
   /* Let the stack know that we have accepted the connection. */
   API_MSG_VAR_REF(msg).conn = newconn;
   /* don't care for the return value of lwip_netconn_do_recv */
   netconn_apimsg(lwip_netconn_do_accepted, &API_MSG_VAR_REF(msg));
   API_MSG_VAR_FREE(msg);
-#endif /* TCP_LISTEN_BACKLOG */
+#endif /* TCP_LISTEN_BACKLogUtils */
 
   *new_conn = newconn;
   /* don't set conn->last_err: it's only ERR_OK, anyway */

@@ -48,8 +48,6 @@ dependencies {
     //androidx项目xui
     implementation 'com.github.xuexiangjys:XUI:1.2.0'
     implementation 'com.github.xuexiangjys.XUtil:xutil-core:2.0.0'
-    implementation 'io.github.jeremyliao:live-event-bus-x:1.8.0'
-    implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:3.0.8'
     implementation 'com.tencent:mmkv:1.2.14'
     api 'cat.ereza:customactivityoncrash:2.3.0'
     implementation rootProject.ext.dependencies.coreKtx
@@ -74,7 +72,17 @@ dependencies {
     kapt rootProject.ext.dependencies.moshiCodegen
     implementation "com.android.installreferrer:installreferrer:2.2"
     implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation 'com.squareup.okhttp3:okhttp:4.10.0' // 要求OkHttp4以上
 
-    implementation("com.squareup.okhttp3:okhttp:4.8.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.8.0")
+    //Apollo依赖RxAndroid2,请使用最新的版本
+    implementation "io.reactivex.rxjava2:rxandroid:2.0.1"
+
+    //Apollo的核心库
+    implementation "com.github.lsxiao.Apollo:core:1.0.2"
+
+    //Apollo的编译时注解处理器
+    annotationProcessor "com.github.lsxiao.Apollo:processor:1.0.2"
+
+    //如果你使用的是kotlin,请使用kapt
+    kapt "com.github.lsxiao.Apollo:processor:1.0.2"
 }

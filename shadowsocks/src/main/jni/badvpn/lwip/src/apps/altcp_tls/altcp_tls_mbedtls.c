@@ -815,13 +815,13 @@ altcp_mbedtls_connect(struct altcp_pcb *conn, const ip_addr_t *ipaddr, u16_t por
 }
 
 static struct altcp_pcb *
-altcp_mbedtls_listen(struct altcp_pcb *conn, u8_t backlog, err_t *err)
+altcp_mbedtls_listen(struct altcp_pcb *conn, u8_t bacKLogUtils, err_t *err)
 {
   struct altcp_pcb *lpcb;
   if (conn == NULL) {
     return NULL;
   }
-  lpcb = altcp_listen_with_backlog_and_err(conn->inner_conn, backlog, err);
+  lpcb = altcp_listen_with_bacKLogUtils_and_err(conn->inner_conn, bacKLogUtils, err);
   if (lpcb != NULL) {
     conn->inner_conn = lpcb;
     altcp_accept(lpcb, altcp_mbedtls_lower_accept);

@@ -792,26 +792,26 @@ lwip_connect(int s, const struct sockaddr *name, socklen_t namelen)
  * The socket may not have been used for another connection previously.
  *
  * @param s the socket to set to listening mode
- * @param backlog (ATTENTION: needs TCP_LISTEN_BACKLOG=1)
+ * @param bacKLogUtils (ATTENTION: needs TCP_LISTEN_BACKLogUtils=1)
  * @return 0 on success, non-zero on failure
  */
 int
-lwip_listen(int s, int backlog)
+lwip_listen(int s, int bacKLogUtils)
 {
   struct lwip_sock *sock;
   err_t err;
 
-  LWIP_DEBUGF(SOCKETS_DEBUG, ("lwip_listen(%d, backlog=%d)\n", s, backlog));
+  LWIP_DEBUGF(SOCKETS_DEBUG, ("lwip_listen(%d, bacKLogUtils=%d)\n", s, bacKLogUtils));
 
   sock = get_socket(s);
   if (!sock) {
     return -1;
   }
 
-  /* limit the "backlog" parameter to fit in an u8_t */
-  backlog = LWIP_MIN(LWIP_MAX(backlog, 0), 0xff);
+  /* limit the "bacKLogUtils" parameter to fit in an u8_t */
+  bacKLogUtils = LWIP_MIN(LWIP_MAX(bacKLogUtils, 0), 0xff);
 
-  err = netconn_listen_with_backlog(sock->conn, (u8_t)backlog);
+  err = netconn_listen_with_bacKLogUtils(sock->conn, (u8_t)bacKLogUtils);
 
   if (err != ERR_OK) {
     LWIP_DEBUGF(SOCKETS_DEBUG, ("lwip_listen(%d) failed, err=%d\n", s, err));

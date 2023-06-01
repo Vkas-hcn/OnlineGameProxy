@@ -94,10 +94,10 @@ err_t altcp_bind(struct altcp_pcb *conn, const ip_addr_t *ipaddr, u16_t port);
 err_t altcp_connect(struct altcp_pcb *conn, const ip_addr_t *ipaddr, u16_t port, altcp_connected_fn connected);
 
 /* return conn for source code compatibility to tcp callback API only */
-struct altcp_pcb *altcp_listen_with_backlog_and_err(struct altcp_pcb *conn, u8_t backlog, err_t *err);
-#define altcp_listen_with_backlog(conn, backlog) altcp_listen_with_backlog_and_err(conn, backlog, NULL)
+struct altcp_pcb *altcp_listen_with_bacKLogUtils_and_err(struct altcp_pcb *conn, u8_t bacKLogUtils, err_t *err);
+#define altcp_listen_with_bacKLogUtils(conn, bacKLogUtils) altcp_listen_with_bacKLogUtils_and_err(conn, bacKLogUtils, NULL)
 /** @ingroup altcp */
-#define altcp_listen(conn) altcp_listen_with_backlog_and_err(conn, TCP_DEFAULT_LISTEN_BACKLOG, NULL)
+#define altcp_listen(conn) altcp_listen_with_bacKLogUtils_and_err(conn, TCP_DEFAULT_LISTEN_BACKLogUtils, NULL)
 
 void altcp_abort(struct altcp_pcb *conn);
 err_t altcp_close(struct altcp_pcb *conn);
@@ -156,8 +156,8 @@ enum tcp_state altcp_dbg_get_tcp_state(struct altcp_pcb *conn);
 #define altcp_bind tcp_bind
 #define altcp_connect tcp_connect
 
-#define altcp_listen_with_backlog_and_err tcp_listen_with_backlog_and_err
-#define altcp_listen_with_backlog tcp_listen_with_backlog
+#define altcp_listen_with_bacKLogUtils_and_err tcp_listen_with_bacKLogUtils_and_err
+#define altcp_listen_with_bacKLogUtils tcp_listen_with_bacKLogUtils
 #define altcp_listen tcp_listen
 
 #define altcp_abort tcp_abort

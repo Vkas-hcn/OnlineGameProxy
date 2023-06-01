@@ -573,7 +573,7 @@ int lwip_getsockopt (int s, int level, int optname, void *optval, socklen_t *opt
 int lwip_setsockopt (int s, int level, int optname, const void *optval, socklen_t optlen);
  int lwip_close(int s);
 int lwip_connect(int s, const struct sockaddr *name, socklen_t namelen);
-int lwip_listen(int s, int backlog);
+int lwip_listen(int s, int bacKLogUtils);
 ssize_t lwip_recv(int s, void *mem, size_t len, int flags);
 ssize_t lwip_read(int s, void *mem, size_t len);
 ssize_t lwip_readv(int s, const struct iovec *iov, int iovcnt);
@@ -620,7 +620,7 @@ int lwip_inet_pton(int af, const char *src, void *dst);
 /** @ingroup socket */
 #define connect(s,name,namelen)                   lwip_connect(s,name,namelen)
 /** @ingroup socket */
-#define listen(s,backlog)                         lwip_listen(s,backlog)
+#define listen(s,bacKLogUtils)                         lwip_listen(s,bacKLogUtils)
 /** @ingroup socket */
 #define recv(s,mem,len,flags)                     lwip_recv(s,mem,len,flags)
 /** @ingroup socket */

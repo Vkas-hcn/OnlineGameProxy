@@ -135,7 +135,7 @@ HISTORY
   ++ New features:
 
   2016-12-31: Simon Goldschmidt
-  * tcp.h/.c: added function tcp_listen_with_backlog_and_err() to get the error
+  * tcp.h/.c: added function tcp_listen_with_bacKLogUtils_and_err() to get the error
     reason when listening fails (bug #49861)
 
   2016-12-20: Erik Andersen
@@ -567,7 +567,7 @@ HISTORY
   2016-03-22: Simon Goldschmidt
   * tcp: changed accept handling to be done internally: the application does not
     have to call tcp_accepted() any more. Instead, when delaying accept (e.g. sockets
-    do), call tcp_backlog_delayed()/tcp_backlog_accepted() (fixes bug #46696)
+    do), call tcp_bacKLogUtils_delayed()/tcp_bacKLogUtils_accepted() (fixes bug #46696)
 
   2016-03-22: Simon Goldschmidt
   * dns.c: ignore dns response parsing errors, only abort resolving for correct
@@ -2386,7 +2386,7 @@ HISTORY
     RECV_BUFSIZE_DEFAULT (fixes bug #23726: pbuf pool exhaustion on slow recv())
 
   2009-02-10 Simon Goldschmidt
-  * tcp.c: fixed bug #25467: Listen backlog is not reset on timeout in SYN_RCVD:
+  * tcp.c: fixed bug #25467: Listen bacKLogUtils is not reset on timeout in SYN_RCVD:
     Accepts_pending is decrease on a corresponding listen pcb when a connection
     in state SYN_RCVD is close.
 
@@ -2526,8 +2526,8 @@ HISTORY
 
   2008-01-04 Frédéric Bernon, Simon Goldschmidt, Jonathan Larmour
   * rawapi.txt, api.h, api_lib.c, api_msg.h, api_msg.c, sockets.c, tcp.h, tcp.c,
-    tcp_in.c, init.c, opt.h: rename backlog options with TCP_ prefix, limit the
-    "backlog" parameter in an u8_t, 0 is interpreted as "smallest queue", add
+    tcp_in.c, init.c, opt.h: rename bacKLogUtils options with TCP_ prefix, limit the
+    "bacKLogUtils" parameter in an u8_t, 0 is interpreted as "smallest queue", add
     documentation in the rawapi.txt file.
 
   2007-12-31 Kieran Mansley (based on patch from Per-Henrik Lundbolm)
@@ -2545,7 +2545,7 @@ HISTORY
 
   2007-12-21 Frédéric Bernon, Simon Goldschmidt, Jonathan Larmour
   * tcp.h, opt.h, api.h, api_msg.h, tcp.c, tcp_in.c, api_lib.c, api_msg.c,
-    sockets.c, init.c: task #7252: Implement TCP listen backlog: Warning: raw API
+    sockets.c, init.c: task #7252: Implement TCP listen bacKLogUtils: Warning: raw API
     applications have to call 'tcp_accepted(pcb)' in their accept callback to
     keep accepting new connections.
 

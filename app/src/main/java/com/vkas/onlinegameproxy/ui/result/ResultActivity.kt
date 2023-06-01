@@ -1,80 +1,120 @@
 package com.vkas.onlinegameproxy.ui.result
 
-import android.os.Bundle
+import android.view.View
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import com.google.gson.reflect.TypeToken
-import com.jeremyliao.liveeventbus.LiveEventBus
-import com.vkas.onlinegameproxy.BR
+import com.lsxiao.apollo.core.annotations.Receive
 import com.vkas.onlinegameproxy.R
 import com.vkas.onlinegameproxy.ad.OgLoadResultAd
 import com.vkas.onlinegameproxy.app.App
 import com.vkas.onlinegameproxy.app.App.Companion.mmkvOg
 import com.vkas.onlinegameproxy.base.AdBase
+import com.vkas.onlinegameproxy.base.BaseActivityNew
 import com.vkas.onlinegameproxy.bean.OgVpnBean
-import com.vkas.onlinegameproxy.databinding.ActivityResultOgBinding
 import com.vkas.onlinegameproxy.key.Constant
-import com.vkas.onlinegameproxy.utils.KLog
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils
 import com.xuexiang.xutil.net.JsonUtil
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
-class ResultActivity : BaseActivity<ActivityResultOgBinding, BaseViewModel>() {
+class ResultActivity : BaseActivityNew() {
     private var isConnectionOg: Boolean = false
 
     //当前服务器
     private lateinit var currentServerBeanOg: OgVpnBean
     private var jobResultOg: Job? = null
-    override fun initContentView(savedInstanceState: Bundle?): Int {
+
+
+    override fun getLayoutId(): Int {
         return R.layout.activity_result_og
     }
 
-    override fun initVariableId(): Int {
-        return BR._all
+    private var vpnState = false
+    private val ogAdFrame: FrameLayout by bindView(R.id.og_ad_frame)
+    private val imgOgAdFrame: ImageView by bindView(R.id.img_og_ad_frame)
+    private val txtTimerOg: TextView by bindView(R.id.txt_timer_og)
+    private val txtTimerOgDis: TextView by bindView(R.id.txt_timer_og_dis)
+    private val tvConnected: TextView by bindView(R.id.tv_connected)
+    private val imgConnectState: ImageView by bindView(R.id.img_connect_state)
+    private val imgCountry: ImageView by bindView(R.id.img_country)
+    private val resultTitle: View by bindView(R.id.result_title)
+
+    private lateinit var titleBack: ImageView
+    private lateinit var titleText: TextView
+
+    fun resultAdOgFun(resultAdOg: Boolean) {
+        if (resultAdOg) {
+            ogAdFrame.visibility = View.VISIBLE
+            imgOgAdFrame.visibility = View.GONE
+        } else {
+            ogAdFrame.visibility = View.GONE
+            imgOgAdFrame.visibility = View.VISIBLE
+        }
     }
 
-    override fun initParam() {
-        super.initParam()
+    fun vpnStateFun(vpnState: Boolean) {
+        if (vpnState) {
+            txtTimerOg.visibility = View.VISIBLE
+            txtTimerOgDis.visibility = View.GONE
+        } else {
+            txtTimerOg.visibility = View.GONE
+            txtTimerOgDis.visibility = View.VISIBLE
+        }
+    }
+
+    override fun initData() {
+        super.initData()
         val bundle = intent.extras
         isConnectionOg = bundle?.getBoolean(Constant.CONNECTION_OG_STATUS) == true
         currentServerBeanOg = JsonUtil.fromJson(
             bundle?.getString(Constant.SERVER_OG_INFORMATION),
             object : TypeToken<OgVpnBean?>() {}.type
         )
-    }
-
-    override fun initToolbar() {
-        super.initToolbar()
-        binding.resultTitle.imgBack.setOnClickListener {
+        titleBack = resultTitle.findViewById(R.id.img_back)
+        titleText = resultTitle.findViewById(R.id.tv_title)
+        titleBack.setOnClickListener {
             finish()
         }
-    }
+//        binding.resultTitle.imgBack.setOnClickListener {
+//            finish()
+//        }
+        resultAdOgFun(isConnectionOg)
+        vpnStateFun(isConnectionOg)
 
-    override fun initData() {
-        super.initData()
-        binding.vpnState = isConnectionOg
         if (isConnectionOg) {
-            binding.vpnState = true
-            binding.tvConnected.text = getString(R.string.connecteds)
+            tvConnected.text = getString(R.string.connecteds)
+            titleText.text = getString(R.string.vpn_connect)
+
         } else {
-            binding.tvConnected.text = getString(R.string.disconnecteds)
-            binding.txtTimerOgDis.text = mmkvOg.decodeString(Constant.LAST_TIME, "").toString()
+            tvConnected.text = getString(R.string.disconnecteds)
+            titleText.text = getString(R.string.vpn_disconnect)
+
+            txtTimerOgDis.text = mmkvOg.decodeString(Constant.LAST_TIME, "").toString()
         }
-        binding.imgCountry.setImageResource(
+        imgCountry.setImageResource(
             OnlineGameUtils.getFlagThroughCountryEc(
                 currentServerBeanOg.ongpro_country.toString()
             )
         )
         AdBase.getResultInstance().whetherToShowOg = false
         initResultAds()
-        displayTimer()
     }
 
     private fun initResultAds() {
-        binding.resultAdOg = false
+        resultAdOgFun(false)
         jobResultOg = lifecycleScope.launch {
             while (isActive) {
-                OgLoadResultAd.setDisplayResultNativeAd(this@ResultActivity, binding)
+                OgLoadResultAd.setDisplayResultNativeAd(
+                    this@ResultActivity,
+                    ogAdFrame,
+                    imgOgAdFrame
+                )
                 if (AdBase.getResultInstance().whetherToShowOg) {
                     jobResultOg?.cancel()
                     jobResultOg = null
@@ -94,7 +134,11 @@ class ResultActivity : BaseActivity<ActivityResultOgBinding, BaseViewModel>() {
             if (App.nativeAdRefreshOg) {
                 AdBase.getResultInstance().whetherToShowOg = false
                 if (AdBase.getResultInstance().appAdDataOg != null) {
-                    OgLoadResultAd.setDisplayResultNativeAd(this@ResultActivity, binding)
+                    OgLoadResultAd.setDisplayResultNativeAd(
+                        this@ResultActivity,
+                        ogAdFrame,
+                        imgOgAdFrame
+                    )
                 } else {
                     AdBase.getResultInstance().advertisementLoadingOg(this@ResultActivity)
                     initResultAds()
@@ -106,25 +150,13 @@ class ResultActivity : BaseActivity<ActivityResultOgBinding, BaseViewModel>() {
     /**
      * 显示计时器
      */
-    private fun displayTimer() {
-        LiveEventBus
-            .get(Constant.TIMER_OG_DATA, String::class.java)
-            .observeForever {
-                KLog.e(
-                    "TAG",
-                    "isConnectionOg=$isConnectionOg---->${
-                        mmkvOg.decodeString(
-                            Constant.LAST_TIME,
-                            ""
-                        )
-                    }"
-                )
-                if (it != "00:00:00") {
-                    if (isConnectionOg) {
-                        binding.txtTimerOg.text = it
-                    }
-                }
+    @Receive(Constant.TIMER_OG_DATA)
+     fun displayTimer(it:String) {
+        if (it != "00:00:00") {
+            if (isConnectionOg) {
+                txtTimerOg.text = it
             }
+        }
     }
 
 }

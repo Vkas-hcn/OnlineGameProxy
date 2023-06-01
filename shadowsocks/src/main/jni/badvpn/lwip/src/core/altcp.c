@@ -195,13 +195,13 @@ altcp_connect(struct altcp_pcb *conn, const ip_addr_t *ipaddr, u16_t port, altcp
 
 /**
  * @ingroup altcp
- * @see tcp_listen_with_backlog_and_err()
+ * @see tcp_listen_with_bacKLogUtils_and_err()
  */
 struct altcp_pcb *
-altcp_listen_with_backlog_and_err(struct altcp_pcb *conn, u8_t backlog, err_t *err)
+altcp_listen_with_bacKLogUtils_and_err(struct altcp_pcb *conn, u8_t bacKLogUtils, err_t *err)
 {
   if (conn && conn->fns && conn->fns->listen) {
-    return conn->fns->listen(conn, backlog, err);
+    return conn->fns->listen(conn, bacKLogUtils, err);
   }
   return NULL;
 }

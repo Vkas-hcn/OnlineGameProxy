@@ -191,10 +191,10 @@ struct tcp_pcb_listen {
   tcp_accept_fn accept;
 #endif /* LWIP_CALLBACK_API */
 
-#if TCP_LISTEN_BACKLOG
-  u8_t backlog;
+#if TCP_LISTEN_BACKLogUtils
+  u8_t bacKLogUtils;
   u8_t accepts_pending;
-#endif /* TCP_LISTEN_BACKLOG */
+#endif /* TCP_LISTEN_BACKLogUtils */
 };
 
 
@@ -220,8 +220,8 @@ struct tcp_pcb {
 #if LWIP_WND_SCALE
 #define TF_WND_SCALE   0x0100U /* Window Scale option enabled */
 #endif
-#if TCP_LISTEN_BACKLOG
-#define TF_BACKLOGPEND 0x0200U /* If this is set, a connection pcb has increased the backlog on its listener */
+#if TCP_LISTEN_BACKLogUtils
+#define TF_BACKLogUtilsPEND 0x0200U /* If this is set, a connection pcb has increased the bacKLogUtils on its listener */
 #endif
 #if LWIP_TCP_TIMESTAMPS
 #define TF_TIMESTAMP   0x0400U   /* Timestamp option enabled */
@@ -303,9 +303,9 @@ struct tcp_pcb {
 
   struct pbuf *refused_data; /* Data previously received but not yet taken by upper layer */
 
-#if LWIP_CALLBACK_API || TCP_LISTEN_BACKLOG
+#if LWIP_CALLBACK_API || TCP_LISTEN_BACKLogUtils
   struct tcp_pcb_listen* listener;
-#endif /* LWIP_CALLBACK_API || TCP_LISTEN_BACKLOG */
+#endif /* LWIP_CALLBACK_API || TCP_LISTEN_BACKLogUtils */
 
 #if LWIP_CALLBACK_API
   /* Function to be called when more send buffer space is available. */
@@ -401,17 +401,17 @@ void             tcp_poll    (struct tcp_pcb *pcb, tcp_poll_fn poll, u8_t interv
 /** @ingroup tcp_raw */
 #define          tcp_nagle_disabled(pcb)  tcp_is_flag_set(pcb, TF_NODELAY)
 
-#if TCP_LISTEN_BACKLOG
-#define          tcp_backlog_set(pcb, new_backlog) do { \
+#if TCP_LISTEN_BACKLogUtils
+#define          tcp_bacKLogUtils_set(pcb, new_bacKLogUtils) do { \
   LWIP_ASSERT("pcb->state == LISTEN (called for wrong pcb?)", (pcb)->state == LISTEN); \
-  ((struct tcp_pcb_listen *)(pcb))->backlog = ((new_backlog) ? (new_backlog) : 1); } while(0)
-void             tcp_backlog_delayed(struct tcp_pcb* pcb);
-void             tcp_backlog_accepted(struct tcp_pcb* pcb);
-#else  /* TCP_LISTEN_BACKLOG */
-#define          tcp_backlog_set(pcb, new_backlog)
-#define          tcp_backlog_delayed(pcb)
-#define          tcp_backlog_accepted(pcb)
-#endif /* TCP_LISTEN_BACKLOG */
+  ((struct tcp_pcb_listen *)(pcb))->bacKLogUtils = ((new_bacKLogUtils) ? (new_bacKLogUtils) : 1); } while(0)
+void             tcp_bacKLogUtils_delayed(struct tcp_pcb* pcb);
+void             tcp_bacKLogUtils_accepted(struct tcp_pcb* pcb);
+#else  /* TCP_LISTEN_BACKLogUtils */
+#define          tcp_bacKLogUtils_set(pcb, new_bacKLogUtils)
+#define          tcp_bacKLogUtils_delayed(pcb)
+#define          tcp_bacKLogUtils_accepted(pcb)
+#endif /* TCP_LISTEN_BACKLogUtils */
 #define          tcp_accepted(pcb) do { LWIP_UNUSED_ARG(pcb); } while(0) /* compatibility define, not needed any more */
 
 void             tcp_recved  (struct tcp_pcb *pcb, u16_t len);
@@ -422,10 +422,10 @@ err_t            tcp_bind_to_netif (struct tcp_pcb *pcb, const char ifname[3]);
 err_t            tcp_connect (struct tcp_pcb *pcb, const ip_addr_t *ipaddr,
                               u16_t port, tcp_connected_fn connected);
 
-struct tcp_pcb * tcp_listen_with_backlog_and_err(struct tcp_pcb *pcb, u8_t backlog, err_t *err);
-struct tcp_pcb * tcp_listen_with_backlog(struct tcp_pcb *pcb, u8_t backlog);
+struct tcp_pcb * tcp_listen_with_bacKLogUtils_and_err(struct tcp_pcb *pcb, u8_t bacKLogUtils, err_t *err);
+struct tcp_pcb * tcp_listen_with_bacKLogUtils(struct tcp_pcb *pcb, u8_t bacKLogUtils);
 /** @ingroup tcp_raw */
-#define          tcp_listen(pcb) tcp_listen_with_backlog(pcb, TCP_DEFAULT_LISTEN_BACKLOG)
+#define          tcp_listen(pcb) tcp_listen_with_bacKLogUtils(pcb, TCP_DEFAULT_LISTEN_BACKLogUtils)
 
 void             tcp_abort (struct tcp_pcb *pcb);
 err_t            tcp_close   (struct tcp_pcb *pcb);

@@ -1346,19 +1346,19 @@
 #endif
 
 /**
- * TCP_LISTEN_BACKLOG: Enable the backlog option for tcp listen pcb.
+ * TCP_LISTEN_BACKLogUtils: Enable the bacKLogUtils option for tcp listen pcb.
  */
-#if !defined TCP_LISTEN_BACKLOG || defined __DOXYGEN__
-#define TCP_LISTEN_BACKLOG              0
+#if !defined TCP_LISTEN_BACKLogUtils || defined __DOXYGEN__
+#define TCP_LISTEN_BACKLogUtils              0
 #endif
 
 /**
- * The maximum allowed backlog for TCP listen netconns.
- * This backlog is used unless another is explicitly specified.
+ * The maximum allowed bacKLogUtils for TCP listen netconns.
+ * This bacKLogUtils is used unless another is explicitly specified.
  * 0xff is the maximum (u8_t).
  */
-#if !defined TCP_DEFAULT_LISTEN_BACKLOG || defined __DOXYGEN__
-#define TCP_DEFAULT_LISTEN_BACKLOG      0xff
+#if !defined TCP_DEFAULT_LISTEN_BACKLogUtils || defined __DOXYGEN__
+#define TCP_DEFAULT_LISTEN_BACKLogUtils      0xff
 #endif
 
 /**

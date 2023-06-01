@@ -284,15 +284,12 @@ object OnlineGameUtils {
                 }
                 `is`.close()
                 conn.disconnect()
-                KLog.e("state", "sb==${sb.toString()}")
                 MmkvUtils.set(Constant.IP_INFORMATION, sb.toString())
             } else {
                 MmkvUtils.set(Constant.IP_INFORMATION, "")
-                KLog.e("state", "code==${code.toString()}")
             }
         } catch (var1: Exception) {
             MmkvUtils.set(Constant.IP_INFORMATION, "")
-            KLog.e("state", "Exception==${var1.message}")
             getIpInformation2()
         }
     }
@@ -314,15 +311,12 @@ object OnlineGameUtils {
                 }
                 `is`.close()
                 conn.disconnect()
-                KLog.e("state", "sb2==${sb.toString()}")
                 MmkvUtils.set(Constant.IP_INFORMATION2, sb.toString())
             } else {
                 MmkvUtils.set(Constant.IP_INFORMATION2, "")
-                KLog.e("state", "code2==${code.toString()}")
             }
         } catch (var1: Exception) {
             MmkvUtils.set(Constant.IP_INFORMATION2, "")
-            KLog.e("state", "Exception2==${var1.message}")
         }
     }
 
@@ -351,9 +345,9 @@ object OnlineGameUtils {
     fun referrer(
         context: Context,
     ) {
-        installReferrer = "gclid"
+//        installReferrer = "gclid"
 //        installReferrer = "fb4a"
-        MmkvUtils.set(Constant.INSTALL_REFERRER, installReferrer)
+//        MmkvUtils.set(Constant.INSTALL_REFERRER, installReferrer)
         try {
             val referrerClient = InstallReferrerClient.newBuilder(context).build()
             referrerClient.startConnection(object : InstallReferrerStateListener {
@@ -370,8 +364,7 @@ object OnlineGameUtils {
                             }
                             installReferrer =
                                 referrerClient.installReferrer.installReferrer ?: ""
-//                            MmkvUtils.set(Constant.INSTALL_REFERRER, installReferrer)
-                            KLog.e("TAG", "installReferrer====${installReferrer}")
+                            MmkvUtils.set(Constant.INSTALL_REFERRER, installReferrer)
                             referrerClient.endConnection()
                             return
                         }
@@ -396,7 +389,6 @@ object OnlineGameUtils {
 
     fun isValuableUser(): Boolean {
         val referrer = mmkvOg.decodeString(Constant.INSTALL_REFERRER) ?: ""
-        KLog.e("state", "referrer==${referrer}")
         return isFacebookUser()
                 || referrer.contains("gclid", true)
                 || referrer.contains("not%20set", true)
@@ -487,7 +479,6 @@ object OnlineGameUtils {
             ufDetailBean?.ongpro_show_ip = ipAfterVpnLink ?: ""
             ufDetailBean?.ongpro_show_city = ipAfterVpnCity ?: ""
         } else {
-            KLog.e("TAG", "getIpBean().ip${getIpBean().ip}")
             ufDetailBean?.ongpro_show_ip = getIpBean().ip.toString()
             ufDetailBean?.ongpro_show_city = "null"
         }

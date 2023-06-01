@@ -315,9 +315,9 @@ err_t   netconn_bind(struct netconn *conn, const ip_addr_t *addr, u16_t port);
 err_t   netconn_bind_if(struct netconn *conn, u8_t if_idx);
 err_t   netconn_connect(struct netconn *conn, const ip_addr_t *addr, u16_t port);
 err_t   netconn_disconnect (struct netconn *conn);
-err_t   netconn_listen_with_backlog(struct netconn *conn, u8_t backlog);
+err_t   netconn_listen_with_bacKLogUtils(struct netconn *conn, u8_t bacKLogUtils);
 /** @ingroup netconn_tcp */
-#define netconn_listen(conn) netconn_listen_with_backlog(conn, TCP_DEFAULT_LISTEN_BACKLOG)
+#define netconn_listen(conn) netconn_listen_with_bacKLogUtils(conn, TCP_DEFAULT_LISTEN_BACKLogUtils)
 err_t   netconn_accept(struct netconn *conn, struct netconn **new_conn);
 err_t   netconn_recv(struct netconn *conn, struct netbuf **new_buf);
 err_t   netconn_recv_udp_raw_netbuf(struct netconn *conn, struct netbuf **new_buf);

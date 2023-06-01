@@ -2,6 +2,7 @@ package com.vkas.onlinegameproxy.ad
 
 import android.content.Context
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -15,9 +16,8 @@ import com.vkas.onlinegameproxy.app.App
 import com.vkas.onlinegameproxy.base.AdBase
 import com.vkas.onlinegameproxy.bean.OgAdBean
 import com.vkas.onlinegameproxy.bean.OgDetailBean
-import com.vkas.onlinegameproxy.databinding.ActivityResultOgBinding
 import com.vkas.onlinegameproxy.key.Constant.logTagOg
-import com.vkas.onlinegameproxy.utils.KLog
+import com.vkas.onlinegameproxy.utils.KLogUtils
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.recordNumberOfAdClickOg
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.recordNumberOfAdDisplaysOg
@@ -28,19 +28,24 @@ import java.util.*
 
 object OgLoadResultAd {
     private val adBase = AdBase.getResultInstance()
+
     // 广告ID
     var idOg = ""
     var ogDetailBean: OgDetailBean? = null
+
     /**
      * 加载result原生广告
      */
     fun loadResultAdvertisementOg(context: Context, adData: OgAdBean) {
-        ogDetailBean = OnlineGameUtils.beforeLoadLinkSettingsOg(adData.ongpro_n_result.getOrNull(
-            adBase.adIndexOg))
+        ogDetailBean = OnlineGameUtils.beforeLoadLinkSettingsOg(
+            adData.ongpro_n_result.getOrNull(
+                adBase.adIndexOg
+            )
+        )
 
         idOg = takeSortedAdIDOg(adBase.adIndexOg, adData.ongpro_n_result)
-        KLog.d(
-            logTagOg,
+        KLogUtils.d(
+
             "result---原生广告id=$idOg;权重=${adData.ongpro_n_result.getOrNull(adBase.adIndexOg)?.ongpro_y}"
         )
 
@@ -61,10 +66,11 @@ object OgLoadResultAd {
         homeNativeAds.withNativeAdOptions(adOelions)
         homeNativeAds.forNativeAd {
             it.setOnPaidEventListener { adValue ->
-                KLog.e("TBA","home-----setOnPaidEventListener")
                 it.responseInfo?.let { it1 ->
-                    OnlineOkHttpUtils.postAdEvent(adValue,
-                        it1, ogDetailBean,"native", "ongpro_n_result")
+                    OnlineOkHttpUtils.postAdEvent(
+                        adValue,
+                        it1, ogDetailBean, "native", "ongpro_n_result"
+                    )
                 }
                 //重新缓存
                 AdBase.getResultInstance().advertisementLoadingOg(context)
@@ -80,7 +86,7 @@ object OgLoadResultAd {
           """"
                 adBase.isLoadingOg = false
                 adBase.appAdDataOg = null
-                KLog.d(logTagOg, "result---加载result原生加载失败: $error")
+                KLogUtils.d("result---加载result原生加载失败: $error")
 
                 if (adBase.adIndexOg < adData.ongpro_n_result.size - 1) {
                     adBase.adIndexOg++
@@ -92,7 +98,7 @@ object OgLoadResultAd {
 
             override fun onAdLoaded() {
                 super.onAdLoaded()
-                KLog.d(logTagOg, "result---加载result原生广告成功")
+                KLogUtils.d("result---加载result原生广告成功")
                 adBase.loadTimeOg = Date().time
                 adBase.isLoadingOg = false
                 adBase.adIndexOg = 0
@@ -100,7 +106,7 @@ object OgLoadResultAd {
 
             override fun onAdOpened() {
                 super.onAdOpened()
-                KLog.d(logTagOg, "result---点击result原生广告")
+                KLogUtils.d("result---点击result原生广告")
                 recordNumberOfAdClickOg()
             }
         }).build().loadAd(AdRequest.Builder().build())
@@ -109,10 +115,14 @@ object OgLoadResultAd {
     /**
      * 设置展示home原生广告
      */
-    fun setDisplayResultNativeAd(activity: AppCompatActivity, binding: ActivityResultOgBinding) {
+    fun setDisplayResultNativeAd(
+        activity: AppCompatActivity,
+        ogAdFrame: FrameLayout,
+        imgOgAdFrame: ImageView
+    ) {
         activity.runOnUiThread {
             adBase.appAdDataOg?.let { adData ->
-                if (adData is NativeAd &&!adBase.whetherToShowOg && activity.lifecycle.currentState == Lifecycle.State.RESUMED) {
+                if (adData is NativeAd && !adBase.whetherToShowOg && activity.lifecycle.currentState == Lifecycle.State.RESUMED) {
                     if (activity.isDestroyed || activity.isFinishing || activity.isChangingConfigurations) {
                         adData.destroy()
                         return@let
@@ -121,16 +131,17 @@ object OgLoadResultAd {
                         .inflate(R.layout.layout_result_native_og, null) as NativeAdView
                     // 对应原生组件
                     setResultNativeComponent(adData, adView)
-                    binding.ogAdFrame.apply {
+                    ogAdFrame.apply {
                         removeAllViews()
                         addView(adView)
                     }
-                    binding.resultAdOg = true
+                    ogAdFrame.visibility = View.VISIBLE
+                    imgOgAdFrame.visibility = View.GONE
                     recordNumberOfAdDisplaysOg()
                     adBase.whetherToShowOg = true
                     App.nativeAdRefreshOg = false
                     adBase.appAdDataOg = null
-                    KLog.d(logTagOg, "result--原生广告--展示")
+                    KLogUtils.d("result--原生广告--展示")
                     ogDetailBean = OnlineGameUtils.afterLoadLinkSettingsOg(ogDetailBean)
                 }
             }
@@ -149,8 +160,8 @@ object OgLoadResultAd {
             adView.mediaView?.apply { setImageScaleType(ImageView.ScaleType.CENTER_CROP) }
                 ?.setMediaContent(it)
         }
-        adView.mediaView?.clipToOutline=true
-        adView.mediaView?.outlineProvider= RoundCornerOutlineProvider(8f)
+        adView.mediaView?.clipToOutline = true
+        adView.mediaView?.outlineProvider = RoundCornerOutlineProvider(8f)
         // These assets aren't guaranteed to be in every UnifiedNativeAd, so it's important to
         // check before trying to display them.
         if (nativeAd.body == null) {

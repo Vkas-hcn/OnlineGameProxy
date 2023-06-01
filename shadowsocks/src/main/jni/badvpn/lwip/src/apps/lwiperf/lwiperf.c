@@ -615,7 +615,7 @@ lwiperf_start_tcp_server(const ip_addr_t *local_addr, u16_t local_port,
   if (pcb != NULL) {
     err = tcp_bind(pcb, local_addr, local_port);
     if (err == ERR_OK) {
-      s->server_pcb = tcp_listen_with_backlog(pcb, 1);
+      s->server_pcb = tcp_listen_with_bacKLogUtils(pcb, 1);
     }
   }
   if (s->server_pcb == NULL) {

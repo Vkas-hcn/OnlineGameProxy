@@ -247,7 +247,7 @@ object OnlineTbaUtils {
         runCatching {
             val adInfo = AdvertisingIdClient.getAdvertisingIdInfo(activity)
             MmkvUtils.set(Constant.GOOGLE_ADVERTISING_ID_OG, adInfo.id)
-            KLog.e("TBA", "googleAdId---->${adInfo.id}")
+            KLogUtils.e( "googleAdId---->${adInfo.id}")
         }.getOrNull()
     }
 

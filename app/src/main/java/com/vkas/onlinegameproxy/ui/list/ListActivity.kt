@@ -3,34 +3,42 @@ package com.vkas.onlinegameproxy.ui.list
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.graphics.Color
-import android.os.Bundle
 import android.view.KeyEvent
+import android.view.View
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.reflect.TypeToken
-import com.jeremyliao.liveeventbus.LiveEventBus
-import com.vkas.onlinegameproxy.BR
+import com.lsxiao.apollo.core.Apollo
+import com.lsxiao.apollo.core.annotations.Receive
 import com.vkas.onlinegameproxy.R
 import com.vkas.onlinegameproxy.ad.OgLoadBackAd
 import com.vkas.onlinegameproxy.ad.OgLoadListAd
 import com.vkas.onlinegameproxy.app.App
 import com.vkas.onlinegameproxy.base.AdBase
+import com.vkas.onlinegameproxy.base.BaseActivityNew
 import com.vkas.onlinegameproxy.bean.OgVpnBean
 import com.vkas.onlinegameproxy.bean.OpRemoteBean
-import com.vkas.onlinegameproxy.databinding.ActivityServiceListOgBinding
 import com.vkas.onlinegameproxy.key.Constant
 import com.vkas.onlinegameproxy.key.Constant.logTagOg
-import com.vkas.onlinegameproxy.utils.KLog
+import com.vkas.onlinegameproxy.utils.KLogUtils
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils
 import com.xuexiang.xutil.net.JsonUtil
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
-class ListActivity : BaseActivity<ActivityServiceListOgBinding, ListViewModel>() {
+class ListActivity : BaseActivityNew() {
     private lateinit var selectAdapter: ListAdapter
     private var ecServiceBeanList: MutableList<OgVpnBean> = ArrayList()
-    private lateinit var adBean: OgVpnBean
     private var jobBackOg: Job? = null
+    val model by viewModels<ListViewModel>()
 
     //选中服务器
     private lateinit var checkSkServiceBean: OgVpnBean
@@ -39,17 +47,19 @@ class ListActivity : BaseActivity<ActivityServiceListOgBinding, ListViewModel>()
 
     // 是否连接
     private var whetherToConnect = false
+    private val ogAdFrame: FrameLayout by bindView(R.id.og_ad_frame)
+    private val imgOgAdFrame: ImageView by bindView(R.id.img_og_ad_frame)
+    private val recyclerSelect: RecyclerView by bindView(R.id.recycler_select)
+    private lateinit var selectTitleOg: View
+    private lateinit var titleBack: ImageView
+    private lateinit var titleText: TextView
 
-    override fun initContentView(savedInstanceState: Bundle?): Int {
+    override fun getLayoutId(): Int {
         return R.layout.activity_service_list_og
     }
 
-    override fun initVariableId(): Int {
-        return BR._all
-    }
-
-    override fun initParam() {
-        super.initParam()
+    override fun initData() {
+        super.initData()
         val bundle = intent.extras
         checkSkServiceBean = OgVpnBean()
         whetherToConnect = bundle?.getBoolean(Constant.WHETHER_OG_CONNECTED) == true
@@ -58,45 +68,45 @@ class ListActivity : BaseActivity<ActivityServiceListOgBinding, ListViewModel>()
             object : TypeToken<OgVpnBean?>() {}.type
         )
         checkSkServiceBeanClick = checkSkServiceBean
-    }
 
-    override fun initToolbar() {
-        super.initToolbar()
-        liveEventBusReceive()
-        binding.selectTitleOg.tvTitle.text = getString(R.string.locations)
-        binding.selectTitleOg.imgBack.setOnClickListener {
+        selectTitleOg = findViewById(R.id.select_title_og)
+        titleBack = selectTitleOg.findViewById(R.id.img_back)
+        titleText = selectTitleOg.findViewById(R.id.tv_title)
+        titleBack.setOnClickListener {
             returnToHomePage()
         }
-    }
+        titleText.text = getString(R.string.locations)
 
-    override fun initData() {
-        super.initData()
         initSelectRecyclerView()
-        viewModel.getServerListData()
+        model.getServerListData()
         AdBase.getBackInstance().whetherToShowOg = false
         AdBase.getListInstance().whetherToShowOg = false
         initListAds()
-    }
-
-    override fun initViewObservable() {
-        super.initViewObservable()
         getServerListData()
+
     }
 
-    private fun liveEventBusReceive() {
+    @Receive(Constant.PLUG_OG_BACK_AD_SHOW)
+    fun liveEventBusReceive(it: Boolean) {
         //插屏关闭后跳转
-        LiveEventBus
-            .get(Constant.PLUG_OG_BACK_AD_SHOW, Boolean::class.java)
-            .observeForever {
-                finish()
-            }
+        finish()
+    }
+
+    fun listAdOgFun(listAdOg: Boolean) {
+        if (listAdOg) {
+            ogAdFrame.visibility = View.VISIBLE
+            imgOgAdFrame.visibility = View.GONE
+        } else {
+            ogAdFrame.visibility = View.GONE
+            imgOgAdFrame.visibility = View.VISIBLE
+        }
     }
 
     private fun initListAds() {
-        binding.listAdOg = false
+        listAdOgFun(false)
         jobBackOg = lifecycleScope.launch {
             while (isActive) {
-                OgLoadListAd.setDisplayListNativeAdOg(this@ListActivity, binding)
+                OgLoadListAd.setDisplayListNativeAdOg(this@ListActivity, ogAdFrame, imgOgAdFrame)
                 if (AdBase.getListInstance().whetherToShowOg) {
                     jobBackOg?.cancel()
                     jobBackOg = null
@@ -108,7 +118,7 @@ class ListActivity : BaseActivity<ActivityServiceListOgBinding, ListViewModel>()
 
 
     private fun getServerListData() {
-        viewModel.liveServerListData.observe(this, {
+        model.liveServerListData.observe(this, {
             echoServer(it)
         })
     }
@@ -117,13 +127,13 @@ class ListActivity : BaseActivity<ActivityServiceListOgBinding, ListViewModel>()
         selectAdapter = ListAdapter(ecServiceBeanList)
         val layoutManager = LinearLayoutManager(this)
         layoutManager.orientation = LinearLayoutManager.VERTICAL
-        binding.recyclerSelect.layoutManager = layoutManager
-        binding.recyclerSelect.adapter = selectAdapter
-        selectAdapter.setOnItemClickListener { _, _, pos ->
-            run {
-                selectServer(pos)
+        recyclerSelect.layoutManager = layoutManager
+        recyclerSelect.adapter = selectAdapter
+        selectAdapter.setOnItemClickListener(object : ListAdapter.OnItemClickListener {
+            override fun onItemClick(position: Int) {
+                selectServer(position)
             }
-        }
+        })
     }
 
 
@@ -134,8 +144,8 @@ class ListActivity : BaseActivity<ActivityServiceListOgBinding, ListViewModel>()
         if (ecServiceBeanList[position].ongpro_ip == checkSkServiceBeanClick.ongpro_ip && ecServiceBeanList[position].og_best == checkSkServiceBeanClick.og_best) {
             if (!whetherToConnect) {
                 finish()
-                LiveEventBus.get<OgVpnBean>(Constant.NOT_CONNECTED_OG_RETURN)
-                    .post(checkSkServiceBean)
+                Apollo.emit(Constant.NOT_CONNECTED_OG_RETURN, checkSkServiceBean)
+
             }
             return
         }
@@ -163,8 +173,8 @@ class ListActivity : BaseActivity<ActivityServiceListOgBinding, ListViewModel>()
                 ecServiceBeanList[0].og_check = false
             }
         }
-        KLog.e("TAG", "ecServiceBeanList=${JsonUtil.toJson(ecServiceBeanList)}")
-        selectAdapter.setList(ecServiceBeanList)
+//        selectAdapter.setList(ecServiceBeanList)
+        selectAdapter.addData(ecServiceBeanList)
     }
 
     /**
@@ -173,7 +183,7 @@ class ListActivity : BaseActivity<ActivityServiceListOgBinding, ListViewModel>()
     private fun returnToHomePage() {
         App.isAppOpenSameDayOg()
         if (OnlineGameUtils.isThresholdReached()) {
-            KLog.d(logTagOg, "广告达到上线")
+            KLogUtils.d("广告达到上线")
             finish()
             return
         }
@@ -192,8 +202,8 @@ class ListActivity : BaseActivity<ActivityServiceListOgBinding, ListViewModel>()
     private fun showDisconnectDialog() {
         if (!whetherToConnect) {
             finish()
-            LiveEventBus.get<OgVpnBean>(Constant.NOT_CONNECTED_OG_RETURN)
-                .post(checkSkServiceBean)
+            Apollo.emit(Constant.NOT_CONNECTED_OG_RETURN, checkSkServiceBean)
+
             return
         }
         val dialog: AlertDialog? = AlertDialog.Builder(this)
@@ -210,8 +220,8 @@ class ListActivity : BaseActivity<ActivityServiceListOgBinding, ListViewModel>()
             .setPositiveButton("DISCONNECT") { dialog, _ ->
                 dialog.dismiss()
                 finish()
-                LiveEventBus.get<OgVpnBean>(Constant.CONNECTED_OG_RETURN)
-                    .post(checkSkServiceBean)
+                Apollo.emit(Constant.CONNECTED_OG_RETURN, checkSkServiceBean)
+
             }.create()
         val params = dialog!!.window!!.attributes
         params.width = 200
@@ -233,9 +243,13 @@ class ListActivity : BaseActivity<ActivityServiceListOgBinding, ListViewModel>()
             if (App.nativeAdRefreshOg) {
                 AdBase.getListInstance().whetherToShowOg = false
                 if (AdBase.getListInstance().appAdDataOg != null) {
-                    OgLoadListAd.setDisplayListNativeAdOg(this@ListActivity, binding)
+                    OgLoadListAd.setDisplayListNativeAdOg(
+                        this@ListActivity,
+                        ogAdFrame,
+                        imgOgAdFrame
+                    )
                 } else {
-                    AdBase.getResultInstance().advertisementLoadingOg(this@ListActivity)
+                    AdBase.getListInstance().advertisementLoadingOg(this@ListActivity)
                     initListAds()
                 }
             }

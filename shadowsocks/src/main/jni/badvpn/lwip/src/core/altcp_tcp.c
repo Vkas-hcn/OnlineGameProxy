@@ -260,7 +260,7 @@ altcp_tcp_connect(struct altcp_pcb *conn, const ip_addr_t *ipaddr, u16_t port, a
 }
 
 static struct altcp_pcb *
-altcp_tcp_listen(struct altcp_pcb *conn, u8_t backlog, err_t *err)
+altcp_tcp_listen(struct altcp_pcb *conn, u8_t bacKLogUtils, err_t *err)
 {
   struct tcp_pcb *pcb;
   struct tcp_pcb *lpcb;
@@ -269,7 +269,7 @@ altcp_tcp_listen(struct altcp_pcb *conn, u8_t backlog, err_t *err)
   }
   ALTCP_TCP_ASSERT_CONN(conn);
   pcb = (struct tcp_pcb *)conn->state;
-  lpcb = tcp_listen_with_backlog_and_err(pcb, backlog, err);
+  lpcb = tcp_listen_with_bacKLogUtils_and_err(pcb, bacKLogUtils, err);
   if (lpcb != NULL) {
     conn->state = lpcb;
     tcp_accept(lpcb, altcp_tcp_accept);

@@ -32,7 +32,7 @@
 
 #define BCONNECTION_SEND_LIMIT 2
 #define BCONNECTION_RECV_LIMIT 2
-#define BCONNECTION_LISTEN_BACKLOG 128
+#define BCONNECTION_LISTEN_BACKLogUtils 128
 
 struct BListener_s {
     BReactor *reactor;

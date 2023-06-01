@@ -10,14 +10,14 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.appopen.AppOpenAd
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
-import com.jeremyliao.liveeventbus.LiveEventBus
+import com.lsxiao.apollo.core.Apollo
 import com.vkas.onlinegameproxy.app.App
 import com.vkas.onlinegameproxy.base.AdBase
 import com.vkas.onlinegameproxy.bean.OgAdBean
 import com.vkas.onlinegameproxy.bean.OgDetailBean
 import com.vkas.onlinegameproxy.key.Constant
 import com.vkas.onlinegameproxy.key.Constant.logTagOg
-import com.vkas.onlinegameproxy.utils.KLog
+import com.vkas.onlinegameproxy.utils.KLogUtils
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.recordNumberOfAdClickOg
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.recordNumberOfAdDisplaysOg
@@ -46,9 +46,8 @@ object OgLoadOpenAd {
      * 加载开屏广告
      */
     fun loadOpenAdvertisementOg(context: Context, adData: OgAdBean) {
-        KLog.e("loadOpenAdvertisementOg", "adData().ongpro_o_open=${JsonUtil.toJson(adData.ongpro_o_open)}")
-        KLog.e(
-            "loadOpenAdvertisementOg",
+        KLogUtils.e( "adData().ongpro_o_open=${JsonUtil.toJson(adData.ongpro_o_open)}")
+        KLogUtils.e(
             "id=${JsonUtil.toJson(takeSortedAdIDOg(adBase.adIndexOg, adData.ongpro_o_open))}"
         )
         ogDetailBean = OnlineGameUtils.beforeLoadLinkSettingsOg(
@@ -58,7 +57,7 @@ object OgLoadOpenAd {
         )
         idOg = takeSortedAdIDOg(adBase.adIndexOg, adData.ongpro_o_open)
 
-        KLog.d(logTagOg, "open--开屏广告id=$idOg;权重=${adData.ongpro_o_open.getOrNull(adBase.adIndexOg)?.ongpro_y}")
+        KLogUtils.d( "open--开屏广告id=$idOg;权重=${adData.ongpro_o_open.getOrNull(adBase.adIndexOg)?.ongpro_y}")
         val request = AdRequest.Builder().build()
         AppOpenAd.load(
             context,
@@ -68,7 +67,7 @@ object OgLoadOpenAd {
             object : AppOpenAd.AppOpenAdLoadCallback() {
                 override fun onAdLoaded(ad: AppOpenAd) {
                     ad.setOnPaidEventListener { adValue ->
-                        KLog.e("TBA", "开屏页--开屏广告开始上报")
+                        KLogUtils.e( "开屏页--开屏广告开始上报")
                         OnlineOkHttpUtils.postAdEvent(
                             adValue,
                             ad.responseInfo, ogDetailBean, "open", "ongpro_o_open"
@@ -77,7 +76,7 @@ object OgLoadOpenAd {
                     adBase.loadTimeOg = Date().time
                     adBase.isLoadingOg = false
                     adBase.appAdDataOg = ad
-                    KLog.d(logTagOg, "open--开屏广告加载成功")
+                    KLogUtils.d( "open--开屏广告加载成功")
                 }
 
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
@@ -93,7 +92,7 @@ object OgLoadOpenAd {
                             adBase.isFirstRotation =true
                         }
                     }
-                    KLog.d(logTagOg, "open--开屏广告加载失败: " + loadAdError.message)
+                    KLogUtils.d( "open--开屏广告加载失败: " + loadAdError.message)
                 }
             }
         )
@@ -111,12 +110,11 @@ object OgLoadOpenAd {
             object : FullScreenContentCallback() {
                 //取消全屏内容
                 override fun onAdDismissedFullScreenContent() {
-                    KLog.d(logTagOg, "open--关闭开屏内容")
+                    KLogUtils.d( "open--关闭开屏内容")
                     adBase.whetherToShowOg = false
                     adBase.appAdDataOg = null
                     if (!App.whetherBackgroundOg) {
-                        LiveEventBus.get<Boolean>(Constant.OPEN_CLOSE_JUMP)
-                            .post(true)
+                        Apollo.emit(Constant.OPEN_CLOSE_JUMP, actual = true, sticky = true)
                     }
                 }
 
@@ -124,7 +122,7 @@ object OgLoadOpenAd {
                 override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                     adBase.whetherToShowOg = false
                     adBase.appAdDataOg = null
-                    KLog.d(logTagOg, "open--全屏内容无法显示时调用")
+                    KLogUtils.d( "open--全屏内容无法显示时调用")
                 }
 
                 //显示全屏内容时调用
@@ -133,13 +131,13 @@ object OgLoadOpenAd {
                     adBase.whetherToShowOg = true
                     recordNumberOfAdDisplaysOg()
                     adBase.adIndexOg = 0
-                    KLog.d(logTagOg, "open---开屏广告展示")
+                    KLogUtils.d( "open---开屏广告展示")
                     ogDetailBean = OnlineGameUtils.afterLoadLinkSettingsOg(ogDetailBean)
                 }
 
                 override fun onAdClicked() {
                     super.onAdClicked()
-                    KLog.d(logTagOg, "open---点击open广告")
+                    KLogUtils.d( "open---点击open广告")
                     recordNumberOfAdClickOg()
                 }
             }
@@ -151,11 +149,11 @@ object OgLoadOpenAd {
     fun displayOpenAdvertisementOg(activity: AppCompatActivity): Boolean {
 
         if (adBase.appAdDataOg == null) {
-            KLog.d(logTagOg, "open---开屏广告加载中。。。")
+            KLogUtils.d( "open---开屏广告加载中。。。")
             return false
         }
         if (adBase.whetherToShowOg || activity.lifecycle.currentState != Lifecycle.State.RESUMED) {
-            KLog.d(logTagOg, "open---前一个开屏广告展示中或者生命周期不对")
+            KLogUtils.d( "open---前一个开屏广告展示中或者生命周期不对")
             return false
         }
         if (adBase.appAdDataOg is AppOpenAd) {
@@ -174,8 +172,8 @@ object OgLoadOpenAd {
     fun loadStartInsertAdOg(context: Context, adData: OgAdBean) {
         val adRequest = AdRequest.Builder().build()
         val id = takeSortedAdIDOg(adBase.adIndexOg, adData.ongpro_o_open)
-        KLog.d(
-            logTagOg,
+        KLogUtils.d(
+
             "open--插屏广告id=$id;权重=${adData.ongpro_o_open.getOrNull(adBase.adIndexOg)?.ongpro_y}"
         )
 
@@ -185,7 +183,7 @@ object OgLoadOpenAd {
             adRequest,
             object : InterstitialAdLoadCallback() {
                 override fun onAdFailedToLoad(adError: LoadAdError) {
-                    adError.toString().let { KLog.d(logTagOg, "open---连接插屏加载失败=$it") }
+                    adError.toString().let { KLogUtils.d( "open---连接插屏加载失败=$it") }
                     adBase.isLoadingOg = false
                     adBase.appAdDataOg = null
                     if (adBase.adIndexOg < adData.ongpro_o_open.size - 1) {
@@ -200,7 +198,7 @@ object OgLoadOpenAd {
                     adBase.loadTimeOg = Date().time
                     adBase.isLoadingOg = false
                     adBase.appAdDataOg = interstitialAd
-                    KLog.d(logTagOg, "open--启动页插屏加载完成")
+                    KLogUtils.d( "open--启动页插屏加载完成")
                 }
             })
     }
@@ -216,16 +214,16 @@ object OgLoadOpenAd {
             object : FullScreenContentCallback() {
                 override fun onAdClicked() {
                     // Called when a click is recorded for an ad.
-                    KLog.d(logTagOg, "open--插屏广告点击")
+                    KLogUtils.d( "open--插屏广告点击")
                     recordNumberOfAdClickOg()
                 }
 
                 override fun onAdDismissedFullScreenContent() {
                     // Called when ad is dismissed.
-                    KLog.d(logTagOg, "open--关闭StartInsert插屏广告${App.isBackDataOg}")
+                    KLogUtils.d( "open--关闭StartInsert插屏广告${App.isBackDataOg}")
                     if (!App.whetherBackgroundOg) {
-                        LiveEventBus.get<Boolean>(Constant.OPEN_CLOSE_JUMP)
-                            .post(true)
+                        Apollo.emit(Constant.OPEN_CLOSE_JUMP, actual = true, sticky = true)
+
                     }
                     adBase.appAdDataOg = null
                     adBase.whetherToShowOg = false
@@ -233,14 +231,13 @@ object OgLoadOpenAd {
 
                 override fun onAdFailedToShowFullScreenContent(p0: AdError) {
                     // Called when ad fails to show.
-                    KLog.d(logTagOg, "Ad failed to show fullscreen content.")
+                    KLogUtils.d( "Ad failed to show fullscreen content.")
                     adBase.appAdDataOg = null
                     adBase.whetherToShowOg = false
                 }
 
                 override fun onAdImpression() {
                     // Called when an impression is recorded for an ad.
-                    KLog.e("TAG", "Ad recorded an impression.")
                 }
 
                 override fun onAdShowedFullScreenContent() {
@@ -249,7 +246,7 @@ object OgLoadOpenAd {
                     // Called when ad is shown.
                     adBase.whetherToShowOg = true
                     adBase.adIndexOg = 0
-                    KLog.d(logTagOg, "open----插屏show")
+                    KLogUtils.d( "open----插屏show")
                 }
             }
     }

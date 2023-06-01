@@ -1,6 +1,6 @@
 package com.vkas.onlinegameproxy.utils
 
-import com.jeremyliao.liveeventbus.LiveEventBus
+import com.lsxiao.apollo.core.Apollo
 import com.vkas.onlinegameproxy.key.Constant
 import kotlinx.coroutines.*
 import java.text.DecimalFormat
@@ -19,13 +19,7 @@ object OgTimerThread {
             while (isActive) {
                 skTime++
                 if (!isStopThread) {
-//                    if(skTime==300){
-//                        LiveEventBus.get<Boolean>(Constant.STOP_VPN_CONNECTION)
-//                            .post(true)
-//                    }else{
-                    LiveEventBus.get<String>(Constant.TIMER_OG_DATA)
-                        .post(formatTime(skTime))
-//                    }
+                    Apollo.emit(Constant.TIMER_OG_DATA,formatTime(skTime))
                 }
                 delay(1000)
             }
@@ -50,8 +44,10 @@ object OgTimerThread {
         MmkvUtils.set(Constant.LAST_TIME_SECOND, skTime)
         skTime = 0
         isStopThread = true
-        LiveEventBus.get<String>(Constant.TIMER_OG_DATA)
-            .post(formatTime(0))
+//        LiveEventBus.get<String>(Constant.TIMER_OG_DATA)
+//            .post(formatTime(0))
+        Apollo.emit(Constant.TIMER_OG_DATA,formatTime(0))
+
     }
 
     /**

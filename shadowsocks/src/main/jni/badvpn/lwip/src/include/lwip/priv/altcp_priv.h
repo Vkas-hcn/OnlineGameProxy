@@ -61,7 +61,7 @@ typedef void (*altcp_recved_fn)(struct altcp_pcb *conn, u16_t len);
 typedef err_t (*altcp_bind_fn)(struct altcp_pcb *conn, const ip_addr_t *ipaddr, u16_t port);
 typedef err_t (*altcp_connect_fn)(struct altcp_pcb *conn, const ip_addr_t *ipaddr, u16_t port, altcp_connected_fn connected);
 
-typedef struct altcp_pcb *(*altcp_listen_fn)(struct altcp_pcb *conn, u8_t backlog, err_t *err);
+typedef struct altcp_pcb *(*altcp_listen_fn)(struct altcp_pcb *conn, u8_t bacKLogUtils, err_t *err);
 
 typedef void  (*altcp_abort_fn)(struct altcp_pcb *conn);
 typedef err_t (*altcp_close_fn)(struct altcp_pcb *conn);

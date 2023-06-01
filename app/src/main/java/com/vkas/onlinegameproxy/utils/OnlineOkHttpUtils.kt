@@ -1,23 +1,21 @@
 package com.vkas.onlinegameproxy.utils
+
 import android.content.Context
 import com.android.installreferrer.api.ReferrerDetails
-import com.blankj.utilcode.util.LogUtils
 import com.google.android.gms.ads.AdValue
 import com.google.android.gms.ads.ResponseInfo
 import com.vkas.onlinegameproxy.BuildConfig
 import com.vkas.onlinegameproxy.app.App.Companion.mmkvOg
 import com.vkas.onlinegameproxy.bean.OgDetailBean
 import com.vkas.onlinegameproxy.key.Constant
-import com.vkas.onlinegameproxy.net.HttpApi
-import com.vkas.onlinegameproxy.net.IHttpCallback
-import com.vkas.onlinegameproxy.net.OkHttpApi
-
-import com.xuexiang.xutil.tip.ToastUtils
 import com.xuexiang.xutil.app.AppUtils
 import com.xuexiang.xutil.net.JsonUtil
 import com.xuexiang.xutil.system.DeviceUtils
+import com.vkas.onlinegameproxy.key.Constant.cloak_url_OG
+import com.vkas.onlinegameproxy.net.*
+
+
 object OnlineOkHttpUtils {
-    private val httpApi: HttpApi = OkHttpApi()
     private var urlService = if (BuildConfig.DEBUG) {
         Constant.SERVER_DISTRIBUTION_ADDRESS_TEST_OG
     } else {
@@ -28,23 +26,26 @@ object OnlineOkHttpUtils {
     } else {
         Constant.TBA_ADDRESS_OG
     }
+    val client = OkHttpClientWrapper()
 
     fun getCurrentIp() {
-        httpApi.get(
-            emptyMap(),
-            "https://ifconfig.me/ip",
-            object : IHttpCallback {
-                override fun onSuccess(data: Any?) {
-                    LogUtils.d("success result : ${data.toString()}")
-                    KLog.e("TAG", "IP----->${data}")
-                    MmkvUtils.set(Constant.CURRENT_IP_OG, data.toString())
+        try {
+            val url = "https://ifconfig.me/ip"
+            client.get(url, object : OkHttpClientWrapper.Callback {
+                override fun onSuccess(response: String) {
+                    KLogUtils.e( "IP----->${response}")
+                    MmkvUtils.set(Constant.CURRENT_IP_OG, response)
                 }
 
-                override fun onFailed(error: Any?) {
-                    KLog.e("TAG", "IP--code Exception")
+                override fun onFailure(error: String) {
+                    KLogUtils.e( "IP--code Exception")
                     MmkvUtils.set(Constant.CURRENT_IP_OG, "")
                 }
             })
+        } catch (e: Exception) {
+
+        }
+
     }
 
     /**
@@ -52,20 +53,23 @@ object OnlineOkHttpUtils {
      */
     fun postSessionEvent() {
         val json = OnlineTbaUtils.getSessionJson()
-        KLog.e("TBA", "json--session-->${json}")
-        httpApi.post(
-            json,
-            urlTba,
-            object : IHttpCallback {
-                override fun onSuccess(data: Any?) {
-                    KLog.e("TBA", "session事件上报-成功->")
+        KLogUtils.e( "json--session-->${json}")
+        try {
+            client.post(urlTba, json, object : OkHttpClientWrapper.Callback {
+                override fun onSuccess(response: String) {
+                    KLogUtils.e( "session事件上报-成功->")
+
                 }
 
-                override fun onFailed(error: Any?) {
+                override fun onFailure(error: String) {
                     MmkvUtils.set(Constant.SESSION_JSON_OG, json)
-                    KLog.e("TBA", "session事件上报-失败-->${error}")
+                    KLogUtils.e( "session事件上报-失败-->${error}")
                 }
             })
+        } catch (e: Exception) {
+
+        }
+
     }
 
 
@@ -74,22 +78,23 @@ object OnlineOkHttpUtils {
      */
     fun postInstallEvent(context: Context, referrerDetails: ReferrerDetails) {
         val json = OnlineTbaUtils.install(context, referrerDetails)
-        KLog.e("TBA", "json-install--->${json}")
-        httpApi.post(
-            json,
-            urlTba,
-            object : IHttpCallback {
-                override fun onSuccess(data: Any?) {
-                    KLog.e("TBA", "install事件上报-成功->")
+        KLogUtils.e( "json-install--->${json}")
+        try {
+            client.post(urlTba, json, object : OkHttpClientWrapper.Callback {
+                override fun onSuccess(response: String) {
+                    KLogUtils.e("install事件上报-成功->")
                     MmkvUtils.set(Constant.INSTALL_TYPE_OG, true)
-
                 }
 
-                override fun onFailed(error: Any?) {
+                override fun onFailure(error: String) {
                     MmkvUtils.set(Constant.INSTALL_TYPE_OG, false)
-                    KLog.e("TBA", "install事件上报-失败-->${error}")
+                    KLogUtils.e("install事件上报-失败-->${error}")
                 }
             })
+        } catch (e: Exception) {
+
+        }
+
     }
 
     /**
@@ -103,20 +108,21 @@ object OnlineOkHttpUtils {
         adKey: String,
     ) {
         val json = OnlineTbaUtils.getAdJson(adValue, responseInfo, ogDetailBean, adType, adKey)
-        KLog.e("TBA", "json-Ad---$adKey---->${json}")
-
-        httpApi.post(
-            json,
-            urlTba,
-            object : IHttpCallback {
-                override fun onSuccess(data: Any?) {
-                    KLog.e("TBA", "${adKey}广告事件上报-成功->")
+        KLogUtils.e( "json-Ad---$adKey---->${json}")
+        try {
+            client.post(urlTba, json, object : OkHttpClientWrapper.Callback {
+                override fun onSuccess(response: String) {
+                    KLogUtils.e("${adKey}广告事件上报-成功->")
                 }
 
-                override fun onFailed(error: Any?) {
-                    KLog.e("TBA", "${adKey}广告事件上报-失败-->${error}")
+                override fun onFailure(error: String) {
+                    KLogUtils.e( "${adKey}广告事件上报-失败-->${error}")
                 }
             })
+        } catch (e: Exception) {
+
+        }
+
     }
 
     /**
@@ -126,51 +132,55 @@ object OnlineOkHttpUtils {
 //        if (BuildConfig.DEBUG) {
 //            return
 //        }
-        val data = mmkvOg.decodeString(Constant.BLACKLIST_USER_OG,"")
-        if(!data.isNullOrBlank()){
+        val data = mmkvOg.decodeString(Constant.BLACKLIST_USER_OG, "")
+        if (!data.isNullOrBlank()) {
             return
         }
         val params = OnlineTbaUtils.cloakJson()
-        KLog.e("TBA","json--黑名单-->${JsonUtil.toJson(params)}")
-        httpApi.get(
-            params,
-            Constant.cloak_url_OG,
-            object : IHttpCallback {
-                override fun onSuccess(data: Any?) {
-                    KLog.e("TBA", "Cloak接入--成功--->${data}")
-                    MmkvUtils.set(Constant.BLACKLIST_USER_OG, data.toString())
+        KLogUtils.e("json--黑名单-->${JsonUtil.toJson(params)}")
+
+        try {
+            client.getMap(cloak_url_OG, params, object : OkHttpClientWrapper.Callback {
+                override fun onSuccess(response: String) {
+                    KLogUtils.e( "Cloak接入--成功--->${response}")
+                    MmkvUtils.set(Constant.BLACKLIST_USER_OG, response)
                 }
 
-                override fun onFailed(error: Any?) {
-                    KLog.e("TBA", "Cloak接入--失败-- $error")
+                override fun onFailure(error: String) {
+                    KLogUtils.e("Cloak接入--失败-- $error")
                     MmkvUtils.set(Constant.BLACKLIST_USER_OG, "")
                 }
-            }, true
-        )
+            })
+        } catch (e: Exception) {
+
+        }
+
     }
 
     /**
      * 获取下发数据
      */
     fun getDeliverData() {
-        httpApi.get(
-            mapOf(),
-            urlService,
-            object : IHttpCallback {
-                override fun onSuccess(data: Any?) {
-                    val fastData = OnlineGameUtils.sendResultDecoding(data as String)
+        try {
+            client.get(urlService, object : OkHttpClientWrapper.Callback {
+                override fun onSuccess(response: String) {
+                    val fastData = OnlineGameUtils.sendResultDecoding(response)
                     MmkvUtils.set(Constant.SEND_SERVER_DATA, fastData)
-                    KLog.e("TBA", "获取下发服务器数据-成功->${fastData}")
+                    KLogUtils.e( "获取下发服务器数据-成功->${fastData}")
                     val data = OnlineGameUtils.getDataFromTheServer()
                     val json = JsonUtil.toJson(data)
-                    KLog.e("TBA","下发服务器数据-json=$json")
+                    KLogUtils.e( "下发服务器数据-json=$json")
                 }
 
-                override fun onFailed(error: Any?) {
+                override fun onFailure(error: String) {
                     MmkvUtils.set(Constant.SEND_SERVER_DATA, "")
-                    KLog.e("TBA", "获取下发服务器数据-失败->${error}")
+                    KLogUtils.e("获取下发服务器数据-失败->${error}")
                 }
             })
+        } catch (e: Exception) {
+
+        }
+
     }
 
     /**
@@ -187,17 +197,20 @@ object OnlineOkHttpUtils {
         val ship = "SS"
         val urlParams =
             "https://${ss_ip}/sdft/hio/?bandages=${lot}&island=${island}&rifle=$rifle&lieutenants=$lieutenants&ship=$ship"
-        httpApi.get(
-            mapOf(),
-            urlParams,
-            object : IHttpCallback {
-                override fun onSuccess(data: Any?) {
-                    KLog.e("TBA", "心跳上报-成功->${data}")
+
+        try {
+            client.get(urlParams, object : OkHttpClientWrapper.Callback {
+                override fun onSuccess(response: String) {
+                    KLogUtils.e( "心跳上报-成功->${response}")
                 }
 
-                override fun onFailed(error: Any?) {
-                    KLog.e("TBA", "心跳上报-失败->${error}")
+                override fun onFailure(error: String) {
+                    KLogUtils.e( "心跳上报-失败->${error}")
                 }
             })
+        } catch (e: Exception) {
+
+        }
+
     }
 }

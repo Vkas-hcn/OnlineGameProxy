@@ -527,7 +527,7 @@ int BListener_InitFrom (BListener *o, struct BLisCon_from from,
     }
     
     // listen
-    if (listen(o->fd, BCONNECTION_LISTEN_BACKLOG) < 0) {
+    if (listen(o->fd, BCONNECTION_LISTEN_BACKLogUtils) < 0) {
         BLog(BLOG_ERROR, "listen failed");
         goto fail3;
     }
