@@ -23,7 +23,7 @@ package com.github.shadowsocks.database
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.github.shadowsocks.Core
+import h.V
 import com.github.shadowsocks.database.migration.RecreateSchemaMigration
 import com.github.shadowsocks.utils.Key
 import kotlinx.coroutines.GlobalScope
@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
 abstract class PublicDatabase : RoomDatabase() {
     companion object {
         private val instance by lazy {
-            Room.databaseBuilder(Core.deviceStorage, PublicDatabase::class.java, Key.DB_PUBLIC).apply {
+            Room.databaseBuilder(V.deviceStorage, PublicDatabase::class.java, Key.DB_PUBLIC).apply {
                 addMigrations(
                         Migration3
                 )

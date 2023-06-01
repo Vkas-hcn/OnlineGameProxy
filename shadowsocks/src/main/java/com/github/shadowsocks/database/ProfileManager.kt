@@ -22,7 +22,7 @@ package com.github.shadowsocks.database
 
 import android.database.sqlite.SQLiteCantOpenDatabaseException
 import android.util.LongSparseArray
-import com.github.shadowsocks.Core
+import h.V
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.forEachTry
@@ -68,7 +68,7 @@ object ProfileManager {
         val profiles = if (replace) getAllProfiles()?.associateBy { it.formattedAddress } else null
         val feature = if (replace) {
             profiles?.values?.singleOrNull { it.id == DataStore.profileId }
-        } else Core.currentProfile
+        } else V.currentProfile
         val lazyClear = lazy { clear() }
         jsons.asIterable().forEachTry { json ->
             Profile.parseJson(JsonStreamParser(json.bufferedReader()).asSequence().single(), feature) {
@@ -114,7 +114,7 @@ object ProfileManager {
     fun delProfile(id: Long) {
         check(PrivateDatabase.profileDao.delete(id) == 1)
         listener?.onRemove(id)
-        if (id in Core.activeProfileIds && DataStore.directBootAware) DirectBoot.clean()
+        if (id in V.activeProfileIds && DataStore.directBootAware) DirectBoot.clean()
     }
 
     @Throws(SQLException::class)

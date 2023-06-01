@@ -1,6 +1,6 @@
 package com.github.shadowsocks.plugin
 
-import com.github.shadowsocks.Core.app
+import h.V.app
 
 object NoPlugin : Plugin() {
     override val id: String get() = ""

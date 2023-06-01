@@ -22,8 +22,8 @@ package com.github.shadowsocks.preference
 
 import android.os.Binder
 import androidx.preference.PreferenceDataStore
-import com.github.shadowsocks.BootReceiver
-import com.github.shadowsocks.Core
+import h.N
+import h.V
 import com.github.shadowsocks.database.PrivateDatabase
 import com.github.shadowsocks.database.PublicDatabase
 import com.github.shadowsocks.utils.DirectBoot
@@ -63,9 +63,9 @@ object DataStore : OnPreferenceDataStoreChangeListener {
         get() = publicStore.getLong(Key.id) ?: 0
         set(value) = publicStore.putLong(Key.id, value)
     val persistAcrossReboot get() = publicStore.getBoolean(Key.persistAcrossReboot)
-            ?: BootReceiver.enabled.also { publicStore.putBoolean(Key.persistAcrossReboot, it) }
+            ?: N.enabled.also { publicStore.putBoolean(Key.persistAcrossReboot, it) }
     val canToggleLocked: Boolean get() = publicStore.getBoolean(Key.directBootAware) == true
-    val directBootAware: Boolean get() = Core.directBootSupported && canToggleLocked
+    val directBootAware: Boolean get() = V.directBootSupported && canToggleLocked
     val serviceMode get() = publicStore.getString(Key.serviceMode) ?: Key.modeVpn
     val listenAddress get() = if (publicStore.getBoolean(Key.shareOverLan, false)) "0.0.0.0" else "127.0.0.1"
     var portProxy: Int

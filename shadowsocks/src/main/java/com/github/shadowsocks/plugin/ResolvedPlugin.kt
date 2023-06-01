@@ -24,8 +24,8 @@ import android.content.pm.ComponentInfo
 import android.content.pm.ResolveInfo
 import android.graphics.drawable.Drawable
 import android.os.Build
-import com.github.shadowsocks.Core
-import com.github.shadowsocks.Core.app
+import h.V
+import h.V.app
 import com.github.shadowsocks.plugin.PluginManager.loadString
 import com.github.shadowsocks.utils.signaturesCompat
 
@@ -51,7 +51,7 @@ abstract class ResolvedPlugin(protected val resolveInfo: ResolveInfo) : Plugin()
     override val defaultConfig by lazy { componentInfo.loadString(PluginContract.METADATA_KEY_DEFAULT_CONFIG) }
     override val packageName: String get() = componentInfo.packageName
     override val trusted by lazy {
-        Core.getPackageInfo(packageName).signaturesCompat.any(PluginManager.trustedSignatures::contains)
+        V.getPackageInfo(packageName).signaturesCompat.any(PluginManager.trustedSignatures::contains)
     }
     override val directBootAware get() = Build.VERSION.SDK_INT < 24 || componentInfo.directBootAware
 }

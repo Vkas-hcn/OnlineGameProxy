@@ -24,7 +24,7 @@ import android.os.Build
 import android.os.SystemClock
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.github.shadowsocks.Core.app
+import h.V.app
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Key

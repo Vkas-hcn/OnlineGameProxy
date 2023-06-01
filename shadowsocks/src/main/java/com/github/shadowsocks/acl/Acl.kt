@@ -22,7 +22,7 @@ package com.github.shadowsocks.acl
 
 import android.content.Context
 import androidx.recyclerview.widget.SortedList
-import com.github.shadowsocks.Core
+import h.V
 import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.utils.BaseSorter
 import com.github.shadowsocks.utils.URLSorter
@@ -52,7 +52,7 @@ class Acl {
 
         private val networkAclParser = "^IMPORT_URL\\s*<(.+)>\\s*$".toRegex()
 
-        fun getFile(id: String, context: Context = Core.deviceStorage) = File(context.noBackupFilesDir, "$id.acl")
+        fun getFile(id: String, context: Context = V.deviceStorage) = File(context.noBackupFilesDir, "$id.acl")
 
         var customRules: Acl
             get() {

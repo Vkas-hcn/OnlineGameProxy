@@ -26,7 +26,7 @@ import android.content.Intent
 import android.net.VpnService
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
-import com.github.shadowsocks.Core
+import h.V
 import com.github.shadowsocks.preference.DataStore
 import timber.log.Timber
 
@@ -50,14 +50,14 @@ class StartService : ActivityResultContract<Void?, Boolean>() {
             cachedIntent = intent
             return null
         }
-//        Core.startService()
+//        V.startService()
         return SynchronousResult(false)
     }
 
     override fun createIntent(context: Context, input: Void?) = cachedIntent!!.also { cachedIntent = null }
 
     override fun parseResult(resultCode: Int, intent: Intent?) = if (resultCode == Activity.RESULT_OK) {
-//        Core.startService()
+//        V.startService()
         false
     } else {
         Timber.e("Failed to start VpnService: $intent")

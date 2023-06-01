@@ -28,7 +28,7 @@ import android.net.NetworkRequest
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import com.github.shadowsocks.Core
+import h.V
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -84,7 +84,7 @@ object DefaultNetworkListener {
 
     suspend fun start(key: Any, listener: (Network?) -> Unit) = networkActor.send(NetworkMessage.Start(key, listener))
     suspend fun get() = if (fallback) @TargetApi(23) {
-        Core.connectivity.activeNetwork ?: throw UnknownHostException() // failed to listen, return current if available
+        V.connectivity.activeNetwork ?: throw UnknownHostException() // failed to listen, return current if available
     } else NetworkMessage.Get().run {
         networkActor.send(this)
         response.await()
@@ -124,24 +124,24 @@ object DefaultNetworkListener {
     private fun register() {
         when (Build.VERSION.SDK_INT) {
 //            in 31..Int.MAX_VALUE -> @TargetApi(31) {
-//                Core.connectivity.registerBestMatchingNetworkCallback(request, Callback, mainHandler)
+//                V.connectivity.registerBestMatchingNetworkCallback(request, Callback, mainHandler)
 //            }
             in 28 until 31 -> @TargetApi(28) {  // we want REQUEST here instead of LISTEN
-                Core.connectivity.requestNetwork(request, Callback, mainHandler)
+                V.connectivity.requestNetwork(request, Callback, mainHandler)
             }
             in 26 until 28 -> @TargetApi(26) {
-                Core.connectivity.registerDefaultNetworkCallback(Callback, mainHandler)
+                V.connectivity.registerDefaultNetworkCallback(Callback, mainHandler)
             }
             in 24 until 26 -> @TargetApi(24) {
-                Core.connectivity.registerDefaultNetworkCallback(Callback)
+                V.connectivity.registerDefaultNetworkCallback(Callback)
             }
             else -> try {
                 fallback = false
-                Core.connectivity.requestNetwork(request, Callback)
+                V.connectivity.requestNetwork(request, Callback)
             } catch (e: RuntimeException) {
                 fallback = true     // known bug on API 23: https://stackoverflow.com/a/33509180/2245107
             }
         }
     }
-    private fun unregister() = Core.connectivity.unregisterNetworkCallback(Callback)
+    private fun unregister() = V.connectivity.unregisterNetworkCallback(Callback)
 }

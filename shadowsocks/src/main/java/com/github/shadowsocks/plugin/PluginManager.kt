@@ -35,9 +35,9 @@ import android.system.Os
 import android.util.Base64
 import android.widget.Toast
 import androidx.core.os.bundleOf
-import com.github.shadowsocks.Core
-import com.github.shadowsocks.Core.app
-import com.github.shadowsocks.bg.BaseService
+import h.V
+import h.V.app
+import i.Z
 import com.github.shadowsocks.utils.listenForPackageChanges
 import com.github.shadowsocks.utils.signaturesCompat
 import timber.log.Timber
@@ -46,7 +46,7 @@ import java.io.FileNotFoundException
 
 object PluginManager {
     class PluginNotFoundException(private val plugin: String) : FileNotFoundException(plugin),
-            BaseService.ExpectedException {
+            Z.ExpectedException {
         override fun getLocalizedMessage() = app.getString(com.github.shadowsocks.core.R.string.plugin_unknown, plugin)
     }
 
@@ -60,7 +60,7 @@ object PluginManager {
      * public key yet since it will also automatically trust packages signed by the same signatures, e.g. debug keys.
      */
     val trustedSignatures by lazy {
-        Core.packageInfo.signaturesCompat.toSet() +
+        V.packageInfo.signaturesCompat.toSet() +
                 Signature(Base64.decode(  // @Mygod
                 """
                     |MIIDWzCCAkOgAwIBAgIEUzfv8DANBgkqhkiG9w0BAQsFADBdMQswCQYDVQQGEwJD
@@ -207,7 +207,7 @@ object PluginManager {
     private fun initNativeSlow(cr: ContentResolver, options: PluginOptions, uri: Uri): String? {
         var initialized = false
         fun entryNotFound(): Nothing = throw IndexOutOfBoundsException("Plugin entry binary not found")
-        val pluginDir = File(Core.deviceStorage.noBackupFilesDir, "plugin")
+        val pluginDir = File(V.deviceStorage.noBackupFilesDir, "plugin")
         (cr.query(uri, arrayOf(PluginContract.COLUMN_PATH, PluginContract.COLUMN_MODE), null, null, null)
                 ?: return null).use { cursor ->
             if (!cursor.moveToFirst()) entryNotFound()

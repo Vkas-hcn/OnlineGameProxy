@@ -26,14 +26,13 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import android.os.RemoteException
-import android.util.Log
-import com.github.shadowsocks.bg.BaseService
-import com.github.shadowsocks.bg.ProxyService
-import com.github.shadowsocks.bg.TransproxyService
-import com.github.shadowsocks.bg.VpnService
+import i.Z
+import i.L
+import i.K
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.Key
+import i.VpnService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -44,15 +43,15 @@ import kotlinx.coroutines.launch
 class ShadowsocksConnection(private var listenForDeath: Boolean = false) : ServiceConnection, IBinder.DeathRecipient {
     companion object {
         val serviceClass get() = when (DataStore.serviceMode) {
-            Key.modeProxy -> ProxyService::class
+            Key.modeProxy -> L::class
             Key.modeVpn -> VpnService::class
-            Key.modeTransproxy -> TransproxyService::class
+            Key.modeTransproxy -> K::class
             else -> throw UnknownError()
         }.java
     }
 
     interface Callback {
-        fun stateChanged(state: BaseService.State, profileName: String?, msg: String?)
+        fun stateChanged(state: Z.State, profileName: String?, msg: String?)
         fun trafficUpdated(profileId: Long, stats: TrafficStats) { }
         fun trafficPersisted(profileId: Long) { }
 
@@ -71,7 +70,7 @@ class ShadowsocksConnection(private var listenForDeath: Boolean = false) : Servi
         override fun stateChanged(state: Int, profileName: String?, msg: String?) {
             val callback = callback ?: return
             GlobalScope.launch(Dispatchers.Main.immediate) {
-                callback.stateChanged(BaseService.State.values()[state], profileName, msg)
+                callback.stateChanged(Z.State.values()[state], profileName, msg)
             }
         }
         override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
