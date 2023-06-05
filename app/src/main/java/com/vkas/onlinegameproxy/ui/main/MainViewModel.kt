@@ -1,5 +1,6 @@
 package com.vkas.onlinegameproxy.ui.main
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
@@ -47,6 +48,11 @@ class MainViewModel : ViewModel() {
     //当前执行连接操作
      var performConnectionOperations: Boolean = false
     var state = BaseService.State.Idle
+    //是否执行A方案
+     var whetherToImplementPlanA = false
+
+    //是否执行B方案
+     var whetherToImplementPlanB = false
     val vpnStateLive: MutableLiveData<Int> by lazy {
         MutableLiveData<Int>()
     }
@@ -304,6 +310,7 @@ class MainViewModel : ViewModel() {
             if (!isBackgroundClosed) {
                 jumpConnectionResultsPage(false)
             }
+            detectingAdSpaceLoading(activity)
             if ((activity.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED))) {
                 Core.stopService()
             } else {
@@ -313,6 +320,11 @@ class MainViewModel : ViewModel() {
         } else {
             if ((activity.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED))) {
                 Core.startService()
+
+                if (!whetherToImplementPlanA && !whetherToImplementPlanB) {
+                   clearAllAdsReload(activity)
+                    whetherToImplementPlanA = true
+                }
             } else {
                 vpnStateLive.postValue(0)
             }
@@ -321,5 +333,51 @@ class MainViewModel : ViewModel() {
             }
             true
         }
+    }
+
+    /**
+     *  清空所有广告重新加载
+     */
+    fun clearAllAdsReload(activity: Activity) {
+        // 开屏
+        AdBase.getOpenInstance().appAdDataOg = null
+        AdBase.getOpenInstance().adIndexOg = 0
+        AdBase.getOpenInstance().advertisementLoadingOg(activity)
+        // 首页原生
+        AdBase.getHomeInstance().appAdDataOg = null
+        AdBase.getHomeInstance().adIndexOg = 0
+        AdBase.getHomeInstance().advertisementLoadingOg(activity)
+        // 结果页原生
+        AdBase.getResultInstance().appAdDataOg = null
+        AdBase.getResultInstance().adIndexOg = 0
+        AdBase.getResultInstance().advertisementLoadingOg(activity)
+        // 连接插屏
+        AdBase.getConnectInstance().appAdDataOg = null
+        AdBase.getConnectInstance().adIndexOg = 0
+        AdBase.getConnectInstance().advertisementLoadingOg(activity)
+        // 服务器页插屏
+        AdBase.getBackInstance().appAdDataOg = null
+        AdBase.getBackInstance().adIndexOg = 0
+        AdBase.getBackInstance().advertisementLoadingOg(activity)
+    }
+
+    /**
+     * 检测广告位加载
+     */
+    fun detectingAdSpaceLoading(activity: Activity) {
+        // 首页原生
+        AdBase.getHomeInstance().advertisementLoadingOg(activity)
+        // 结果页原生
+        AdBase.getResultInstance().advertisementLoadingOg(activity)
+        // 连接插屏
+        AdBase.getConnectInstance().advertisementLoadingOg(activity)
+        // 服务器页插屏
+        AdBase.getBackInstance().advertisementLoadingOg(activity)
+    }
+    /**
+     * 是否是买量用户
+     */
+    fun isItABuyingUser(): Boolean {
+        return OnlineGameUtils.isValuableUser()
     }
 }

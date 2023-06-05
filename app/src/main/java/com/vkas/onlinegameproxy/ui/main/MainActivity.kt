@@ -67,6 +67,9 @@ class MainActivity : BaseActivityNew(),
 
     //是否点击连接
     private var clickToConnect: Boolean = false
+
+    val onlineConfig: OpRemoteBean = OnlineGameUtils.getLocalVpnBootData()
+
     val model by viewModels<MainViewModel>()
     private val txtTimerOg: TextView by bindView(R.id.txt_timer_og)
 
@@ -181,7 +184,9 @@ class MainActivity : BaseActivityNew(),
 
         // 显示VPN指南
         showVpnGuide()
-
+        if (onlineConfig.online_start == "1") {
+            judgeVpnScheme()
+        }
         // 跳转结果页
         jumpResultsPageData()
         setServiceData()
@@ -561,6 +566,10 @@ class MainActivity : BaseActivityNew(),
             }
 
             if (App.nativeAdRefreshOg) {
+                //A方案热启动
+                if (onlineConfig.online_start == "2") {
+                    judgeVpnScheme()
+                }
                 changeOfVpnStatus()
                 AdBase.getHomeInstance().whetherToShowOg = false
                 if (AdBase.getHomeInstance().appAdDataOg != null) {
@@ -652,5 +661,60 @@ class MainActivity : BaseActivityNew(),
             }
         }
     }
+    /**
+     * 判断Vpn方案
+     */
+    private fun judgeVpnScheme() {
+        if (!model.isItABuyingUser()) {
+            //非买量用户直接走A方案
+            model.whetherToImplementPlanA = true
+            return
+        }
+        val data = onlineConfig.online_ratio
+        if (Utils.isNullOrEmpty(data)) {
+            KLogUtils.d("判断Vpn方案---默认")
+            vpnCScheme("50")
+        } else {
+            //C
+            model.whetherToImplementPlanA = false
+            vpnCScheme(data)
+        }
+    }
 
+    /**
+     * vpn B 方案
+     */
+    private fun vpnBScheme() {
+        lifecycleScope.launch {
+            delay(300)
+            if (!model.state.canStop) {
+                connect.launch(null)
+            }
+        }
+    }
+
+    /**
+     * vpn C 方案
+     * 概率
+     */
+    private fun vpnCScheme(mProbability: String) {
+        val mProbabilityInt = mProbability.toIntOrNull()
+        if (mProbabilityInt == null) {
+            model.whetherToImplementPlanA = true
+        } else {
+            val random = (0..100).shuffled().last()
+            when {
+                random <= mProbabilityInt -> {
+                    //B
+                    KLogUtils.d( "随机落在B方案")
+                    vpnBScheme() //20，代表20%为B用户；80%为A用户
+                }
+                else -> {
+                    //A
+                    KLogUtils.d("随机落在A方案")
+                    model.whetherToImplementPlanA = true
+                }
+            }
+        }
+    }
 }
