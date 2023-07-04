@@ -26,6 +26,7 @@ import com.vkas.onlinegameproxy.utils.OnlineGameUtils.isThresholdReached
 import com.vkas.onlinegameproxy.widget.HorizontalProgressViewOg
 import com.xuexiang.xui.widget.progress.HorizontalProgressView
 import com.xuexiang.xutil.net.NetworkUtils
+import com.xuexiang.xutil.tip.ToastUtils
 import kotlinx.coroutines.*
 import java.util.*
 
@@ -49,7 +50,7 @@ class StartActivity : BaseActivityNew(),
 
     override fun initData() {
         horizontalProgressViewOg.setProgressViewUpdateListener(this)
-        horizontalProgressViewOg.setProgressDuration(10000)
+        horizontalProgressViewOg.setProgressDuration(12000)
         horizontalProgressViewOg.setProgressTextVisibility(true)
         horizontalProgressViewOg.startProgressAnimation()
         lifecycleScope.launch(Dispatchers.IO) {
@@ -98,6 +99,7 @@ class StartActivity : BaseActivityNew(),
                     MmkvUtils.set(Constant.ADVERTISING_OG_DATA, auth.getString("ongpro_ad"))
                     MmkvUtils.set(Constant.ONLINE_CONFIG, auth.getString(Constant.ONLINE_CONFIG))
                     isCa =true
+                    ToastUtils.toast("Firebase获取成功")
                 }
                 try {
                     withTimeout(4000L) {
@@ -111,6 +113,7 @@ class StartActivity : BaseActivityNew(),
                         }
                     }
                 } catch (e: TimeoutCancellationException) {
+                    ToastUtils.toast("TimeoutCancellationException")
                     startCate?.cancel()
                     startCate = null
                     preloadedAdvertisement()
@@ -196,6 +199,7 @@ class StartActivity : BaseActivityNew(),
      * 预加载广告
      */
     private fun preloadedAdvertisement() {
+        ToastUtils.toast("预加载广告")
         App.isAppOpenSameDayOg()
         if (isThresholdReached()) {
             KLogUtils.d("广告达到上线")
