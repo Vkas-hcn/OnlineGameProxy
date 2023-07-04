@@ -13,6 +13,7 @@ import com.lsxiao.apollo.core.Apollo
 import com.lsxiao.apollo.core.annotations.Receive
 import com.vkas.onlinegameproxy.BuildConfig
 import com.vkas.onlinegameproxy.R
+import com.vkas.onlinegameproxy.ad.OgLoadConnectAd
 import com.vkas.onlinegameproxy.ad.OgLoadOpenAd
 import com.vkas.onlinegameproxy.app.App
 import com.vkas.onlinegameproxy.base.AdBase
@@ -36,7 +37,7 @@ class StartActivity : BaseActivityNew(),
     private var liveJumpHomePage2 = MutableLiveData<Boolean>()
     private var jobOpenAdsOg: Job? = null
     private val horizontalProgressViewOg: HorizontalProgressViewOg by bindView(R.id.pb_start_og)
-
+    private var startCate: Job? = null
     override fun getLayoutId(): Int {
         return R.layout.activity_start
     }
@@ -75,7 +76,7 @@ class StartActivity : BaseActivityNew(),
     }
 
     @Receive(Constant.OPEN_CLOSE_JUMP)
-     fun liveEventBusOg(it:Boolean) {
+    fun liveEventBusOg(it: Boolean) {
         KLogUtils.d("关闭开屏内容-接收==${this.lifecycle.currentState}")
         if (this.lifecycle.currentState == Lifecycle.State.STARTED) {
             jumpPage()
@@ -85,27 +86,35 @@ class StartActivity : BaseActivityNew(),
     private fun getFirebaseDataOg() {
         if (BuildConfig.DEBUG) {
             preloadedAdvertisement()
-//            lifecycleScope.launch {
-//                val ips = listOf("192.168.0.1", "8.8.8.8", "114.114.114.114")
-//                val fastestIP = findFastestIP(ips)
-//                KLogUtils.e("TAG", "Fastest IP: $fastestIP")
-//                delay(1500)
-//                MmkvUtils.set(
-//                    Constant.ADVERTISING_OG_DATA,
-//                    ResourceUtils.readStringFromAssert("elAdDataFireBase.json")
-//                )
-//            }
             return
         } else {
-            preloadedAdvertisement()
-            val auth = Firebase.remoteConfig
-            auth.fetchAndActivate().addOnSuccessListener {
-                MmkvUtils.set(Constant.PROFILE_OG_DATA, auth.getString("ongpro_server"))
-                MmkvUtils.set(Constant.PROFILE_OG_DATA_FAST, auth.getString("ongpro_smart"))
-                MmkvUtils.set(Constant.AROUND_OG_FLOW_DATA, auth.getString("ongproAroundFlow_Data"))
-                MmkvUtils.set(Constant.ADVERTISING_OG_DATA, auth.getString("ongpro_ad"))
-                MmkvUtils.set(Constant.ONLINE_CONFIG, auth.getString(Constant.ONLINE_CONFIG))
-
+            startCate = lifecycleScope.launch {
+                var isCa = false
+                val auth = Firebase.remoteConfig
+                auth.fetchAndActivate().addOnSuccessListener {
+                    MmkvUtils.set(Constant.PROFILE_OG_DATA, auth.getString("ongpro_server"))
+                    MmkvUtils.set(Constant.PROFILE_OG_DATA_FAST, auth.getString("ongpro_smart"))
+                    MmkvUtils.set(Constant.AROUND_OG_FLOW_DATA, auth.getString("ongproAroundFlow_Data"))
+                    MmkvUtils.set(Constant.ADVERTISING_OG_DATA, auth.getString("ongpro_ad"))
+                    MmkvUtils.set(Constant.ONLINE_CONFIG, auth.getString(Constant.ONLINE_CONFIG))
+                    isCa =true
+                }
+                try {
+                    withTimeout(4000L) {
+                        while (startCate?.isActive == true) {
+                            if(isCa){
+                                preloadedAdvertisement()
+                                startCate?.cancel()
+                                startCate = null
+                            }
+                            delay(500)
+                        }
+                    }
+                } catch (e: TimeoutCancellationException) {
+                    startCate?.cancel()
+                    startCate = null
+                    preloadedAdvertisement()
+                }
             }
         }
     }
@@ -152,7 +161,7 @@ class StartActivity : BaseActivityNew(),
         AdBase.getResultInstance().advertisementLoadingOg(this)
         // 连接插屏
         AdBase.getConnectInstance().adIndexOg = 0
-        AdBase.getConnectInstance().advertisementLoadingOg(this,isLoad = true)
+        AdBase.getConnectInstance().advertisementLoadingOg(this, isLoad = true)
         // 服务器页原生
         AdBase.getListInstance().adIndexOg = 0
         AdBase.getListInstance().advertisementLoadingOg(this)
@@ -189,9 +198,9 @@ class StartActivity : BaseActivityNew(),
     private fun preloadedAdvertisement() {
         App.isAppOpenSameDayOg()
         if (isThresholdReached()) {
-            KLogUtils.d( "广告达到上线")
+            KLogUtils.d("广告达到上线")
             lifecycleScope.launch {
-                delay(2000L)
+                delay(1000L)
                 liveJumpHomePage.postValue(true)
             }
         } else {
