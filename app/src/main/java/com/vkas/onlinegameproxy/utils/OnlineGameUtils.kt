@@ -5,6 +5,7 @@ import android.util.Base64
 import androidx.core.os.bundleOf
 import com.android.installreferrer.api.InstallReferrerClient
 import com.android.installreferrer.api.InstallReferrerStateListener
+import com.blankj.utilcode.util.LogUtils
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import com.google.gson.reflect.TypeToken
@@ -39,7 +40,7 @@ object OnlineGameUtils {
     ).toMutableList()
     private var installReferrer: String = ""
     fun getFastIpOg(): OgVpnBean {
-        val ufVpnBean: MutableList<OgVpnBean> = getDataFastServerData() ?:local
+        val ufVpnBean: MutableList<OgVpnBean> = getDataFastServerData() ?: local
         return ufVpnBean.shuffled().first().apply {
             og_best = true
             ongpro_country = getString(R.string.fast_service)
@@ -345,9 +346,9 @@ object OnlineGameUtils {
     fun referrer(
         context: Context,
     ) {
-        installReferrer = "gclid"
+//        installReferrer = "gclid"
 //        installReferrer = "fb4a"
-        MmkvUtils.set(Constant.INSTALL_REFERRER, installReferrer)
+//        MmkvUtils.set(Constant.INSTALL_REFERRER, installReferrer)
         try {
             val referrerClient = InstallReferrerClient.newBuilder(context).build()
             referrerClient.startConnection(object : InstallReferrerStateListener {
@@ -364,7 +365,7 @@ object OnlineGameUtils {
                             }
                             installReferrer =
                                 referrerClient.installReferrer.installReferrer ?: ""
-                            MmkvUtils.set(Constant.INSTALL_REFERRER, installReferrer)
+//                            MmkvUtils.set(Constant.INSTALL_REFERRER, installReferrer)
                             referrerClient.endConnection()
                             return
                         }
@@ -515,10 +516,35 @@ object OnlineGameUtils {
     /**
      * 是否是黑名单
      */
-    fun whetherItIsABlacklist(data:String):Boolean{
-        if(data == Constant.WHITELIST_KEY){
+    fun whetherItIsABlacklist(data: String): Boolean {
+        if (data == Constant.WHITELIST_KEY) {
             return false
         }
         return true
+    }
+
+    /**
+     * 是否根据买量屏蔽
+     */
+    fun whetherBuyQuantityBan(): Boolean {
+        val localVpnBootData = getLocalVpnBootData()
+        KLogUtils.d("bubble_cloak---${localVpnBootData.online_cloak}。。。")
+        if (!whetherToBlockScreenAds(localVpnBootData.online_ref)) {
+            return true
+        }
+        return false
+    }
+
+    /**
+     * 是否根据黑名单屏蔽
+     */
+    fun whetherBlackListBan(): Boolean {
+        val localVpnBootData = getLocalVpnBootData()
+        val blacklistUser = mmkvOg.decodeString(Constant.BLACKLIST_USER_OG, "")
+        val blacklistUserBool = whetherItIsABlacklist(blacklistUser ?: "")
+        if (blacklistUserBool && localVpnBootData.online_cloak == "1") {
+            return true
+        }
+        return false
     }
 }

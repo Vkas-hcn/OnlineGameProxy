@@ -81,5 +81,6 @@ object AppFun {
         val intent = Intent(App.top_activity_og, StartActivity::class.java)
         intent.putExtra(Constant.RETURN_OG_CURRENT_PAGE, true)
         App.top_activity_og?.startActivity(intent)
+        App.whetherHotStart = true
     }
 }

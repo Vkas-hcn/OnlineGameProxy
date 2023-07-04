@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import com.blankj.utilcode.util.LogUtils
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
@@ -24,6 +25,7 @@ import com.vkas.onlinegameproxy.utils.OnlineGameUtils.recordNumberOfAdDisplaysOg
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.takeSortedAdIDOg
 import com.vkas.onlinegameproxy.utils.OnlineGameUtils.whetherItIsABlacklist
 import com.vkas.onlinegameproxy.utils.OnlineOkHttpUtils
+import com.xuexiang.xui.utils.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
@@ -38,7 +40,7 @@ object OgLoadBackAd {
     /**
      * 加载首页插屏广告
      */
-    fun loadBackAdvertisementOg(context: Context, adData: OgAdBean) {
+    fun loadBackAdvertisementOg(context: Context, adData: OgAdBean,isLoad:Boolean) {
         val adRequest = AdRequest.Builder().build()
         ogDetailBean = OnlineGameUtils.beforeLoadLinkSettingsOg(adData.ongpro_i_2H.getOrNull(adBase.adIndexOg))
 
@@ -49,11 +51,11 @@ object OgLoadBackAd {
             context,
             idOg,
             adRequest,
-            interstitialAdLoadCallback(context,adData)
+            interstitialAdLoadCallback(context,adData,isLoad)
         )
     }
 
-    private fun interstitialAdLoadCallback(context: Context,adData: OgAdBean): InterstitialAdLoadCallback {
+    private fun interstitialAdLoadCallback(context: Context,adData: OgAdBean,isLoad: Boolean): InterstitialAdLoadCallback {
         return object : InterstitialAdLoadCallback() {
             override fun onAdFailedToLoad(adError: LoadAdError) {
                 adError.toString().let {
@@ -63,7 +65,7 @@ object OgLoadBackAd {
                 adBase.appAdDataOg = null
                 if (adBase.adIndexOg < adData.ongpro_i_2H.size - 1) {
                     adBase.adIndexOg++
-                    loadBackAdvertisementOg(context, adData)
+                    loadBackAdvertisementOg(context, adData,isLoad)
                 } else {
                     adBase.adIndexOg = 0
                 }
@@ -101,7 +103,6 @@ object OgLoadBackAd {
                 // Called when ad is dismissed.
                 KLogUtils.d("关闭back插屏广告${App.isBackDataOg}")
                 Apollo.emit(Constant.PLUG_OG_BACK_AD_SHOW, App.isBackDataOg, true)
-
                 adBase.appAdDataOg = null
                 adBase.whetherToShowOg = false
             }
@@ -145,6 +146,12 @@ object OgLoadBackAd {
         }
         if(!OnlineGameUtils.whetherToBlockScreenAds(localVpnBootData.online_ref)){
             KLogUtils.d("根据买量屏蔽插屏广告。。。")
+            return 0
+        }
+        App.isAppOpenSameDayOg()
+        val isThresholdReached = OnlineGameUtils.isThresholdReached()
+        val idOgEmpty = Utils.isNullOrEmpty(OgLoadConnectAd.idOg)
+        if (adBase.appAdDataOg == null && (isThresholdReached || idOgEmpty)) {
             return 0
         }
         if (adBase.appAdDataOg == null) {

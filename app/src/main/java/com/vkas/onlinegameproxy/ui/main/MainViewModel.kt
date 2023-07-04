@@ -8,6 +8,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.ProgressBar
@@ -19,6 +20,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
+import com.blankj.utilcode.util.AppUtils
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
@@ -40,19 +42,27 @@ import com.vkas.onlinegameproxy.utils.OnlineGameUtils
 import com.xuexiang.xui.utils.Utils
 import com.xuexiang.xutil.XUtil
 import com.xuexiang.xutil.net.JsonUtil
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
 
 class MainViewModel : ViewModel() {
+    // vpnUI
+    val vpnUiLive: MutableLiveData<Int> by lazy {
+        MutableLiveData<Int>()
+    }
+
     //当前执行连接操作
-     var performConnectionOperations: Boolean = false
+    var performConnectionOperations: Boolean = false
     var state = BaseService.State.Idle
+
     //是否执行A方案
-     var whetherToImplementPlanA = false
+    var whetherToImplementPlanA = false
 
     //是否执行B方案
-     var whetherToImplementPlanB = false
+    var whetherToImplementPlanB = false
     val vpnStateLive: MutableLiveData<Int> by lazy {
         MutableLiveData<Int>()
     }
@@ -294,42 +304,36 @@ class MainViewModel : ViewModel() {
         val showState = OgLoadConnectAd.displayConnectAdvertisementOg(activity)
 
         if (showState != "22") {
-            connectOrDisconnectOg(false,activity)
+            connectOrDisconnectOg(false, activity)
         }
     }
+
     /**
      * 连接或断开
      * 是否后台关闭（true：后台关闭；false：手动关闭）
      */
-     fun connectOrDisconnectOg(isBackgroundClosed: Boolean,activity: AppCompatActivity) {
-        if (whetherParsingIsIllegalIp()) {
-            whetherTheBulletBoxCannotBeUsed(activity)
-            return
-        }
-        performConnectionOperations = if (state.canStop) {
+    fun connectOrDisconnectOg(isBackgroundClosed: Boolean, activity: AppCompatActivity) {
+        performConnectionOperations = if (whetherItIsDisConnected()) {
             if (!isBackgroundClosed) {
                 jumpConnectionResultsPage(false)
             }
             detectingAdSpaceLoading(activity)
             if ((activity.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED))) {
-                Core.stopService()
-            } else {
-                vpnStateLive.postValue(2)
-            }
-            false
-        } else {
-            if ((activity.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED))) {
-                Core.startService()
-
-                if (!whetherToImplementPlanA && !whetherToImplementPlanB) {
-                   clearAllAdsReload(activity)
-                    whetherToImplementPlanA = true
-                }
+                vpnUiLive.postValue(0)
             } else {
                 vpnStateLive.postValue(0)
             }
+            false
+        } else {
             if (!isBackgroundClosed) {
                 jumpConnectionResultsPage(true)
+            }
+            if ((activity.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED))) {
+                Log.e("Vpn", "connectOrDisconnectOg: ", )
+
+                vpnUiLive.postValue(2)
+            } else {
+                vpnStateLive.postValue(2)
             }
             true
         }
@@ -339,10 +343,6 @@ class MainViewModel : ViewModel() {
      *  清空所有广告重新加载
      */
     fun clearAllAdsReload(activity: Activity) {
-        // 开屏
-        AdBase.getOpenInstance().appAdDataOg = null
-        AdBase.getOpenInstance().adIndexOg = 0
-        AdBase.getOpenInstance().advertisementLoadingOg(activity)
         // 首页原生
         AdBase.getHomeInstance().appAdDataOg = null
         AdBase.getHomeInstance().adIndexOg = 0
@@ -359,12 +359,16 @@ class MainViewModel : ViewModel() {
         AdBase.getBackInstance().appAdDataOg = null
         AdBase.getBackInstance().adIndexOg = 0
         AdBase.getBackInstance().advertisementLoadingOg(activity)
+        // 服务器页原生
+        AdBase.getListInstance().appAdDataOg = null
+        AdBase.getListInstance().adIndexOg = 0
+        AdBase.getListInstance().advertisementLoadingOg(activity)
     }
 
     /**
      * 检测广告位加载
      */
-    fun detectingAdSpaceLoading(activity: Activity) {
+    private fun detectingAdSpaceLoading(activity: Activity) {
         // 首页原生
         AdBase.getHomeInstance().advertisementLoadingOg(activity)
         // 结果页原生
@@ -374,10 +378,56 @@ class MainViewModel : ViewModel() {
         // 服务器页插屏
         AdBase.getBackInstance().advertisementLoadingOg(activity)
     }
+
     /**
      * 是否是买量用户
      */
     fun isItABuyingUser(): Boolean {
         return OnlineGameUtils.isValuableUser()
+    }
+
+    /**
+     * 连接VPN
+     */
+    fun connectVpn() {
+        Log.e("Vpn", "connectVpn: state.name=${state.name}")
+        if (whetherItIsConnected()) {
+            Core.stopService()
+        }
+        if (whetherItIsDisConnected()) {
+            Core.startService()
+        }
+    }
+
+    /**
+     * 是否是连接状态
+     */
+    fun whetherItIsConnected(): Boolean {
+        return state.name == BaseService.State.Connected.name
+    }
+
+    /**
+     * 是否是断开状态
+     */
+    fun whetherItIsDisConnected(): Boolean {
+        return state.name == BaseService.State.Stopped.name
+    }
+
+    /**
+     * 当前状态
+     */
+    fun getCurrentStatus(): String {
+        return state.name
+    }
+
+    /**
+     * 是否是合法ip
+     */
+    fun isLegalIpAddress(activity: AppCompatActivity):Boolean{
+        if (whetherParsingIsIllegalIp()) {
+            whetherTheBulletBoxCannotBeUsed(activity)
+            return true
+        }
+        return false
     }
 }

@@ -1,6 +1,7 @@
 package com.vkas.onlinegameproxy.base
 
 import android.content.Context
+import com.blankj.utilcode.util.LogUtils
 import com.vkas.onlinegameproxy.ad.*
 import com.vkas.onlinegameproxy.app.App
 import com.vkas.onlinegameproxy.bean.OgAdBean
@@ -52,8 +53,7 @@ class AdBase {
     /**
      * 广告加载前判断
      */
-    fun advertisementLoadingOg(context: Context) {
-        val isAppOpenSameDay = App.isAppOpenSameDayOg()
+    fun advertisementLoadingOg(context: Context,isLoad: Boolean = false) {
         val isThresholdReached = OnlineGameUtils.isThresholdReached()
         val isAlreadyLoading = isLoadingOg
         val hasExpiredAd = appAdDataOg != null && !whetherAdExceedsOneHour(loadTimeOg)
@@ -67,20 +67,33 @@ class AdBase {
             KLogUtils.d( "${getInstanceName()}--广告加载中，不能再次加载")
             return
         }
+        if (!isLoad
+            && getInstanceName() == "back"
+            && OnlineGameUtils.whetherBuyQuantityBan()) {
+            KLogUtils.e("买量屏蔽用户不加载back广告")
+            return
+        }
+        KLogUtils.e("getInstanceName()-${getInstanceName()}")
+        if (!isLoad
+            && (getInstanceName() == "back" || getInstanceName() == "connect")
+            && OnlineGameUtils.whetherBlackListBan()) {
+            KLogUtils.e("黑名单用户不加载插屏广告")
+            return
+        }
 
         isFirstRotation = false
 
         if (appAdDataOg == null) {
             isLoadingOg = true
             KLogUtils.d( "${getInstanceName()}--广告开始加载")
-            loadStartupPageAdvertisementOg(context, OnlineGameUtils.getAdServerDataOg())
+            loadStartupPageAdvertisementOg(context, OnlineGameUtils.getAdServerDataOg(),isLoad)
         }
 
         if (hasExpiredAd) {
             isLoadingOg = true
             appAdDataOg = null
             KLogUtils.d("${getInstanceName()}--广告过期重新加载")
-            loadStartupPageAdvertisementOg(context, OnlineGameUtils.getAdServerDataOg())
+            loadStartupPageAdvertisementOg(context, OnlineGameUtils.getAdServerDataOg(),isLoad)
         }
     }
 
@@ -94,11 +107,11 @@ class AdBase {
     /**
      * 加载启动页广告
      */
-    private fun loadStartupPageAdvertisementOg(context: Context, adData: OgAdBean) {
-        adLoaders[id]?.invoke(context, adData)
+    private fun loadStartupPageAdvertisementOg(context: Context, adData: OgAdBean,isLoad: Boolean =false) {
+        adLoaders[id]?.invoke(context, adData,isLoad)
     }
 
-    private val adLoaders = mapOf<Int, (Context, OgAdBean) -> Unit>(
+    private val adLoaders = mapOf<Int, (Context, OgAdBean,Boolean) -> Unit>(
         1 to ::loadOpenAdOg,
         2 to ::loadHomeAdOg,
         3 to ::loadResultAdOg,
@@ -110,7 +123,7 @@ class AdBase {
     /**
      * 加载"open"类型广告
      */
-    private fun loadOpenAdOg(context: Context, adData: OgAdBean) {
+    private fun loadOpenAdOg(context: Context, adData: OgAdBean,isLoad: Boolean) {
         val adType = adData.ongpro_o_open.getOrNull(adIndexOg)?.ongpro_type
         if (adType == "screen") {
             OgLoadOpenAd.loadStartInsertAdOg(context, adData)
@@ -122,35 +135,35 @@ class AdBase {
     /**
      * 加载"home"类型广告
      */
-    private fun loadHomeAdOg(context: Context, adData: OgAdBean) {
+    private fun loadHomeAdOg(context: Context, adData: OgAdBean,isLoad: Boolean) {
         OgLoadHomeAd.loadHomeAdvertisementOg(context, adData)
     }
 
     /**
      * 加载"result"类型广告
      */
-    private fun loadResultAdOg(context: Context, adData: OgAdBean) {
+    private fun loadResultAdOg(context: Context, adData: OgAdBean,isLoad: Boolean) {
         OgLoadResultAd.loadResultAdvertisementOg(context, adData)
     }
 
     /**
      * 加载"connect"类型广告
      */
-    private fun loadConnectAdOg(context: Context, adData: OgAdBean) {
+    private fun loadConnectAdOg(context: Context, adData: OgAdBean,isLoad: Boolean) {
         OgLoadConnectAd.loadConnectAdvertisementOg(context, adData)
     }
 
     /**
      * 加载"back"类型广告
      */
-    private fun loadBackAdOg(context: Context, adData: OgAdBean) {
-        OgLoadBackAd.loadBackAdvertisementOg(context, adData)
+    private fun loadBackAdOg(context: Context, adData: OgAdBean,isLoad:Boolean) {
+        OgLoadBackAd.loadBackAdvertisementOg(context, adData,isLoad)
     }
 
     /**
      * 加载"list"类型广告
      */
-    private fun loadListAdOg(context: Context, adData: OgAdBean) {
+    private fun loadListAdOg(context: Context, adData: OgAdBean,isLoad: Boolean) {
         OgLoadListAd.loadListAdvertisementOg(context, adData)
     }
 

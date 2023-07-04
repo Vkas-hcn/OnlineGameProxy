@@ -10,6 +10,8 @@ import kotlinx.coroutines.*
 object MainFun {
     var vpnState: Int = 0
     private var jobHeart: Job? = null
+    // 点击时候的状态
+    var statusAtTheTimeOfClick:String=""
     /**
      * 心跳上报(链接)
      */

@@ -152,10 +152,7 @@ class StartActivity : BaseActivityNew(),
         AdBase.getResultInstance().advertisementLoadingOg(this)
         // 连接插屏
         AdBase.getConnectInstance().adIndexOg = 0
-        AdBase.getConnectInstance().advertisementLoadingOg(this)
-        // 服务器页插屏
-        AdBase.getBackInstance().adIndexOg = 0
-        AdBase.getBackInstance().advertisementLoadingOg(this)
+        AdBase.getConnectInstance().advertisementLoadingOg(this,isLoad = true)
         // 服务器页原生
         AdBase.getListInstance().adIndexOg = 0
         AdBase.getListInstance().advertisementLoadingOg(this)
@@ -167,7 +164,7 @@ class StartActivity : BaseActivityNew(),
     private fun rotationDisplayOpeningAdOg() {
         jobOpenAdsOg = lifecycleScope.launch {
             try {
-                withTimeout(10000L) {
+                withTimeout(12000L) {
                     delay(1000L)
                     while (isActive) {
                         val showState = OgLoadOpenAd
@@ -176,7 +173,7 @@ class StartActivity : BaseActivityNew(),
                             jobOpenAdsOg?.cancel()
                             jobOpenAdsOg = null
                         }
-                        delay(1000L)
+                        delay(500L)
                     }
                 }
             } catch (e: TimeoutCancellationException) {

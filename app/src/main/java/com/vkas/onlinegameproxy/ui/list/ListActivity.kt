@@ -43,7 +43,6 @@ class ListActivity : BaseActivityNew() {
     //选中服务器
     private lateinit var checkSkServiceBean: OgVpnBean
     private lateinit var checkSkServiceBeanClick: OgVpnBean
-    val onlineConfig: OpRemoteBean = OnlineGameUtils.getLocalVpnBootData()
 
     // 是否连接
     private var whetherToConnect = false
@@ -79,6 +78,8 @@ class ListActivity : BaseActivityNew() {
 
         initSelectRecyclerView()
         model.getServerListData()
+        // 服务器页插屏
+        AdBase.getBackInstance().advertisementLoadingOg(this)
         AdBase.getBackInstance().whetherToShowOg = false
         AdBase.getListInstance().whetherToShowOg = false
         initListAds()
@@ -141,11 +142,11 @@ class ListActivity : BaseActivityNew() {
      * 选中服务器
      */
     private fun selectServer(position: Int) {
-        if (ecServiceBeanList[position].ongpro_ip == checkSkServiceBeanClick.ongpro_ip && ecServiceBeanList[position].og_best == checkSkServiceBeanClick.og_best) {
+        if (ecServiceBeanList[position].ongpro_ip == checkSkServiceBeanClick.ongpro_ip
+            && ecServiceBeanList[position].og_best == checkSkServiceBeanClick.og_best) {
             if (!whetherToConnect) {
                 finish()
                 Apollo.emit(Constant.NOT_CONNECTED_OG_RETURN, checkSkServiceBean)
-
             }
             return
         }
@@ -181,17 +182,7 @@ class ListActivity : BaseActivityNew() {
      * 返回主页
      */
     private fun returnToHomePage() {
-        App.isAppOpenSameDayOg()
-        if (OnlineGameUtils.isThresholdReached()) {
-            KLogUtils.d("广告达到上线")
-            finish()
-            return
-        }
-        if (OnlineGameUtils.whetherToBlockScreenAds(onlineConfig.online_ref)) {
-            if (OgLoadBackAd.displayBackAdvertisementOg(this) != 2) {
-                finish()
-            }
-        } else {
+        if (OgLoadBackAd.displayBackAdvertisementOg(this) != 2) {
             finish()
         }
     }
@@ -253,6 +244,7 @@ class ListActivity : BaseActivityNew() {
                     initListAds()
                 }
             }
+            App.whetherHotStart = false
         }
     }
 

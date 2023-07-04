@@ -144,6 +144,7 @@ class ResultActivity : BaseActivityNew() {
                     initResultAds()
                 }
             }
+            App.whetherHotStart = false
         }
     }
 

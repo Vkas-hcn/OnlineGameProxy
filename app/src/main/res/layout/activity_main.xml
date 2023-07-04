@@ -22,11 +22,9 @@
                 android:id="@+id/in_home_navigation"
                 layout="@layout/layout_main_navigation_og"/>
 
-
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="20dp"
                 android:background="@drawable/bg_main"
                 android:orientation="vertical">
 

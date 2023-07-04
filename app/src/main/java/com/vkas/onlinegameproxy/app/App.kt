@@ -34,6 +34,8 @@ class App : Application(), LifecycleObserver {
 
         // 原生广告刷新
         var nativeAdRefreshOg = false
+        //是否热启动
+        var whetherHotStart:Boolean = true
         val mmkvOg by lazy {
             //启用mmkv的多进程功能
             MMKV.mmkvWithID("OnlineGameProxy", MMKV.MULTI_PROCESS_MODE)
